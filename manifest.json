@@ -1,0 +1,10 @@
+{
+    "display_name": "PHONE MOUSE",
+    "loading_order": 50,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "author": "SATURIC",
+    "version": "1.0.1",
+    "homePage": "https://t.me/saturic"
+}
