@@ -1,7 +1,8 @@
 import { settings, install, selfTest, fail } from './core.js';
+import { installHint } from './hint.js';
 
 const BASE = new URL('./', import.meta.url).href;
-const VERSION = '1.0.1';
+const VERSION = '1.1.6';
 let mountTimer = null;
 let mounting = false;
 let status = 'не запускался';
@@ -99,6 +100,9 @@ function freeToggle() {
     }
 }
 
+let fullVh = 0;
+let lastVw = 0;
+
 function fit() {
     const wrap = document.getElementById('rp_phone_wrap');
     const frame = document.getElementById('rp_frame');
@@ -108,14 +112,19 @@ function fit() {
     const vh = vv ? vv.height : innerHeight;
     const ox = vv ? vv.offsetLeft : 0;
     const oy = vv ? vv.offsetTop : 0;
+    if (Math.abs(vw - lastVw) > 40) { fullVh = 0; lastVw = vw; }
+    fullVh = Math.max(fullVh, vh, innerHeight);
+    const keyboard = fullVh - vh > 150;
     const mobile = vw < 700;
     const compact = mobile || vh < 560;
+    const zh = keyboard ? fullVh : vh;
     const AW = vw - 16;
-    const AH = compact ? vh - 20 : vh - 82;
+    const AHz = compact ? zh - 20 : zh - 82;
+    const AH = compact ? vh - 12 : vh - 82;
     const pick = Number(settings().phoneScale) || 0;
-    let z = pick ? pick / 100 : mobile ? Math.min(Math.max(AW / 320, 1), 1.4) : Math.min(Math.max(AH / 592, 1), 1.5);
-    z = Math.max(0.8, Math.min(z, AW / 320, AH / 380));
-    const H = Math.max(380, Math.min(AH / z, mobile ? 900 : 592));
+    let z = pick ? pick / 100 : mobile ? Math.min(Math.max(AW / 320, 1), 1.4) : Math.min(Math.max(AHz / 592, 1), 1.5);
+    z = Math.max(0.8, Math.min(z, AW / 320, AHz / 380));
+    const H = Math.max(keyboard ? 200 : 380, Math.min(AH / z, mobile ? 900 : 592));
     frame.style.setProperty('width', '320px', 'important');
     frame.style.setProperty('height', H + 'px', 'important');
     frame.style.setProperty('max-height', 'none', 'important');
@@ -124,7 +133,7 @@ function fit() {
     const h = H * z;
     if (compact) {
         wrap.style.setProperty('left', Math.round(ox + (vw - w) / 2) + 'px', 'important');
-        wrap.style.setProperty('top', Math.round(oy + (vh - h) / 2) + 'px', 'important');
+        wrap.style.setProperty('top', Math.round(oy + (keyboard ? 6 : (vh - h) / 2)) + 'px', 'important');
         wrap.style.setProperty('right', 'auto', 'important');
         wrap.style.setProperty('bottom', 'auto', 'important');
     } else {
@@ -132,6 +141,13 @@ function fit() {
         wrap.style.setProperty('top', 'auto', 'important');
         wrap.style.setProperty('right', '16px', 'important');
         wrap.style.setProperty('bottom', '66px', 'important');
+    }
+    if (keyboard !== fit.kb) {
+        fit.kb = keyboard;
+        setTimeout(() => {
+            const box = document.getElementById('cx_msgs');
+            if (box) box.scrollTop = box.scrollHeight;
+        }, 120);
     }
 }
 
@@ -227,6 +243,7 @@ function addMenuItem() {
 jQuery(async () => {
     install();
     settings();
+    installHint();
     addSettingsUi();
     addMenuItem();
     const c = ctx();

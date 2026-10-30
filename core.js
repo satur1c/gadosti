@@ -536,6 +536,15 @@ const input = {
     },
 };
 
+function chatMemory() {
+    const list = [];
+    for (const m of ctx().chat || []) {
+        const t = m && m.extra && m.extra.memory ? String(m.extra.memory).trim() : '';
+        if (t && list[list.length - 1] !== t) list.push(t);
+    }
+    return { enabled: true, memories: list.slice(-6) };
+}
+
 export const pm = {
     toast,
     fail,
@@ -549,7 +558,7 @@ export const pm = {
     ai,
     input,
     media: { pick: pickFiles, saveFile, saveDataUrl, toDataUrl, asDataUrl, restore: restoreFile, remove: removeImage, download, preview },
-    who: { current: currentChat, character: characterCard, persona: personaCard },
+    who: { current: currentChat, character: characterCard, persona: personaCard, memory: chatMemory },
 };
 
 export function install() {
@@ -618,6 +627,13 @@ export async function selfTest() {
         await refreshNames();
         if (!b1 || b1.entries.length !== 1 || !b2 || b2.entries[0].content !== 'b') throw new Error('запись не сохранилась');
         return id;
+    });
+    await step('чат телефона', async () => {
+        const th = chatBag().rp_cx_threads || [], cs = chatBag().rp_cx_contacts || [];
+        const nm = id => id === 'char' ? 'ГЕРОЙ' : id === 'me' ? 'я' : ((cs.find(x => x.id === id) || {}).name || '?' + id);
+        const gr = th.filter(x => x.kind === 'group').map(x => '«' + (x.title || '') + '»: ' + (x.who || []).map(nm).join(', '));
+        const lr = chatBag().rp_cx_lastraw;
+        return 'контактов=' + cs.length + (gr.length ? ' группы=[' + gr.join(' | ') + ']' : ' групп нет') + (lr ? ' последний_ответ=' + JSON.stringify(lr).slice(0, 700) : '');
     });
     return lines.join('\n');
 }

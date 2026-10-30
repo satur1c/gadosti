@@ -4,8 +4,8 @@ function rpLive(){ return RP_GEN === window.__rpPhoneGen; }
 var setInterval = (function(nativeSI){ return function(fn, ms){ var id = nativeSI(function(){ if (!rpLive()){ clearInterval(id); return; } return fn.apply(this, arguments); }, ms); return id; }; })(window.setInterval.bind(window));
 
 var APPS = [
-  { id:'messenger', label:'Мессенджер', icon:'rpi-chat', c1:'#5b8def' },
   { id:'status', label:'Статус', icon:'rpi-gauge', c1:'#00c2e0' },
+  { id:'messenger', label:'Чат', icon:'rpi-chat', c1:'#8B5CF6' },
   { id:'love', label:'Love', icon:'rpi-heart', c1:'#ff4d6d' },
   { id:'flo', label:'Flo', icon:'rpi-drop', c1:'#ff4d6d' },
   { id:'diary', label:'Дневник', icon:'rpi-journal', c1:'#9c6b2e' },
@@ -14,7 +14,7 @@ var APPS = [
   { id:'npcs', label:'Сеть НПС', icon:'rpi-network', c1:'#0f7a4a' },
   { id:'twitch', label:'Twitch', icon:'rpi-twitch', c1:'#9146ff' },
   { id:'delivery', label:'Доставка', icon:'rpi-bag', c1:'#1a1a1a' },
-  { id:'bank', label:'Банк', icon:'rpi-bank', c1:'#0a5c3b' },
+  { id:'bank', label:'Банк', icon:'rpi-bank', c1:'#9333ea' },
   { id:'market', label:'Маркет', icon:'rpi-cart', c1:'#9c1d6e' },
   { id:'calendar', label:'Календарь', icon:'rpi-calendar', c1:'#0f766e' },
   { id:'channels', label:'Каналы', icon:'rpi-megaphone', c1:'#229ED9' },
@@ -29,8 +29,7 @@ var APPS = [
   { id:'casino', label:'Казино', icon:'rpi-dice', c1:'#8a1030' },
   { id:'sattok', label:'Сатток', icon:'rpi-music', c1:'#111111' },
   { id:'phonebook', label:'Контакты', icon:'rpi-book', c1:'#2fd37a' },
-  { id:'gallery', label:'Галерея', icon:'rpi-camera', c1:'#8b5cf6' },
-  { id:'memorybook', label:'Книга памяти', icon:'rpi-book', c1:'#7c3aed' }
+  { id:'gallery', label:'Галерея', icon:'rpi-camera', c1:'#8b5cf6' }
 ];
 var STATUS_TYPES = [
   { id:'mortal_enemies',  label:'Смертельные враги',     icon:'rpi-skull',      color:'#7a0d0d' },
@@ -217,8 +216,8 @@ var ICON_PRESETS = APP_ICON_COLORS.concat(APP_ICON_HIDDEN).map(function(hex, i){
   var m = /linear-gradient\([^,]+,\s*(#[0-9a-fA-F]{3,6}),\s*(#[0-9a-fA-F]{3,6})\)/.exec(grad);
   return { id:'g'+i, label: APP_ICON_GRADIENT_LABELS[i] || ('Градиент '+(i+1)), accent: m?m[1]:'#8b5cf6', accent2: m?m[2]:'#4338ca' };
 }));
-var CONTACT_COLORS = ['#8b5cf6','#ff6fae','#4cc9f0','#5ad0a0','#ffb37a','#ff4d6d','#c9781c','#6b7280'];
 var APP_PALETTES = {
+  messenger:{ bg1:'#0B0B0F', bg2:'#14141B', text:'#F3F4F6', textdim:'#9CA3AF', accent:'#8B5CF6', accent2:'#F43F5E', tile:'rgba(139,92,246,.08)', tileborder:'#242433', border:'#242433' },
   flo:      { bg1:'#faf1e4', bg2:'#f2dfc7', text:'#3c1410', textdim:'#9c6e55', accent:'#c81e3a', accent2:'#e2635a', tile:'rgba(200,30,58,.08)', tileborder:'rgba(200,30,58,.18)', border:'rgba(200,30,58,.22)' },
   diary:    { bg1:'#fbf0e0', bg2:'#ecd6b6', text:'#3b2415', textdim:'#8a6a4e', accent:'#8c5a2b', accent2:'#c98a4b', tile:'rgba(140,90,43,.08)', tileborder:'rgba(140,90,43,.18)', border:'rgba(140,90,43,.22)' },
   twitter:  { bg1:'#000000', bg2:'#000000', text:'#e7e9ea', textdim:'#71767b', accent:'#1d9bf0', accent2:'#1a8cd8', tile:'rgba(255,255,255,.06)', tileborder:'rgba(255,255,255,.13)', border:'rgba(255,255,255,.13)' },
@@ -228,7 +227,7 @@ var APP_PALETTES = {
   twitch:   { bg1:'#0e0e10', bg2:'#18181b', text:'#efeff1', textdim:'#adadb8', accent:'#9146ff', accent2:'#772ce8', tile:'rgba(145,70,255,.08)', tileborder:'rgba(145,70,255,.2)', border:'rgba(145,70,255,.22)' },
   love:     { bg1:'#fff0f6', bg2:'#fbe4f0', text:'#4a1f3d', textdim:'#a3637f', accent:'#ff6fa8', accent2:'#c58bf2', tile:'rgba(255,111,168,.1)', tileborder:'rgba(255,111,168,.22)', border:'rgba(255,111,168,.24)' },
   delivery: { bg1:'#0b1220', bg2:'#060a12', text:'#f1f5f9', textdim:'#8b9bb4', accent:'#10b981', accent2:'#34d399', tile:'rgba(255,255,255,.06)', tileborder:'rgba(255,255,255,.1)', border:'rgba(255,255,255,.09)' },
-  bank:     { bg1:'#f2f6f3', bg2:'#e3ece6', text:'#0f2b20', textdim:'#5c7c6d', accent:'#0a5c3b', accent2:'#1f8a5a', tile:'rgba(10,92,59,.07)', tileborder:'rgba(10,92,59,.16)', border:'rgba(10,92,59,.18)' },
+  bank:     { bg1:'#080A10', bg2:'#111522', text:'#f8fafc', textdim:'#94a3b8', accent:'#8b5cf6', accent2:'#d946ef', tile:'rgba(255,255,255,.05)', tileborder:'rgba(255,255,255,.1)', border:'rgba(255,255,255,.08)' },
   market:   { bg1:'#f6f3fd', bg2:'#ece2fa', text:'#241347', textdim:'#7d6b9c', accent:'#6c3ce0', accent2:'#8b5ff0', tile:'rgba(108,60,224,.08)', tileborder:'rgba(108,60,224,.18)', border:'rgba(108,60,224,.2)' },
   calendar: { bg1:'#fdf1e0', bg2:'#f8dfc0', text:'#3c2415', textdim:'#9c7a56', accent:'#e2793f', accent2:'#f0a868', tile:'rgba(226,121,63,.1)', tileborder:'rgba(226,121,63,.22)', border:'rgba(226,121,63,.18)' },
   channels: { bg1:'#0e1621', bg2:'#17212b', text:'#e9edf1', textdim:'#7d8b99', accent:'#2ea6ff', accent2:'#1f8ad1', tile:'rgba(255,255,255,.06)', tileborder:'rgba(255,255,255,.1)', border:'rgba(255,255,255,.08)' },
@@ -964,7 +963,9 @@ async function rpImgCast(prompt, cfg){
   var subjName = who.indexOf('npc:') === 0 ? who.slice(4).trim() : '';
   try{
     var pool = (await pbCollect()).filter(function(c){ return c.src !== 'char'; }).map(function(c){ return { name:c.name, about:c.about, photo:c.img }; });
-    var ncs = await rpGet('rp_npc_contacts', []);
+    var cxc = await rpGet('rp_cx_contacts', []); if (!Array.isArray(cxc)) cxc = [];
+    cxc.forEach(function(c){ if (!c || !c.name) return; var hit = pool.filter(function(n){ return rpSameContact({ name:c.name, aliases:c.aliases || [] }, n.name); })[0]; if (hit){ if (!hit.photo && c.avatar) hit.photo = c.avatar; if (!hit.aliases) hit.aliases = c.aliases || []; } else pool.push({ name:c.name, about:c.desc || '', photo:c.avatar || '', aliases:c.aliases || [] }); });
+    var ncs = (await rpGet('rp_npc_contacts', [])).concat(cxc);
     var uLc = String(names.userName||'').toLowerCase(), cLc = String(names.charName||'').toLowerCase(), seen = {};
     if (subjName){
       var al = (ncs.filter(function(c){ return rpSameContact(c, subjName); })[0] || {}).aliases || [];
@@ -975,7 +976,7 @@ async function rpImgCast(prompt, cfg){
     }
     pool.forEach(function(n){
       var k = String(n.name||'').toLowerCase(); if (!k || seen[k] || k === uLc || k === cLc) return; seen[k] = 1;
-      if (stemHit(n.name)) npcs.push(n);
+      if (stemHit(n.name) || (n.aliases || []).some(stemHit)) npcs.push(n);
     });
   }catch(e){ if (subjName) npcs = [subject = { name: subjName, about:'', photo:'' }]; }
   var useChar, useUser;
@@ -983,7 +984,7 @@ async function rpImgCast(prompt, cfg){
   else if (who === 'char'){ useChar = true; useUser = userM; }
   else if (who === 'both'){ useChar = true; useUser = true; }
   else if (who === 'none'){ useChar = charM; useUser = userM; }
-  else if (who.indexOf('npc:') === 0){ useChar = false; useUser = false; }
+  else if (who.indexOf('npc:') === 0){ useChar = false; useUser = !!(cfg && cfg.withUser); }
   else { useUser = userM; useChar = charM || npcs.length === 0; }
   return { char:useChar, user:useUser, npcs:npcs.slice(0, 3), subject: subject };
 }
@@ -1104,14 +1105,6 @@ async function pickContactAvatar(){
     return { path: f.path, url: f.path };
   }catch(e){ console.error('RP avatar import failed', e); toast('Не удалось загрузить фото: '+(e && e.message ? e.message : e)); return null; }
 }
-async function setContactAvatar(storeKey, contactId, path){
-  var list = await rpGet(storeKey, []);
-  var idx = list.findIndex(function(x){ return x.id === contactId; });
-  if (idx === -1) return false;
-  list[idx].avatarPath = path;
-  await rpSet(storeKey, list);
-  return true;
-}
 async function getCharCard(){
   try{
     var chat = await PM.who.current();
@@ -1204,41 +1197,68 @@ async function currentRpLabel(){
   }catch(e){ return ''; }
 }
 
-function msgKey(t){ return t==='main' ? 'rp_messages' : 'rp_messages_'+t; }
-function statusKey(t){ return t==='main' ? 'rp_msg_status' : 'rp_msg_status_'+t; }
-function summaryCountKey(t){ return t==='main' ? 'rp_msg_summary_count' : 'rp_msg_summary_count_'+t; }
-function summaryEntryId(t, n){ return t==='main' ? ('rp-messenger-summary-'+n) : ('rp-contact-'+t+'-summary-'+n); }
 
-var msgQueues = {};
-function mutateMessages(threadId, fn){
-  var q = msgQueues[threadId] || Promise.resolve();
-  var run = q.then(async function(){
-    var key = msgKey(threadId);
-    var list = await rpGet(key, []);
-    var res = await fn(list);
-    await rpSet(key, list.slice(-500));
-    return res;
+
+function rpEditFields(title, fields){
+  return new Promise(function(resolve){
+    var root = document.getElementById('rp_screen') || document.getElementById('rp_frame') || document.body;
+    var ov = document.createElement('div'); ov.className = 'rp_confirm_overlay'; ov.style.zIndex = 99999;
+    var card = document.createElement('div'); card.className = 'rp_confirm_card rp_edit_card';
+    var h = '<div class="rp_confirm_title">' + escapeHtml(title || 'Редактировать') + '</div>';
+    fields.forEach(function(f, i){
+      h += '<div class="rp_edit_lbl">' + escapeHtml(f.label || '') + '</div>';
+      if (f.line) h += '<input class="rp_input rp_edit_in" data-i="' + i + '" value="' + escapeHtml(f.value || '') + '">';
+      else h += '<textarea class="rp_input rp_edit_in" data-i="' + i + '" rows="' + (f.rows || 5) + '">' + escapeHtml(f.value || '') + '</textarea>';
+    });
+    h += '<div class="rp_edit_row"><button class="rp_btn rp_edit_no">Отмена</button><button class="rp_btn rp_btn_primary rp_edit_ok">Сохранить</button></div>';
+    card.innerHTML = h; ov.appendChild(card); root.appendChild(ov);
+    function done(v){ if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
+    ov.addEventListener('click', function(e){ if (e.target === ov) done(null); });
+    ['mousedown','touchstart'].forEach(function(ev){ card.addEventListener(ev, function(e){ e.stopPropagation(); }); });
+    card.querySelector('.rp_edit_no').addEventListener('click', function(){ done(null); });
+    card.querySelector('.rp_edit_ok').addEventListener('click', function(){
+      var out = {}; fields.forEach(function(f, i){ out[f.k] = card.querySelector('[data-i="' + i + '"]').value; }); done(out);
+    });
+    var first = card.querySelector('.rp_edit_in'); if (first) setTimeout(function(){ try{ first.focus(); }catch(e){} }, 30);
   });
-  msgQueues[threadId] = run.catch(function(){});
-  return run;
 }
-async function getMsgStatus(threadId){
-  var s = await rpGet(statusKey(threadId), null);
-  if (!s) return null;
-  if (s.state === 'pending' && Date.now() - s.at > 45000 && !rpImgJobsActive()) return { state:'error', at: s.at };
-  return s;
+function rpWireEdit(wrap, selector, key, fields, rerender, title){
+  if (!wrap) return;
+  Array.prototype.forEach.call(wrap.querySelectorAll(selector), function(card){
+    if (card.querySelector(':scope > .rp_edit_btn')) return;
+    var b = document.createElement('div'); b.className = 'rp_edit_btn'; b.textContent = '✎'; b.title = 'Редактировать';
+    if (card.querySelector(':scope > .rp_del_tr')) b.classList.add('rp_edit_tr');
+    card.appendChild(b);
+    ['mousedown','touchstart','mouseup'].forEach(function(ev){ b.addEventListener(ev, function(e){ e.stopPropagation(); }); });
+    b.addEventListener('click', async function(e){
+      e.preventDefault(); e.stopPropagation();
+      card.classList.remove('rp_del_armed');
+      var list = await rpGet(key, []), id = card.getAttribute('data-id');
+      var it = list.find(function(x){ return x.id === id; }); if (!it) return;
+      var res = await rpEditFields(title, fields.map(function(f){ return { k:f.k, label:f.label, line:f.line, rows:f.rows, value: it[f.k] == null ? '' : String(it[f.k]) }; }));
+      if (!res) return;
+      fields.forEach(function(f){ if (f.k in res) it[f.k] = res[f.k]; });
+      await rpSet(key, list);
+      await rerender();
+    });
+  });
 }
-async function setMsgStatus(threadId, state){
-  if (state === 'idle'){ await rpSet(statusKey(threadId), null); return; }
-  await rpSet(statusKey(threadId), { state: state, at: Date.now() });
-}
-async function nextSummaryIndex(threadId){
-  var key = summaryCountKey(threadId);
-  var n = (await rpGet(key, 0)) + 1;
-  await rpSet(key, n);
-  return n;
-}
-
+document.addEventListener('click', async function(e){
+  var sp = e.target && e.target.closest ? e.target.closest('.rp_cm_edit') : null;
+  if (!sp) return;
+  e.preventDefault(); e.stopPropagation();
+  var ci = +sp.getAttribute('data-ci');
+  var tw = sp.closest('.rp_tw_tweet'), ch = sp.closest('.rp_ch_post');
+  var row = tw || ch; if (!row) return;
+  var id = row.getAttribute('data-id'), key = tw ? 'rp_tweets' : 'rp_tg_posts';
+  var list = await rpGet(key, []), it = list.find(function(x){ return x.id === id; });
+  var c = it && it.comments && it.comments[ci]; if (!c) return;
+  var res = await rpEditFields('Комментарий', [{ k:'text', label: c.author || 'Комментарий', rows:4, value: c.text || '' }]);
+  if (!res) return;
+  c.text = res.text; await rpSet(key, list);
+  if (tw) await twOpenComments(row, id, true);
+  else { var slot = row.querySelector('.rp_ch_comments_slot'); if (slot) renderChCommentsInto(slot, id, row.querySelector('[data-act="comments"]')); }
+}, true);
 function showChoiceModal(opts){
   return new Promise(function(resolve){
     var root = $('#rp_screen') || $('#rp_frame');
@@ -1353,81 +1373,6 @@ async function applyIconPreset(id, persist){
 
 var SCREENS = {};
 
-function photoMarkerInstruction(rare){
-  return '\nЕсли '+(rare ? 'очень изредка хочешь сама' : 'собеседник прямо просит фото/видео/кружочек, или')+' уместно показать что-то визуально (например: прислали фото по просьбе, или "о, смотри что готовлю") — вставь в сообщение один из двух тегов:\n'+
-    '`[ФОТО: подробное описание кадра на английском]` — обычное фото, можно с коротким текстом рядом.\n'+
-    '`[КРУЖОК: подробное описание кадра на английском]` — видео-кружочек (видеосообщение); используй именно этот тег, если собеседник просит видео, видеосообщение или кружок — настоящее видео прислать нельзя, но кружочек с кадром прекрасно это заменяет. ОБЯЗАТЕЛЬНО добавь рядом с тегом в кавычках то, что ты говоришь в этом видео-кружочке (как расшифровка голосового) — например: [КРУЖОК: ...] "Смотри какая погода!"\n'+
-    'Не делай так в каждом сообщении, только когда это естественно. Используй только ОДИН тег за сообщение.';
-}
-function extractPhotoMarker(text){
-  var s = String(text||'');
-  var m = /\[(ФОТО|КРУЖОК|ФАЙЛ)\s*:\s*([^\]]{1,600})\]/i.exec(s) || /^\s*(ФОТО|КРУЖОК|ФАЙЛ)\s*:\s*([^\n]{3,600})$/im.exec(s);
-  if (!m) return null;
-  if (/^ФАЙЛ$/i.test(m[1]) && RP_DOC_RE.test(m[2])) return null;
-  var kind = /^КРУЖОК$/i.test(m[1]) ? 'circle' : 'photo';
-  var desc = m[2].trim();
-  var caption = (s.slice(0, m.index) + s.slice(m.index + m[0].length)).trim();
-  return { kind: kind, desc: desc, caption: caption };
-}
-function multiMessageInstruction(){
-  return '\nОбычно достаточно ОДНОГО сообщения. Но изредка, если это естественно (например: сначала фото, потом короткая реплика; или просто написал(а) мысль в несколько сообщений подряд, как бывает в настоящих переписках) — можешь прислать 2-3 отдельных коротких сообщения вместо одного. Раздели их строкой `[NEXT]` на отдельной строке между ними. Не делай это часто — в большинстве случаев достаточно одного сообщения.';
-}
-function splitMultiReply(text){
-  return String(text||'').split(/\s*\[NEXT\]\s*/i).map(function(s){ return s.trim(); }).filter(Boolean);
-}
-async function generatePhoneReply(list){
-  var names = await getNames();
-  var card = await getCharCard();
-  var styleNote = await rpGet('rp_style_note', '');
-  var visible = list.filter(function(m){ return !m.hidden; });
-  var tail = visible.slice(-16).map(function(m){ return (m.role==='user'?names.userName:names.charName)+': '+m.text; }).join('\n');
-  var lastUser = visible.slice().reverse().find(function(m){ return m.role==='user'; });
-  var ctx = await getContext(Math.min(cfg('contextRange',24), 8));
-  var prompt = 'Ты — персонаж "'+names.charName+'".'+
-    (card.facts ? ' Факты о тебе (используй точно, не выдумывай новых): '+card.facts+'\n' : '')+
-    (card.styleSample ? '\nВОТ КАК ТЫ ГОВОРИШЬ (примеры твоих реплик) — обязательно копируй именно эту манеру: длину фраз, лексику, пунктуацию, характерные словечки, наличие или отсутствие эмодзи. Не пиши нейтральным литературным языком, если в примерах не так:\n'+card.styleSample+'\n' : '')+
-    (styleNote ? '\nДополнительно про манеру речи (обязательно учти поверх примеров выше):\n'+styleNote+'\n' : '')+
-    (ctx ? '\nФон истории до этого момента — только для ощущения тона. Эти события уже произошли и НЕ требуют ответа:\n'+ctx+'\n' : '')+
-    '\nСейчас "'+names.userName+'" пишет тебе ЛИЧНО В ТЕЛЕФОН, отдельно от сцены. Переписка в мессенджере:\n'+tail+'\n\n'+
-    'Ответь именно на последнее сообщение от '+names.userName+' в этой переписке'+(lastUser ? (': "'+lastUser.text+'"') : '')+'.\n'+
-    'Напиши короткое сообщение-ответ (1-3 предложения на сообщение) точно в своей манере речи из примеров выше. '+
-    'Ответь ТОЛЬКО текстом самого сообщения — без кавычек, без markdown, без пояснений, без описаний действий.'+
-    photoMarkerInstruction(false)+multiMessageInstruction();
-  return callModelForMessage(prompt, 900);
-}
-async function generateContactReply(contact, list){
-  var names = await getNames();
-  var visible = list.filter(function(m){ return !m.hidden; });
-  var tail = visible.slice(-16).map(function(m){ return (m.role==='user'?names.userName:contact.name)+': '+m.text; }).join('\n');
-  var lastUser = visible.slice().reverse().find(function(m){ return m.role==='user'; });
-  var prompt = 'Ты играешь эпизодического персонажа по имени "'+contact.name+'" для переписки в мессенджере внутри ролевой игры пользователя "'+names.userName+'". '+
-    'Вот кто это: '+(contact.desc ? contact.desc : 'без описания — придумай уместный образ по ситуации')+'. '+
-    'Это НЕ главный герой истории, просто контакт в телефоне — держись выданного краткого описания, не выдумывай глубокую предысторию.\n\n'+
-    (tail ? 'Переписка:\n'+tail+'\n\n' : '')+
-    'Ответь именно на последнее сообщение от '+names.userName+(lastUser?(': "'+lastUser.text+'"'):'')+'.\n'+
-    'Напиши короткое сообщение (1-2 предложения на сообщение), в характере, подходящем описанию. '+
-    'Только текст сообщения — без кавычек, markdown, пояснений.'+
-    photoMarkerInstruction(false)+multiMessageInstruction();
-  return callModelForMessage(prompt, 900);
-}
-async function generateAutonomousMessage(list){
-  var names = await getNames();
-  var card = await getCharCard();
-  var styleNote = await rpGet('rp_style_note', '');
-  var visible = list.filter(function(m){ return !m.hidden; });
-  var tail = visible.slice(-10).map(function(m){ return (m.role==='user'?names.userName:names.charName)+': '+m.text; }).join('\n');
-  var ctx = await getContext(Math.min(cfg('contextRange',24), 8));
-  var prompt = 'Ты — персонаж "'+names.charName+'".'+
-    (card.facts ? ' Факты о тебе: '+card.facts+'\n' : '')+
-    (card.styleSample ? '\nКак ты говоришь (примеры) — копируй манеру:\n'+card.styleSample+'\n' : '')+
-    (styleNote ? '\nМанера речи:\n'+styleNote+'\n' : '')+
-    (ctx ? '\nЧто сейчас происходит в основной сцене:\n'+ctx+'\n' : '')+
-    (tail ? '\nПоследняя переписка в мессенджере с "'+names.userName+'":\n'+tail+'\n' : '')+
-    '\nТы САМ(А), без повода со стороны '+names.userName+', решаешь написать ему(ей) в мессенджер прямо сейчас — вспомнил(а) о чём-то, соскучился(лась), хочешь поделиться мыслью или спросить что-то. Придумай уместный повод исходя из ситуации и характера.\n'+
-    'Напиши короткое сообщение (1-2 предложения на сообщение) в своей манере речи. Только текст сообщения — без кавычек, markdown, пояснений.'+
-    photoMarkerInstruction(true)+multiMessageInstruction();
-  return callModelForMessage(prompt, 900);
-}
 function sanitizeShortReply(text, maxLen){
   var s = String(text||'').trim();
   if (!s) return '';
@@ -1452,205 +1397,13 @@ async function callModelForMessage(prompt, maxLen){
     return text;
   }catch(e){ console.error('RP message generation failed', e); return ''; }
 }
-function rpPickMember(members, label){
-  var l = String(label || '').trim().toLowerCase();
-  var exact = members.filter(function(x){ return String(x).trim().toLowerCase() === l; })[0];
-  if (exact) return exact;
-  var norm = function(s){ return rpTranslit(String(s)).replace(/[^a-z0-9 ]/g, '').trim(); };
-  var tl = norm(l);
-  if (!tl) return null;
-  var hit = members.filter(function(x){
-    var tx = norm(x), first = tx.split(' ')[0];
-    if (tx === tl) return true;
-    if (!first || first.length < 3) return false;
-    var a = first.slice(0, Math.max(3, first.length - 2)), b = tl.slice(0, Math.max(3, tl.length - 2));
-    return tl.indexOf(a) === 0 || first.indexOf(b) === 0;
-  });
-  return hit.length === 1 ? hit[0] : null;
-}
-async function generateGroupReply(contact, list){
-  var names = await getNames();
-  var members = (contact.members || []).filter(function(n){ return String(n).trim().toLowerCase() !== String(names.userName||'').trim().toLowerCase(); });
-  if (!members.length) members = [names.charName];
-  var info = {}; try{ (await pbCollect()).forEach(function(pp){ info[String(pp.name).trim().toLowerCase()] = pp.about || ''; }); }catch(e){}
-  var card = null; try{ card = await getCharCard(); }catch(e){}
-  var who = members.map(function(n){ var lc = String(n).trim().toLowerCase(), d = info[lc] || ''; if (lc === String(names.charName||'').trim().toLowerCase() && card && card.facts) d = card.facts; return '- '+n+(d ? ': '+String(d).slice(0,200) : ''); }).join('\n');
-  var visible = list.filter(function(m){ return !m.hidden; });
-  var tail = visible.slice(-18).map(function(m){ var f = m.role === 'user' ? (m.senderLabel || names.userName) : (m.from || names.charName); return f+': '+m.text; }).join('\n');
-  var ctx = ''; try{ ctx = await getContext(Math.min(cfg('contextRange',24), 6)); }catch(e){}
-  var prompt = 'Это ГРУППОВОЙ чат «'+contact.name+'» в мессенджере внутри ролевой игры. Игрок — "'+names.userName+'" (за него НЕ пиши).\nУчастники, которые могут отвечать:\n'+who+'\n\n'+
-    (ctx ? 'Что сейчас в основной сцене:\n'+ctx+'\n\n' : '')+
-    (tail ? 'Переписка:\n'+tail+'\n\n' : '')+
-    'Напиши продолжение: 2-4 коротких реплики от РАЗНЫХ участников (необязательно от всех), живо и в характере каждого, можно перебивать друг друга и спорить. '+
-    'Формат СТРОГО: каждая реплика с новой строки как «Имя: текст», имя — точно как в списке участников, без перевода и транслитерации. Без кавычек, markdown и пояснений.';
-  var raw = String(await callModel(prompt) || '').replace(/```[a-zA-Z]*\n?/g,'').trim();
-  var out = [];
-  raw.split(/\n+/).forEach(function(line){
-    var mm = /^\s*[*_]*([^:\n]{1,40}?)[*_]*\s*:\s*([\s\S]+)$/.exec(line); if (!mm) return;
-    var nm = rpPickMember(members, mm[1]); if (!nm) return;
-    var tx = mm[2].trim().replace(/^["«]|["»]$/g,''); if (tx) out.push({ from:nm, text:tx });
-  });
-  return out;
-}
-async function attemptReply(threadId, listWrap, contact){
-  await setMsgStatus(threadId, 'pending');
-  await renderThreadList(threadId, listWrap, contact);
-  var list = await rpGet(msgKey(threadId), []);
-  if (contact && contact.group){
-    var gl = [];
-    try{ gl = await generateGroupReply(contact, list); }catch(e){ console.error('RP group reply failed', e); }
-    if (!gl.length){ await setMsgStatus(threadId, 'error'); toast('Не удалось получить ответ'); }
-    else {
-      for (var gi = 0; gi < gl.length; gi++){
-        var gm = { id: uid(), role:'char', from: gl[gi].from, text: gl[gi].text, ts: Date.now()+gi, hidden:false };
-        await mutateMessages(threadId, function(l){ l.push(gm); });
-        if (gi < gl.length-1) await renderThreadList(threadId, listWrap, contact);
-      }
-      await setMsgStatus(threadId, 'idle');
-    }
-    await renderThreadList(threadId, listWrap, contact);
-    return;
-  }
-  var reply = '';
-  try{ reply = contact ? await generateContactReply(contact, list) : await generatePhoneReply(list); }catch(e){ console.error(e); }
-  if (reply){
-    var parts = splitMultiReply(reply);
-    if (!parts.length) parts = [reply];
-    var imgOn = await imagesEnabled();
-    var pushed = [];
-    var jobs = parts.map(function(part, i){
-      var msgObj = { id: uid(), role:'char', ts: Date.now()+i, hidden:false };
-      var media = extractPhotoMarker(part);
-      if (!media){ msgObj.text = part; return Promise.resolve(msgObj); }
-      if (!imgOn){
-        msgObj.text = media.caption || (media.kind==='circle' ? '⭕ Видеосообщение — ' : '📷 Фото — ') + media.desc;
-        msgObj.mediaDesc = media.desc;
-        return Promise.resolve(msgObj);
-      }
-      return getImgConfig().then(function(c0){
-        var c1 = Object.assign({}, c0);
-        c1.refWho = (!contact || scanSameName(contact.name, RP_LAST_CHAR_NAME || '')) ? 'char' : 'npc:' + contact.name;
-        return rpGenerateImage(buildChatImagePrompt(media.desc, contact ? contact.name : null, media.kind), c1);
-      }).then(function(url){
-        msgObj.kind = media.kind; msgObj.imgUrl = url; msgObj.text = media.caption || ''; msgObj.mediaDesc = media.desc;
-        return msgObj;
-      }).catch(function(e){
-        console.error('RP phone chat image gen failed', e);
-        msgObj.text = media.caption || (media.kind==='circle' ? '⭕' : '📷');
-        return msgObj;
-      });
-    });
-    for (var i=0; i<jobs.length; i++){
-      var done = await jobs[i];
-      if (!(done.text || done.kind)) continue;
-      pushed.push(done);
-      await mutateMessages(threadId, function(l){ l.push(done); });
-      if (threadId === 'main') await rpSet('rp_msg_last_activity', Date.now());
-      if (i < jobs.length-1) await renderThreadList(threadId, listWrap, contact);
-    }
-    if (pushed.length){
-      await setMsgStatus(threadId, 'idle');
-      if (threadId === 'main') await rpSet('rp_msg_last_activity', Date.now());
-    } else {
-      await setMsgStatus(threadId, 'error');
-      toast('Не удалось получить ответ');
-    }
-  } else {
-    await setMsgStatus(threadId, 'error');
-    toast('Не удалось получить ответ');
-  }
-  await renderThreadList(threadId, listWrap, contact);
-}
-function summaryPrompt(text){
-  return 'Перескажи переписку ниже как обычный связный пересказ для памяти персонажа — 2-4 коротких предложения, а не список пунктов.\n'+
-    'КРИТИЧНО: сначала различи, что сказано ВСЕРЬЁЗ, а что — шутка, подъёб, сарказм, гипербола или дразнилка. '+
-    'В пересказ попадают только реальные факты, решения и значимые моменты. '+
-    'Шутки и подколы не пересказывай как буквальные факты и не выводи из них новых "фактов" (пример: если персонаж в шутку жалуется на "лагучий самсунг" — это не значит, что у собеседника телефон Samsung, это просто подкол — можно упомянуть, что был такой подкол, но не как факт о телефоне).\n'+
-    'Если во всей переписке нет ничего, кроме шуток и болтовни без реальной информации — верни только одну строку: "(ничего существенного)".\n'+
-    'Пиши сразу с сути, без вводных фраз («в ходе беседы», «она сказала», «было получено»), без канцелярита, обычным языком, компактно.\n\n'+
-    text+'\n\nОтветь только текстом пересказа (или строкой "(ничего существенного)"), ничего больше.';
-}
 
-function formatChatPayload(payload){
-  payload = String(payload||'').trim();
-  var m;
-  if ((m = /^ГОЛОС:([^|]*)\|([^|]*)\|?([\s\S]*)$/.exec(payload))){
-    var dur = m[1].trim(), desc = m[2].trim(), tr = m[3].trim();
-    return '🎤 Голосовое'+(dur?' ('+dur+')':'')+(desc?' — '+desc:'')+(tr?': «'+tr+'»':'');
-  }
-  if ((m = /^КРУГ:([^|]*)\|?([\s\S]*)$/.exec(payload))){
-    var desc2 = m[1].trim(), tr2 = m[2].trim();
-    return '⭕ Видеосообщение'+(desc2?' — '+desc2:'')+(tr2?': «'+tr2+'»':'');
-  }
-  if ((m = /^ФАЙЛ:([\s\S]*)$/.exec(payload))){
-    return '📎 Файл — '+m[1].trim();
-  }
-  if ((m = /^ФОТО:([\s\S]*)$/.exec(payload))){
-    return '📷 Фото — '+m[1].trim();
-  }
-  return payload;
-}
-var RP_DOC_RE = /(\.|\b)(pdf|docx?|xlsx?|pptx?|txt|zip|rar|apk|mp3|wav)\b|документ|таблиц|презентац|резюме|договор|архив|аудиофайл|трек|голосов/i;
-function parseImagePayload(payload){
-  payload = String(payload||'').trim();
-  var m;
-  if ((m = /^ФАЙЛ:([\s\S]*)$/i.exec(payload))){ if (RP_DOC_RE.test(m[1])) return null; return { kind:'photo', desc: m[1].trim() }; }
-  if ((m = /^ФОТО:([\s\S]*)$/i.exec(payload))) return { kind:'photo', desc: m[1].trim() };
-  if ((m = /^КРУГ:([^|]*)\|?([\s\S]*)$/i.exec(payload))) return { kind:'circle', desc: m[1].trim(), transcript: (m[2]||'').trim() };
-  return null;
-}
 function buildChatImagePrompt(desc, senderName, kind){
   var base = desc || ('a candid photo of '+(senderName||'a person')+' in an everyday moment');
   var common = ', real-life snapshot, amateur phone camera photo, ' + (/Lighting:/.test(base) ? '' : 'natural lighting, ') + 'candid, photorealistic, no text, no UI, no app interface, no screenshot elements, no frame, no overlay, no watermark, no borders';
   if (kind === 'circle') return base + ', close-up selfie-angle shot, front camera angle'+common;
   return base + common;
 }
-function parseChatNBlocks(text){
-  var blocks = [];
-  var re = /\[CHAT_N\]([\s\S]*?)\[\/CHAT_N\]/g, bm;
-  var TIME_MARKER = /\|\s*(\d{1,2}:\d{2})\s*\|/g;
-  function splitGap(gap, isLast){
-    if (isLast) return { before: gap.trim(), after: '' };
-    var lastNl = gap.lastIndexOf('\n');
-    if (lastNl !== -1) return { before: gap.slice(0, lastNl).trim(), after: gap.slice(lastNl+1).trim() };
-    var trimmed = gap.trim();
-    var lastSpace = trimmed.lastIndexOf(' ');
-    if (lastSpace === -1) return { before: '', after: trimmed };
-    return { before: trimmed.slice(0, lastSpace).trim(), after: trimmed.slice(lastSpace+1).trim() };
-  }
-  while ((bm = re.exec(text))){
-    var block = bm[1];
-    var markers = [];
-    var tm; TIME_MARKER.lastIndex = 0;
-    while ((tm = TIME_MARKER.exec(block))){
-      markers.push({ start: tm.index, end: tm.index + tm[0].length, time: tm[1] });
-    }
-    var chatName = '';
-    var cnm = /chat_name\s*:\s*/i.exec(block);
-    var afterChatName = cnm ? cnm.index + cnm[0].length : 0;
-    var pendingSender = null;
-    if (markers.length){
-      var preGap = block.slice(afterChatName, markers[0].start);
-      var preSplit = splitGap(preGap, false);
-      chatName = preSplit.before;
-      pendingSender = preSplit.after;
-    } else if (cnm){
-      chatName = block.slice(afterChatName).trim();
-    }
-    var msgLines = [];
-    for (var i=0;i<markers.length;i++){
-      var sender = pendingSender !== null ? pendingSender : block.slice(i===0?afterChatName:markers[i-1].end, markers[i].start).trim();
-      var gap = block.slice(markers[i].end, (i+1<markers.length) ? markers[i+1].start : block.length);
-      var split = splitGap(gap, i+1>=markers.length);
-      pendingSender = split.after || null;
-      if (sender) msgLines.push({ sender: sender, time: markers[i].time, payload: split.before });
-    }
-    if (msgLines.length) blocks.push({ chatName: chatName, lines: msgLines });
-  }
-  return blocks;
-}
-var RP_SERVICE_RE = /(^| )(telegram|телеграм|телеграмм|twitter|твиттер|твитер|tweet|твит|twitch|твич|tiktok|тикток|тик ток|sattok|сатток|instagram|инстаграм|инста|youtube|ютуб|ютьюб|яндекс|yandex|доставка|доставки|delivery|самокат|ozon|озон|wildberries|вайлдберриз|авито|avito|банк|bank|сбер|сбербанк|тинькофф|альфа банк|втб|госуслуги|уведомление|уведомления|notification|notifications|push|бот|bot|system|система|системное|приложение|маркет|market|satinder|tinder|тиндер|onlyfans|онлифанс|boosty|бусти|донат|донаты|donation|spotify|спотифай|steam|discord|дискорд|почта|email|mail|поддержка|support)( |$)/i;
-function rpIsServiceName(name){ return RP_SERVICE_RE.test(' ' + String(name || '').toLowerCase().replace(/[^a-zа-яё0-9]+/gi, ' ').trim() + ' '); }
 var RP_FAM = [
   ['mom', /^(мама|мамуля|мамулька|мамулечка|мамочка|мамка|мамуся|мамуська|мамусик|мамуш\S*|мамскин|мамс|мамси|мамчик|мать|матушка|маман|мамаша|mom|mommy|mum|mummy|mama)$/],
   ['dad', /^(папа|папуля|папочка|папка|папс|папаша|батя|батяня|отец|dad|papa)$/],
@@ -1697,178 +1450,6 @@ function rpSameContact(c, name){
     if (fk && rpFamKey(x) === fk) return true;
     return rpNameSame(x, b, !!c.group);
   });
-}
-async function findOrCreateContactByName(name){
-  name = String(name||'').trim() || 'Контакт';
-  if (rpIsServiceName(name)) return null;
-  if (await isMergedChatName(name)) return 'main';
-  var contacts = await rpGet('rp_npc_contacts', []);
-  var found = contacts.find(function(c){ return c.name && c.name.trim().toLowerCase() === name.toLowerCase(); }) || contacts.find(function(c){ return rpSameContact(c, name); });
-  if (found){
-    if (found.name.trim().toLowerCase() !== name.toLowerCase()){
-      found.aliases = (found.aliases || []).concat([name]).filter(function(x, i, a){ return a.indexOf(x) === i; }).slice(-12);
-      await rpSet('rp_npc_contacts', contacts);
-    }
-    return found.id;
-  }
-  var color = CONTACT_COLORS[contacts.length % CONTACT_COLORS.length];
-  var id = 'npc-'+uid();
-  contacts.push({ id:id, name:name, desc:'чат персонажа', color:color, ts:Date.now(), npc:true });
-  await rpSet('rp_npc_contacts', contacts);
-  return id;
-}
-async function markGroupContact(threadId, members){
-  try{
-    var list = await rpGet('rp_npc_contacts', []), ch = false;
-    list.forEach(function(c){ if (c.id === threadId){ if (!c.group){ c.group = true; ch = true; } c.members = c.members || []; members.forEach(function(n){ if (c.members.indexOf(n) < 0){ c.members.push(n); ch = true; } }); if (!c.desc || c.desc === 'чат персонажа') c.desc = 'группа · '+c.members.length+' уч.'; } });
-    if (ch) await rpSet('rp_npc_contacts', list);
-  }catch(e){}
-}
-async function findExistingContactByName(name){
-  name = String(name||'').trim();
-  if (!name) return null;
-  var contacts = await rpGet('rp_npc_contacts', []);
-  var found = contacts.find(function(c){ return c.name && c.name.trim().toLowerCase() === name.toLowerCase(); });
-  return found ? found.id : null;
-}
-var RP_TOMB = null;
-async function rpTombLoad(){ var t = await rpGet('rp_msg_tomb', []); RP_TOMB = Array.isArray(t) ? t : []; return RP_TOMB; }
-async function rpTombAdd(m){
-  if (!m) return;
-  var t = await rpTombLoad();
-  [m.text, m.mediaDesc].forEach(function(x){ var n = scanNorm(rpMediaStrip(x)); if (n && n.length >= 4 && t.indexOf(n) < 0) t.push(n); });
-  RP_TOMB = t.slice(-400);
-  await rpSet('rp_msg_tomb', RP_TOMB);
-}
-function rpRawFix(t){
-  var src = String(t == null ? '' : t), s = src.trim(), pre = '';
-  var g = /^([^:\n\[\]]{1,30}):\s+(?=\[?\s*(?:ГОЛОС|КРУГ|КРУЖОК|ФАЙЛ|ФОТО)\s*:)/i.exec(s);
-  if (g){ pre = g[1].trim() + ': '; s = s.slice(g[0].length); }
-  var m = /^\[?\s*(ГОЛОС|КРУГ|КРУЖОК|ФАЙЛ|ФОТО)\s*:\s*([\s\S]*?)\s*\]?$/i.exec(s);
-  if (!m) return src;
-  var kw = m[1].toUpperCase(), body = m[2].trim();
-  if (kw === 'КРУЖОК') kw = 'КРУГ';
-  if (kw === 'ФОТО' || (kw === 'ФАЙЛ' && !RP_DOC_RE.test(body))) return pre + '📷 Фото — ' + body;
-  if (kw === 'ГОЛОС' && body.indexOf('|') < 0) return pre + '🎤 Голосовое' + (body ? ': «' + body + '»' : '');
-  return pre + formatChatPayload(kw + ':' + body);
-}
-function rpThreadDedupe(list){
-  if (!Array.isArray(list) || list.length < 2) return null;
-  var out = list.slice(), changed = false;
-  out.forEach(function(m, i){ if (m && !m.kind && typeof m.text === 'string'){ var fx = rpRawFix(m.text); if (fx !== m.text){ out[i] = Object.assign({}, m, { text: fx }); changed = true; } } });
-  var norms = out.map(function(m){ return rpMsgNorms(m); }), drop = {};
-  for (var j = 1; j < out.length; j++){
-    if (!norms[j].length) continue;
-    for (var i = Math.max(0, j - 80); i < j; i++){
-      if (drop[i] || !norms[i].length) continue;
-      var a = out[i], b = out[j], sp = !!(a.scan || b.scan);
-      if (!sp && (a.role !== b.role || j - i > 8 || (a.ts && b.ts && Math.abs(b.ts - a.ts) > 900000))) continue;
-      var same = norms[j].some(function(x){ return norms[i].some(function(y){ return sp ? scanSame(x, y) : (x === y && x.length >= 14); }); });
-      if (!same) continue;
-      var victim = (a.scan && !b.scan) ? i : j;
-      drop[victim] = 1; changed = true;
-      if (victim === j) break;
-    }
-  }
-  return changed ? out.filter(function(m, k){ return !drop[k]; }) : null;
-}
-function rpMediaStrip(t){ return rpRawFix(t).replace(/^\s*(?:[^:\n]{1,30}:\s+(?=📎|📷|⭕|🎤))?(?:📎|📷|⭕|🎤)?\s*(?:\[)?\s*(?:ФАЙЛ|ФОТО|КРУГ|КРУЖОК|Файл|Фото|Видеосообщение|Голосовое)\s*(?:\([^)]*\))?\s*[:—\-]\s*/i, '').replace(/\]\s*$/, ''); }
-function rpMsgNorms(m){ var out = []; if (!m) return out; [m.text, m.mediaDesc].forEach(function(x){ var n = scanNorm(rpMediaStrip(x)); if (n) out.push(n); }); return out; }
-function rpMsgIsDup(list, text, tomb){
-  var n = scanNorm(rpMediaStrip(text)); if (!n) return false;
-  if (tomb && n.length >= 4 && tomb.some(function(x){ return scanSame(x, n); })) return true;
-  var recent = list.slice(n.length < 5 ? -3 : -80);
-  return recent.some(function(m){ return rpMsgNorms(m).some(function(k){ return scanSame(k, n); }); });
-}
-var CHATN_BUSY = false;
-async function maybeImportMessengerTags(){
-  if (CHATN_BUSY) return;
-  CHATN_BUSY = true;
-  try{
-    var count = 0;
-    try{ count = await PM.chat.count(); }catch(e){ return; }
-    var watermark = await rpGet('rp_msg_tag_watermark', null);
-    if (watermark === null){ await rpSet('rp_msg_tag_watermark', count); return; }
-    if (count <= watermark){ if (count < watermark) await rpSet('rp_msg_tag_watermark', count); return; }
-    var msgs = [];
-    try{ msgs = await PM.chat.slice([watermark, count-1]); }catch(e){ msgs = []; }
-    await rpSet('rp_msg_tag_watermark', count);
-    if (!Array.isArray(msgs) || !msgs.length) return;
-
-    var names = await getNames();
-    var userNameLc = String(names.userName||'').trim().toLowerCase();
-    var touchedMain = false, touchedOther = false;
-    var imgEnabled = await imagesEnabled();
-
-    for (var mi=0; mi<msgs.length; mi++){
-      var m = msgs[mi];
-      if (!m || m.role !== 'assistant' || !m.content) continue;
-      var blocks = parseChatNBlocks(rpTagText(String(m.content)));
-      for (var bi=0; bi<blocks.length; bi++){
-        var block = blocks[bi];
-        var others = [];
-        block.lines.forEach(function(l){ if (l.sender !== 'Я' && others.indexOf(l.sender) === -1) others.push(l.sender); });
-        var isGroup = others.length > 1;
-        var threadId;
-        if (!others.length){
-          var cn = (block.chatName || '').trim();
-          threadId = (cn && cn.toLowerCase() !== userNameLc) ? await findOrCreateContactByName(cn) : 'main';
-        }
-        else if (!isGroup && others[0].trim().toLowerCase() === userNameLc) threadId = 'main';
-        else if (!isGroup) threadId = await findOrCreateContactByName(others[0]);
-        else { threadId = await findOrCreateContactByName(block.chatName || others.join(', ')); if (threadId) await markGroupContact(threadId, others); }
-        if (!threadId){
-          for (var sv = 0; sv < block.lines.length; sv++){ var sl = block.lines[sv]; await pushHomeNotification(String(block.chatName || sl.sender || 'Уведомление').slice(0, 40), formatChatPayload(sl.payload)); }
-          continue;
-        }
-        var addedHere = 0;
-        var tombNow = await rpTombLoad();
-        var existNow = await rpGet(msgKey(threadId), []);
-        var freshLines = block.lines.filter(function(l){ var md = parseImagePayload(l.payload); return !rpMsgIsDup(existNow, md ? md.desc : formatChatPayload(l.payload), tombNow); });
-        var lineJobs = freshLines.map(function(l){
-          var isChar = l.sender === 'Я';
-          var isMeSender = !isChar && String(l.sender).trim().toLowerCase() === userNameLc;
-          var msgObj = { id: uid(), role: isChar ? 'char' : (isGroup && !isMeSender ? 'char' : 'user'), ts: Date.now(), hidden:false };
-          if (isGroup){ msgObj.from = isChar ? names.charName : l.sender; }
-          var media = parseImagePayload(l.payload);
-          function finishText(){
-            msgObj.text = formatChatPayload(l.payload);
-            return msgObj;
-          }
-          if (media && imgEnabled){
-            return getImgConfig().then(function(c0){ var c1 = Object.assign({}, c0); c1.refWho = isChar ? 'char' : (String(l.sender).trim().toLowerCase() === userNameLc ? 'user' : 'npc:'+l.sender); return rpGenerateImage(buildChatImagePrompt(media.desc, l.sender, media.kind), c1); }).then(function(url){
-              msgObj.kind = media.kind; msgObj.imgUrl = url; msgObj.text = media.transcript || ''; msgObj.mediaDesc = media.desc;
-              return msgObj;
-            }).catch(function(e){ console.error('RP messenger image gen failed', e); return finishText(); });
-          }
-          return Promise.resolve(finishText());
-        });
-        for (var li=0; li<lineJobs.length; li++){
-          var readyMsg = await lineJobs[li];
-          var added = await mutateMessages(threadId, function(l){ if (rpMsgIsDup(l, readyMsg.mediaDesc || readyMsg.text, tombNow)) return false; l.push(readyMsg); return true; });
-          if (!added) continue;
-          addedHere++;
-          if (panelOpen && threadId === 'main' && currentScreen === 'thread:main'){
-            var liveWrap = $('#rp_msg_list');
-            if (liveWrap) await renderThreadList('main', liveWrap, null);
-          }
-        }
-        if (addedHere){ if (threadId === 'main') touchedMain = true; else touchedOther = true; }
-      }
-    }
-    if (touchedMain || touchedOther){
-      await rpSet('rp_msg_last_activity', Date.now());
-      await rpSet('rp_autonomy_watch_messenger', null);
-      if (panelOpen && currentScreen === 'thread:main' && touchedMain){
-        var wrap = $('#rp_msg_list');
-        if (wrap) await renderThreadList('main', wrap, null);
-      } else {
-        unreadCount++; updateBadge();
-        pushHomeNotification('Мессенджер', 'Новое сообщение');
-      }
-    }
-  }catch(e){ console.error('RP tag import failed', e); }
-  finally{ CHATN_BUSY = false; }
 }
 
 function parseTwitchChatBlocks(text){
@@ -1976,40 +1557,6 @@ async function maybeImportTwitchTags(){
       }
     }
   }catch(e){ console.error('RP twitch tag import failed', e); }
-}
-async function maybeAutonomousMessage(){
-  try{
-    var conf = await rpGet('rp_autonomy_messenger', null);
-    if (!conf || !conf.enabled) return;
-    var intervalMs = Math.max(3, Number(conf.intervalMin)||20) * 60000;
-    var count = 0;
-    try{ count = await PM.chat.count(); }catch(e){ return; }
-    var watch = await rpGet('rp_autonomy_watch_messenger', null);
-    if (!watch || watch.count !== count){
-      await rpSet('rp_autonomy_watch_messenger', { count: count, at: Date.now() });
-      return;
-    }
-    if (Date.now() - watch.at < intervalMs) return;
-    var lastAuto = await rpGet('rp_autonomy_last_messenger', 0);
-    if (Date.now() - lastAuto < intervalMs) return;
-    if (Math.random() > 0.4) return;
-    await rpSet('rp_autonomy_last_messenger', Date.now());
-
-    var status = await getMsgStatus('main');
-    if (status && status.state === 'pending') return;
-    var list = await rpGet(msgKey('main'), []);
-    var text = await generateAutonomousMessage(list);
-    if (!text) return;
-    await mutateMessages('main', function(l){ l.push({ id: uid(), role:'char', text: text, ts: Date.now(), hidden:false }); });
-    await rpSet('rp_msg_last_activity', Date.now());
-    if (panelOpen && currentScreen === 'thread:main'){
-      var wrap = $('#rp_msg_list');
-      if (wrap) await renderThreadList('main', wrap);
-    } else {
-      unreadCount++; updateBadge();
-      pushHomeNotification('Мессенджер', text.slice(0,120));
-    }
-  }catch(e){ console.error('RP autonomy (messenger) failed', e); }
 }
 async function maybeAutonomousReminder(){
   try{
@@ -2465,6 +2012,7 @@ async function renderNotesJar(wrap){
     wrap.innerHTML = shown.map(function(n){
       return '<div class="rp_note_bubble'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn">'+RP_DEL_ICON+'</div><span>'+escapeHtml(n.text)+'</span></div>';
     }).join('');
+    rpWireEdit(wrap, '.rp_note_bubble', 'rp_notes', [{k:'text',label:'Записка'}], function(){ return renderNotesJar(wrap); }, 'Записка');
     rpWireLongPressDelete(wrap, '.rp_note_bubble', async function(id){
       var list = await rpGet('rp_notes', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2481,6 +2029,7 @@ async function renderRemindersJar(wrap){
     wrap.innerHTML = shown.map(function(n){
       return '<div class="rp_reminder_chip'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg class="rp_reminder_bell"><use href="#rpi-bell"/></svg><span>'+escapeHtml(n.text)+'</span></div>';
     }).join('');
+    rpWireEdit(wrap, '.rp_reminder_chip', 'rp_reminders', [{k:'text',label:'Напоминание'}], function(){ return renderRemindersJar(wrap); }, 'Напоминание');
     rpWireLongPressDelete(wrap, '.rp_reminder_chip', async function(id){
       var list = await rpGet('rp_reminders', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2982,6 +2531,7 @@ async function renderDiaryList(wrap){
       var dateLabel = pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+'.'+d.getFullYear();
       return '<div class="rp_diary_entry'+(e.hidden?' rp_note_hidden':'')+'" data-id="'+e.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><div class="rp_diary_date">☕ '+dateLabel+'</div>'+escapeHtml(e.text)+'</div>';
     }).join('');
+    rpWireEdit(wrap, '.rp_diary_entry', 'rp_diary', [{k:'text',label:'Запись',rows:8}], function(){ return renderDiaryList(wrap); }, 'Запись дневника');
     rpWireLongPressDelete(wrap, '.rp_diary_entry', async function(id){
       var list = await rpGet('rp_diary', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -3030,6 +2580,7 @@ async function renderSecretsList(wrap){
     wrap.querySelectorAll('.rp_secret_seal_card').forEach(function(card){
       card.querySelector('[data-act=reveal]').addEventListener('click', function(){ card.classList.toggle('rp_revealed'); });
     });
+    rpWireEdit(wrap, '.rp_secret_seal_card', 'rp_secrets', [{k:'text',label:'Секрет',rows:6}], function(){ return renderSecretsList(wrap); }, 'Секрет');
     rpWireLongPressDelete(wrap, '.rp_secret_seal_card', async function(id){
       var list = await rpGet('rp_secrets', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -3183,6 +2734,7 @@ async function renderTweetFeed(wrap){
       row.querySelector('[data-act=reply]').addEventListener('click', openC);
       var cl = row.querySelector('.rp_tw_clink'); if (cl) cl.addEventListener('click', openC);
     });
+    rpWireEdit(wrap, '.rp_tw_tweet', 'rp_tweets', [{k:'author',label:'Автор',line:true},{k:'text',label:'Твит',rows:6}], function(){ return renderTweetFeed(wrap); }, 'Твит');
     rpWireLongPressDelete(wrap, '.rp_tw_tweet', async function(id){
       var list = await rpGet('rp_tweets', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -3193,7 +2745,7 @@ async function renderTweetFeed(wrap){
 }
 function renderTwComments(comments){
   var rows = (comments || []).map(function(c, i){
-    return '<div class="rp_tw_comment' + (c.me ? ' me' : '') + (c.replyTo ? ' sub' : '') + '"><b>' + escapeHtml(c.author) + (c.replyTo ? ' <span class="rp_tw_rto">→ ' + escapeHtml(c.replyTo) + '</span>' : '') + ':</b> ' + twHighlight(c.text) + (c.me ? '' : ' <span class="rp_tw_creply" data-ci="' + i + '">Ответить</span>') + '</div>';
+    return '<div class="rp_tw_comment' + (c.me ? ' me' : '') + (c.replyTo ? ' sub' : '') + '"><b>' + escapeHtml(c.author) + (c.replyTo ? ' <span class="rp_tw_rto">→ ' + escapeHtml(c.replyTo) + '</span>' : '') + ':</b> ' + twHighlight(c.text) + ' <span class="rp_cm_edit" data-ci="' + i + '">✎</span>' + (c.me ? '' : ' <span class="rp_tw_creply" data-ci="' + i + '">Ответить</span>') + '</div>';
   }).join('');
   return '<div class="rp_tw_comments">' + (rows || '<div class="rp_muted" style="padding:2px 0;">Пока без комментариев.</div>') +
     '<div class="rp_tw_cbox"><input class="rp_input rp_tw_cin" placeholder="Твой комментарий…" maxlength="280"><div class="rp_tw_csend"><svg><use href="#rpi-send"/></svg></div></div></div>';
@@ -3426,6 +2978,7 @@ async function renderMemoriesList(wrap){
         '<div class="rp_mem_body"><div class="rp_mem_date">'+escapeHtml(m.dateLabel||'')+'</div><div class="rp_mem_text">'+escapeHtml(m.text)+'</div></div>'+
       '</div>';
     }).join('')+'</div>';
+    rpWireEdit(wrap, '.rp_mem_row', 'rp_memories', [{k:'text',label:'Воспоминание',rows:6}], function(){ return renderMemoriesList(wrap); }, 'Воспоминание');
     rpWireLongPressDelete(wrap, '.rp_mem_row', async function(id){
       var list = await rpGet('rp_memories', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -3493,11 +3046,17 @@ async function renderNpcsTab(body){
   var hint = el('div','rp_muted','Второстепенные персонажи истории — можно найти по контексту или добавить вручную.');
   body.appendChild(hint);
 
-  var actions = el('div'); actions.style.display='flex'; actions.style.gap='8px'; actions.style.margin='10px 0 4px';
+  var actions = el('div'); actions.style.display='flex'; actions.style.flexWrap='wrap'; actions.style.gap='8px'; actions.style.margin='10px 0 4px';
   actions.innerHTML =
     '<div class="rp_btn rp_sm" id="rp_npc_find"><span>Найти по контексту</span></div>'+
+    '<div class="rp_btn rp_sm" id="rp_npc_lore"><span>Из лорбуков</span></div>'+
     '<div class="rp_btn rp_ghost rp_sm" id="rp_npc_add"><span>Добавить вручную</span></div>';
   body.appendChild(actions);
+
+  var loreWrap = el('div'); loreWrap.style.display = 'none';
+  body.appendChild(loreWrap);
+  $('#rp_npc_lore', actions).addEventListener('click', function(){ npcLoreOpen(loreWrap); });
+  if (CX_LB.busy || (CX_LB.found && CX_LB.chat === RP_CHAT_ID)) npcLoreOpen(loreWrap);
 
   var formWrap = el('div'); formWrap.style.display = 'none'; formWrap.style.marginTop = '10px';
   body.appendChild(formWrap);
@@ -4545,8 +4104,6 @@ var bankUnlocked = false;
 var bankActiveTab = 'home';
 var bankWho = 'me';
 var bankPuzzle = null;
-var bankTransferMode = null;
-var bankDepositProgram = 'standard';
 var DEPOSIT_PROGRAMS = [
   { id:'safe', label:'Надёжный', apr:6 },
   { id:'standard', label:'Стандарт', apr:11 },
@@ -4589,9 +4146,12 @@ function daysBetweenISO(a, b){
   return Math.max(0, diff);
 }
 async function pushBankTx(tx){
+  tx = await bkLinkRoute(tx);
   var key = bankAcctKey(tx.acct).tx;
   var list = await rpGet(key, []);
   tx.id = uid(); tx.hidden = false; tx.ts = Date.now();
+  if (!tx.cat) tx.cat = bkCat(tx);
+  if (tx.acct !== 'bot' && tx.type === 'out' && tx.amount < 0 && !tx.declined && !BK_CB_NO[tx.cat] && BK_CAT_BY[tx.cat]){ var cbc = await bkCbGet(); tx.cb = Math.round(Math.abs(tx.amount) * (cbc.cat === tx.cat ? 0.05 : 0.01)); }
   list.push(tx);
   await rpSet(key, list.slice(-300));
 }
@@ -4693,380 +4253,6 @@ async function accrueDepositInterest(){
     return changed;
   }catch(e){ console.error('RP bank deposit accrual failed', e); return false; }
 }
-SCREENS.bank = {
-  title: 'Банк',
-  async render(container){
-    container.innerHTML = '';
-    container.style.padding = '0';
-    var scope = el('div','rp_bank_scope');
-    container.appendChild(scope);
-    if (!bankUnlocked){
-      renderBankLock(scope);
-      return;
-    }
-    bankActiveTab = 'home';
-    await buildBankMenu(scope);
-    await maybeAutoPaySalary();
-    await maybeAutoPayBills();
-    await accrueDepositInterest();
-    await renderBankBody(scope);
-  }
-};
-function renderBankLock(scope){
-  $('#rp_appbar_menu_btn').style.display = 'none';
-  bankPuzzle = generateBankPuzzle();
-  var lock = el('div','rp_bank_lock');
-  lock.innerHTML =
-    '<div class="rp_bank_lock_icon"><svg><use href="#rpi-bank"/></svg></div>'+
-    '<div class="rp_bank_lock_title">Проверка безопасности</div>'+
-    '<div class="rp_bank_lock_sub">Решите пример, чтобы открыть банковское приложение</div>'+
-    '<div class="rp_bank_lock_q" id="rp_bank_lock_q">'+escapeHtml(bankPuzzle.question)+' = ?</div>'+
-    '<div class="rp_bank_lock_choices" id="rp_bank_lock_choices"></div>';
-  scope.appendChild(lock);
-  var choicesWrap = $('#rp_bank_lock_choices', lock);
-  function renderChoices(){
-    choicesWrap.innerHTML = bankPuzzle.choices.map(function(c){ return '<div class="rp_bank_lock_choice" data-v="'+c+'">'+c+'</div>'; }).join('');
-    choicesWrap.querySelectorAll('[data-v]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        var val = Number(btn.getAttribute('data-v'));
-        if (val === bankPuzzle.answer){
-          bankUnlocked = true;
-          await SCREENS.bank.render($('#rp_screens'));
-        } else {
-          lock.classList.remove('rp_bank_lock_fail'); void lock.offsetWidth; lock.classList.add('rp_bank_lock_fail');
-          toast('Неверно — другой пример');
-          bankPuzzle = generateBankPuzzle();
-          $('#rp_bank_lock_q', lock).textContent = bankPuzzle.question+' = ?';
-          renderChoices();
-        }
-      });
-    });
-  }
-  renderChoices();
-}
-async function buildBankMenu(scope){
-  $('#rp_appbar_menu_btn').style.display = 'flex';
-  var menu = buildAppbarMenu();
-  menu.innerHTML =
-    '<div class="rp_btn rp_sm" id="rp_bank_menu_lore"><svg><use href="#rpi-note"/></svg><span>Саммари в лорбук</span></div>'+
-    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_hide"><svg><use href="#rpi-eyeoff"/></svg><span>Хайд</span></div>'+
-    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_unhide"><svg><use href="#rpi-eye"/></svg><span>Анхайд</span></div>'+
-    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_lock"><svg><use href="#rpi-lock"/></svg><span>Заблокировать</span></div>';
-  menu.appendChild(buildOocButton('ooc-bank', gatherOocBank));
-
-  wireBusyButton($('#rp_bank_menu_lore', menu), 'bank-lore', async function(){
-    var tx = (await rpGet('rp_bank_tx', [])).filter(function(t){ return !t.hidden; });
-    if (!tx.length){ toast('Пока нет операций'); closeAppbarMenu(); return; }
-    var lines = tx.slice(-15).map(function(t){ return '- ('+t.dateLabel+') '+t.counterparty+': '+(t.amount>=0?'+':'')+fmtMoney(t.amount)+(t.note?(' — '+t.note):''); });
-    await upsertLorebookEntry('rp-bank', 'История банковских операций', lines.join('\n'));
-    toast('История сохранена в лорбук');
-    closeAppbarMenu();
-  });
-  wireBusyButton($('#rp_bank_menu_hide', menu), 'bank-hide', async function(){
-    var changed = await hideBankLists();
-    toast(changed ? 'Скрыто (кроме последней записи в каждом разделе)' : 'Нечего скрывать');
-    closeAppbarMenu();
-    await renderBankBody(scope);
-  });
-  wireBusyButton($('#rp_bank_menu_unhide', menu), 'bank-unhide', async function(){
-    var changed = await unhideBankLists();
-    toast(changed ? 'Показано всё скрытое' : 'Нечего показывать');
-    closeAppbarMenu();
-    await renderBankBody(scope);
-  });
-  wireBusyButton($('#rp_bank_menu_lock', menu), 'bank-lock', async function(){
-    bankUnlocked = false;
-    closeAppbarMenu();
-    await SCREENS.bank.render($('#rp_screens'));
-  });
-}
-async function renderBankBody(scope){
-  scope.innerHTML = '';
-  if (bankActiveTab === 'settings'){
-    await renderBankSettingsScreen(scope);
-    return;
-  }
-  var whoNames = await getNames();
-  var whoRow = el('div','rp_bank_tabs'); whoRow.style.marginBottom = '10px';
-  whoRow.innerHTML = '<div class="rp_bank_tab'+(bankWho==='me'?' on':'')+'" data-who="me">Моя карта</div><div class="rp_bank_tab'+(bankWho==='bot'?' on':'')+'" data-who="bot">Карта: '+escapeHtml(whoNames.charName)+'</div>';
-  scope.appendChild(whoRow);
-  whoRow.querySelectorAll('[data-who]').forEach(function(t){ t.addEventListener('click', async function(){ bankWho = t.getAttribute('data-who'); bankTransferMode = null; if (bankWho==='bot' && (bankActiveTab==='deposits' || bankActiveTab==='notifications' || bankActiveTab==='bills')) bankActiveTab = 'home'; await renderBankBody(scope); }); });
-  var tabs = el('div','rp_bank_tabs');
-  var tabDefs = bankWho==='bot' ? [ ['home','Главная'], ['tx','История'] ] : [ ['home','Главная'], ['tx','История'], ['bills','Платежи'], ['deposits','Вклады'], ['notifications','Уведомления'] ];
-  tabs.innerHTML = tabDefs.map(function(t){ return '<div class="rp_bank_tab'+(bankActiveTab===t[0]?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</div>'; }).join('');
-  scope.appendChild(tabs);
-  tabs.querySelectorAll('[data-tab]').forEach(function(t){
-    t.addEventListener('click', async function(){ bankActiveTab = t.getAttribute('data-tab'); await renderBankBody(scope); });
-  });
-  var body = el('div');
-  scope.appendChild(body);
-  if (bankActiveTab==='home') await (bankWho==='bot' ? renderBotBankHome(body, scope) : renderBankHome(body, scope));
-  else if (bankActiveTab==='tx') await renderBankTxList(body, scope, null, bankWho==='bot' ? 'bot' : undefined);
-  else if (bankActiveTab==='deposits') await renderBankDeposits(body, scope);
-  else if (bankActiveTab==='bills') await renderBankBills(body, scope);
-  else await renderBankNotifications(body, scope);
-}
-
-async function renderBotBankHome(wrap, scope){
-  wrap.innerHTML = '';
-  var names = await getNames();
-  var known = await botBalanceKnown();
-  var bal = await getBankBalance('bot');
-  var conf = (await rpGet('rp_bot_conf', null)) || {};
-  var card = el('div','rp_bank_card');
-  card.style.background = 'linear-gradient(155deg,#2a1450,#0d0620)';
-  card.innerHTML =
-    '<div class="rp_bank_card_top"><div><div class="rp_bank_card_label">Карта: '+escapeHtml(names.charName)+'</div></div><div class="rp_bank_card_chip"></div></div>'+
-    '<div class="rp_bank_card_balance">'+(known ? fmtMoney(bal) : '—')+'</div>'+
-    '<div class="rp_bank_card_sub">'+(known ? escapeHtml(conf.note ? 'Оценка по контексту: '+conf.note : 'Свой счёт и свои траты') : 'Баланс ещё не определён — нажми «По контексту»')+'</div>';
-  wrap.appendChild(card);
-  var actions = el('div','rp_bank_actions');
-  actions.innerHTML =
-    '<div class="rp_bank_action_btn" id="rp_bot_est"><svg><use href="#rpi-sparkle"/></svg><span>По контексту</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bot_to"><svg><use href="#rpi-send"/></svg><span>Ему от меня</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bot_from"><svg><use href="#rpi-plus"/></svg><span>Мне от него</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bot_set"><svg><use href="#rpi-gear"/></svg><span>Вручную</span></div>';
-  wrap.appendChild(actions);
-  var formWrap = el('div'); wrap.appendChild(formWrap);
-  var form = function(mode){
-    var title = { to:'Перевести '+names.charName, from:'Перевод от '+names.charName+' мне', set:'Баланс карты вручную' }[mode];
-    formWrap.innerHTML = '<div class="rp_card" style="margin-bottom:12px;"><div class="rp_h" style="margin-bottom:8px;">'+escapeHtml(title)+'</div>'+
-      '<div class="rp_muted" style="margin-bottom:3px;">'+(mode==='set'?'Новый баланс':'Сумма')+'</div><input class="rp_input" type="number" id="rp_bot_amt" min="0" placeholder="0">'+
-      '<div style="height:10px;"></div><div class="rp_btn rp_sm" id="rp_bot_ok"><span>Готово</span></div></div>';
-    $('#rp_bot_ok', formWrap).addEventListener('click', async function(){
-      var a = Math.abs(Number($('#rp_bot_amt', formWrap).value)||0);
-      if (mode !== 'set' && a <= 0){ toast('Укажи сумму'); return; }
-      var today = await getStoryDate();
-      if (mode === 'set'){ await setBankBalance(a, 'bot'); toast('Баланс карты обновлён'); }
-      else if (mode === 'to'){
-        var my = await getBankBalance();
-        if (a > my){ toast('На твоём счёте не хватает денег'); return; }
-        await setBankBalance(my - a); await setBankBalance((await getBankBalance('bot')) + a, 'bot');
-        await pushBankTx({ type:'out', amount:-a, counterparty:names.charName, note:'Перевод на карту', dateLabel:today, source:'manual' });
-        await pushBankTx({ type:'in', amount:a, counterparty:names.userName, note:'Перевод', dateLabel:today, source:'manual', acct:'bot' });
-        toast('Переведено');
-      } else {
-        var bb = await getBankBalance('bot');
-        if (a > bb){ toast('На карте '+names.charName+' не хватает денег'); return; }
-        await setBankBalance(bb - a, 'bot'); await setBankBalance((await getBankBalance()) + a);
-        await pushBankTx({ type:'out', amount:-a, counterparty:names.userName, note:'Перевод', dateLabel:today, source:'manual', acct:'bot' });
-        await pushBankTx({ type:'in', amount:a, counterparty:names.charName, note:'Перевод от него', dateLabel:today, source:'manual' });
-        toast('Получено');
-      }
-      await renderBankBody(scope);
-    });
-  };
-  $('#rp_bot_to', actions).addEventListener('click', function(){ form('to'); });
-  $('#rp_bot_from', actions).addEventListener('click', function(){ form('from'); });
-  $('#rp_bot_set', actions).addEventListener('click', function(){ form('set'); });
-  wireBusyButton($('#rp_bot_est', actions), 'bot-balance', async function(){
-    try{ var v = await estimateBotBalance(); if (!v){ toast('Не получилось оценить — введи вручную'); return; } toast('Баланс определён'); await renderBankBody(scope); }
-    catch(e){ console.error(e); toast('Ошибка: '+(e.message||e)); }
-  });
-  var title = el('div','rp_bank_section_title'); title.innerHTML = '<span>Траты '+escapeHtml(names.charName)+'</span>';
-  wrap.appendChild(title);
-  var txWrap = el('div'); wrap.appendChild(txWrap);
-  await renderBankTxList(txWrap, scope, 8, 'bot');
-}
-async function renderBankSettingsScreen(scope){
-  scope.innerHTML = '';
-  var backRow = el('div'); backRow.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:14px;';
-  backRow.innerHTML = '<div class="rp_iconbtn" id="rp_bank_settings_back"><svg><use href="#rpi-back"/></svg></div><div style="font-weight:800;font-size:14.5px;color:var(--text);">Настройки банка</div>';
-  scope.appendChild(backRow);
-  $('#rp_bank_settings_back', backRow).addEventListener('click', async function(){ bankActiveTab = 'home'; await renderBankBody(scope); });
-
-  var bankConf = await getBankConfig();
-  var bankCooldownLeft = bankConf.lastIncomeSetAt ? Math.max(0, 3600000 - (Date.now()-bankConf.lastIncomeSetAt)) : 0;
-  var bankLocked = bankCooldownLeft > 0;
-  var form = el('div','rp_card');
-  form.innerHTML =
-    '<div class="rp_h" style="margin-bottom:8px;">Доход и зарплата</div>'+
-    '<div class="rp_muted" style="margin-bottom:8px;">Банк сам зачислит доход на счёт в указанный день месяца (день определяется по единой ролевой дате телефона). Изменить можно не чаще раза в час.</div>'+
-    (bankLocked ? '<div class="rp_muted" style="margin-bottom:8px;color:#c23a3a;">Можно будет изменить через '+Math.ceil(bankCooldownLeft/60000)+' мин.</div>' : '')+
-    '<div class="rp_muted" style="margin-bottom:3px;">Доход за раз</div><input class="rp_input" type="number" id="rp_bank_income_input" min="0" value="'+(bankConf.income||0)+'" '+(bankLocked?'disabled':'')+'>'+
-    '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">День месяца зачисления (1-28)</div><input class="rp_input" type="number" id="rp_bank_payday_input" min="1" max="28" value="'+(bankConf.payday||1)+'" '+(bankLocked?'disabled':'')+'>'+
-    '<div style="height:10px;"></div><div class="rp_btn'+(bankLocked?' rp_ghost':'')+'" id="rp_bank_conf_save"><span>'+(bankLocked?'Подождите':'Сохранить')+'</span></div>';
-  scope.appendChild(form);
-  var payer = await rpGet('rp_bank_scene_payer', 'auto');
-  var payCard = el('div','rp_card'); payCard.style.marginTop = '12px';
-  payCard.innerHTML = '<div class="rp_h" style="margin-bottom:6px;">Чьи траты из сцены</div><div class="rp_muted" style="margin-bottom:8px;">Чеки доставки и банковские уведомления из основного чата: с чьей карты списывать.</div>'+
-    '<div class="rp_bank_tabs" id="rp_payer_seg" style="margin-bottom:0;">'+[['auto','Авто'],['bot','Бота'],['me','Мои']].map(function(o){ return '<div class="rp_bank_tab'+(payer===o[0]?' on':'')+'" data-v="'+o[0]+'">'+o[1]+'</div>'; }).join('')+'</div>'+
-    '<div class="rp_muted" style="margin-top:8px;">Авто: чеки и подарки — с карты бота, банковские уведомления — с карты бота, если в них его имя, иначе с твоей.</div>';
-  scope.appendChild(payCard);
-  payCard.querySelectorAll('[data-v]').forEach(function(t){ t.addEventListener('click', async function(){ await rpSet('rp_bank_scene_payer', t.getAttribute('data-v')); await renderBankSettingsScreen(scope); }); });
-  if (!bankLocked){
-    $('#rp_bank_conf_save', form).addEventListener('click', async function(){
-      var income = Math.max(0, Number($('#rp_bank_income_input', form).value)||0);
-      var payday = Math.max(1, Math.min(28, Number($('#rp_bank_payday_input', form).value)||1));
-      var conf2 = await getBankConfig();
-      conf2.income = income;
-      conf2.payday = payday;
-      conf2.lastIncomeSetAt = Date.now();
-      await rpSet('rp_bank_config', conf2);
-      toast('Настройки банка сохранены — следующее изменение через час');
-      await renderBankSettingsScreen(scope);
-    });
-  }
-}
-async function renderBankHome(wrap, scope){
-  wrap.innerHTML = '';
-  var bal = await getBankBalance();
-  var card = el('div','rp_bank_card');
-  card.innerHTML =
-    '<div class="rp_bank_card_top"><div><div class="rp_bank_card_label">Основной счёт</div></div><div class="rp_bank_card_chip"></div></div>'+
-    '<div class="rp_bank_card_balance">'+fmtMoney(bal)+'</div>'+
-    '<div class="rp_bank_card_sub">Доступно для переводов и вкладов</div>';
-  wrap.appendChild(card);
-
-  var actions = el('div','rp_bank_actions');
-  actions.innerHTML =
-    '<div class="rp_bank_action_btn" id="rp_bank_act_out"><svg><use href="#rpi-send"/></svg><span>Перевести</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bank_act_in"><svg><use href="#rpi-plus"/></svg><span>Пополнить</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bank_act_dep"><svg><use href="#rpi-coin"/></svg><span>Вклады</span></div>'+
-    '<div class="rp_bank_action_btn" id="rp_bank_act_settings"><svg><use href="#rpi-gear"/></svg><span>Настройки</span></div>';
-  wrap.appendChild(actions);
-
-  var formWrap = el('div');
-  wrap.appendChild(formWrap);
-  $('#rp_bank_act_out', actions).addEventListener('click', function(){ bankTransferMode = bankTransferMode==='out'?null:'out'; renderBankTransferForm(formWrap, scope); });
-  $('#rp_bank_act_in', actions).addEventListener('click', function(){ bankTransferMode = bankTransferMode==='in'?null:'in'; renderBankTransferForm(formWrap, scope); });
-  $('#rp_bank_act_dep', actions).addEventListener('click', async function(){ bankActiveTab = 'deposits'; await renderBankBody(scope); });
-  $('#rp_bank_act_settings', actions).addEventListener('click', async function(){ bankActiveTab = 'settings'; await renderBankBody(scope); });
-  renderBankTransferForm(formWrap, scope);
-
-  var title = el('div','rp_bank_section_title'); title.innerHTML = '<span>Последние операции</span>';
-  wrap.appendChild(title);
-  var txWrap = el('div');
-  wrap.appendChild(txWrap);
-  await renderBankTxList(txWrap, scope, 5);
-}
-function renderBankTransferForm(formWrap, scope){
-  if (!bankTransferMode){ formWrap.innerHTML=''; return; }
-  var isOut = bankTransferMode === 'out';
-  formWrap.innerHTML =
-    '<div class="rp_card" style="margin-bottom:12px;">'+
-      '<div class="rp_h" style="margin-bottom:8px;">'+(isOut?'Перевести':'Пополнить')+'</div>'+
-      (isOut
-        ? '<div class="rp_muted" style="margin-bottom:3px;">Кому</div><input class="rp_input" id="rp_bank_form_who" placeholder="Имя получателя">'
-        : '<div class="rp_muted" style="margin-bottom:3px;">Откуда</div><input class="rp_input" id="rp_bank_form_who" placeholder="Например: перевод от Х">')+
-      '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">Сумма</div><input class="rp_input" type="number" id="rp_bank_form_amount" placeholder="0" min="0">'+
-      '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">Комментарий (необязательно)</div><input class="rp_input" id="rp_bank_form_note" placeholder="За что">'+
-      '<div style="height:10px;"></div><div class="rp_btn rp_sm" id="rp_bank_form_submit"><span>'+(isOut?'Отправить':'Пополнить')+'</span></div>'+
-    '</div>';
-  $('#rp_bank_form_submit', formWrap).addEventListener('click', async function(){
-    var who = $('#rp_bank_form_who', formWrap).value.trim() || (isOut?'Получатель':'Поступление');
-    var amount = Math.abs(Number($('#rp_bank_form_amount', formWrap).value) || 0);
-    var note = $('#rp_bank_form_note', formWrap).value.trim();
-    if (amount<=0){ toast('Укажите сумму'); return; }
-    var bal = await getBankBalance();
-    if (isOut && amount>bal){ toast('Недостаточно средств на счёте'); return; }
-    var newBal = isOut ? bal-amount : bal+amount;
-    await setBankBalance(newBal);
-    var today = await getStoryDate();
-    await pushBankTx({ type: isOut?'out':'in', amount: isOut?-amount:amount, counterparty: who, note: note, dateLabel: today, source:'manual' });
-    bankTransferMode = null;
-    toast(isOut ? 'Перевод отправлен' : 'Счёт пополнен');
-    await renderBankBody(scope);
-  });
-}
-async function renderBankTxList(wrap, scope, limit, acct){
-  try{
-    var txKey = bankAcctKey(acct).tx;
-    var all = await rpGet(txKey, []);
-    var shown = (limit ? all.slice(-limit) : all).slice().reverse();
-    if (!shown.length){ wrap.innerHTML = '<div class="rp_empty">Пока нет операций.</div>'; return; }
-    var iconFor = function(t){
-      if (t.type==='salary') return '🏦';
-      if (t.type==='bill') return '🧾';
-      if (t.type==='deposit_open') return '📥';
-      if (t.type==='deposit_close') return '📤';
-      return t.amount>=0 ? '💰' : '💸';
-    };
-    wrap.innerHTML = shown.map(function(t){
-      return '<div class="rp_bank_tx_row'+(t.hidden?' rp_note_hidden':'')+'" data-id="'+t.id+'">'+
-        '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
-        '<div class="rp_bank_tx_icon">'+iconFor(t)+'</div>'+
-        '<div class="rp_bank_tx_body"><div class="rp_bank_tx_name">'+escapeHtml(t.counterparty||'—')+'</div><div class="rp_bank_tx_meta">'+escapeHtml(t.dateLabel||'')+(t.note?(' · '+escapeHtml(t.note)):'')+'</div></div>'+
-        '<div class="rp_bank_tx_amount '+(t.amount>=0?'in':'out')+'">'+(t.amount>=0?'+':'')+fmtMoney(t.amount)+'</div>'+
-      '</div>';
-    }).join('');
-    rpWireLongPressDelete(wrap, '.rp_bank_tx_row', async function(id){
-      var list = await rpGet(txKey, []);
-      var next = list.filter(function(x){ return x.id !== id; });
-      await rpSet(txKey, next);
-      await renderBankTxList(wrap, scope, limit, acct);
-    });
-  }catch(e){ console.error(e); wrap.innerHTML = '<div class="rp_empty">Не удалось загрузить операции.</div>'; }
-}
-async function renderBankDeposits(wrap, scope){
-  wrap.innerHTML = '';
-  var bal = await getBankBalance();
-  var openCard = el('div','rp_card'); openCard.style.marginBottom='12px';
-  openCard.innerHTML =
-    '<div class="rp_h" style="margin-bottom:8px;">Открыть вклад</div>'+
-    '<div class="rp_muted" style="margin-bottom:8px;">Баланс счёта: '+fmtMoney(bal)+'</div>'+
-    '<div style="display:flex;gap:6px;margin-bottom:8px;">'+
-      DEPOSIT_PROGRAMS.map(function(p){ return '<div class="rp_bank_tab'+(p.id===bankDepositProgram?' on':'')+'" data-p="'+p.id+'" style="flex:1;line-height:1.3;">'+escapeHtml(p.label)+'<br><span style="font-size:9px;opacity:.85;">'+p.apr+'% годовых</span></div>'; }).join('')+
-    '</div>'+
-    '<input class="rp_input" type="number" id="rp_bank_dep_amount" placeholder="Сумма вклада" min="0">'+
-    '<div style="height:8px;"></div><div class="rp_btn rp_sm" id="rp_bank_dep_open"><span>Открыть вклад</span></div>';
-  wrap.appendChild(openCard);
-  openCard.querySelectorAll('[data-p]').forEach(function(chip){
-    chip.addEventListener('click', function(){
-      bankDepositProgram = chip.getAttribute('data-p');
-      openCard.querySelectorAll('[data-p]').forEach(function(c){ c.classList.toggle('on', c===chip); });
-    });
-  });
-  $('#rp_bank_dep_open', openCard).addEventListener('click', async function(){
-    var amount = Math.abs(Number($('#rp_bank_dep_amount', openCard).value)||0);
-    if (amount<=0){ toast('Укажите сумму'); return; }
-    var curBal = await getBankBalance();
-    if (amount>curBal){ toast('Недостаточно средств на счёте'); return; }
-    var prog = DEPOSIT_PROGRAMS.find(function(p){ return p.id===bankDepositProgram; }) || DEPOSIT_PROGRAMS[1];
-    var today = await getStoryDate();
-    await setBankBalance(curBal-amount);
-    var deps = await rpGet('rp_bank_deposits', []);
-    deps.push({ id: uid(), name: prog.label, apr: prog.apr, principal: amount, balance: amount, openedDate: today, lastAccrualDate: today, closed:false, hidden:false, source:'manual' });
-    await rpSet('rp_bank_deposits', deps);
-    await pushBankTx({ type:'deposit_open', amount: -amount, counterparty: 'Вклад «'+prog.label+'»', note: prog.apr+'% годовых', dateLabel: today, source:'manual' });
-    toast('Вклад открыт');
-    await renderBankBody(scope);
-  });
-
-  var listTitle = el('div','rp_bank_section_title'); listTitle.innerHTML = '<span>Мои вклады</span>';
-  wrap.appendChild(listTitle);
-  var listWrap = el('div');
-  wrap.appendChild(listWrap);
-  await renderBankDepositsList(listWrap, scope);
-}
-async function renderBankDepositsList(wrap, scope){
-  try{
-    var deps = await rpGet('rp_bank_deposits', []);
-    if (!deps.length){ wrap.innerHTML = '<div class="rp_empty">Вкладов пока нет.</div>'; return; }
-    wrap.innerHTML = deps.slice().reverse().map(function(d){
-      var earned = Math.round((d.balance - d.principal)*100)/100;
-      return '<div class="rp_bank_deposit_card'+(d.hidden?' rp_note_hidden':'')+'" data-id="'+d.id+'">'+
-        '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
-        '<div class="rp_bank_deposit_head"><span class="rp_bank_deposit_name">'+escapeHtml(d.name)+'</span><span class="rp_bank_deposit_rate">'+d.apr+'%</span></div>'+
-        '<div class="rp_bank_deposit_balance">'+fmtMoney(d.balance)+'</div>'+
-        '<div class="rp_bank_deposit_meta">Вложено: '+fmtMoney(d.principal)+' · Начислено: +'+fmtMoney(earned)+(d.closed?' · закрыт':'')+'</div>'+
-        (d.closed ? '' : '<div class="rp_bank_deposit_actions"><div class="rp_btn rp_ghost rp_xs" data-act="close" data-id="'+d.id+'"><span>Закрыть и забрать</span></div></div>')+
-      '</div>';
-    }).join('');
-    wrap.querySelectorAll('[data-act="close"]').forEach(function(btn){
-      btn.addEventListener('click', async function(){
-        await closeBankDeposit(btn.getAttribute('data-id'));
-        await renderBankBody(scope);
-      });
-    });
-    rpWireLongPressDelete(wrap, '.rp_bank_deposit_card', async function(id){
-      var list = await rpGet('rp_bank_deposits', []);
-      var next = list.filter(function(x){ return x.id !== id; });
-      await rpSet('rp_bank_deposits', next);
-      await renderBankDepositsList(wrap, scope);
-    });
-  }catch(e){ console.error(e); wrap.innerHTML = '<div class="rp_empty">Не удалось загрузить вклады.</div>'; }
-}
 async function closeBankDeposit(id){
   var deps = await rpGet('rp_bank_deposits', []);
   var d = deps.find(function(x){ return x.id===id; });
@@ -5113,7 +4299,7 @@ async function maybeAutoPayBills(){
       for (var i = 0; i < due.length; i++){
         var d = due[i][0]+'-'+pad2(due[i][1])+'-'+pad2(day);
         bal -= b.amount; paid++;
-        await pushBankTx({ type:'bill', amount: -b.amount, counterparty: b.name, note:'Ежемесячный платёж', dateLabel: d, source:'system' });
+        await pushBankTx({ type:'bill', amount: -b.amount, counterparty: b.name, note:'Ежемесячный платёж', dateLabel: d, source:'system', cat: b.cat || bkBillCat('', b.name) });
         await pushBankNotification({ bank:'Банк', ntype:'СПИСАНИЕ', amount: b.amount, place: b.name, message:'Ежемесячный платёж', balanceAfter: bal, time:'', dateLabel: d, source:'system' });
         b.lastKey = due[i][0]+'-'+pad2(due[i][1]);
       }
@@ -5124,107 +4310,6 @@ async function maybeAutoPayBills(){
     if (paid > 1) toast('Списано платежей: '+paid);
     return paid > 0;
   }catch(e){ console.error('RP bank bills failed', e); return false; }
-}
-async function generateBankBillsFromContext(){
-  var names = await getNames(), card = await getCharCard();
-  var ctx = await getContext(Math.min(cfg('contextRange',24), 20));
-  var cur = rpLocIsRu() ? 'рублях' : rpLocInfo().cur;
-  var prompt = 'Определи регулярные ЕЖЕМЕСЯЧНЫЕ платежи, которые должен нести '+names.userName+' (не '+names.charName+'): аренда или ипотека, коммуналка, связь и интернет, подписки, кредиты, учёба, абонементы и т.п. '+
-    'Опирайся на то, что реально упоминается в истории, а если упоминаний мало — на правдоподобный быт этого человека и сюжета.\n'+
-    (card.facts ? 'Факты о персонаже: '+card.facts+'\n' : '')+(ctx ? 'Недавние события:\n'+ctx+'\n' : '')+
-    '\nОтветь СТРОГО списком, по одному платежу в строке, без пояснений, не больше 8 строк, формат:\nBILL: название | сумма в '+cur+' (число) | день месяца (1-28)';
-  var raw = await callModel(prompt);
-  var out = [], re = /BILL:\s*([^|\n]+)\|\s*([\d\s.,]+)\s*[^|\n]*\|\s*(\d{1,2})/gi, m;
-  while ((m = re.exec(String(raw||'')))){
-    var amount = Math.abs(parseFloat(m[2].replace(/\s/g,'').replace(',','.'))||0), day = Math.max(1, Math.min(28, +m[3]||1));
-    if (amount > 0) out.push({ name: m[1].trim().slice(0,40), amount: Math.round(amount), day: day });
-  }
-  return out.slice(0, 8);
-}
-async function renderBankBills(wrap, scope){
-  wrap.innerHTML = '';
-  var list = await bankBillsLoad(), editId = null;
-  var total = list.filter(function(b){ return b.active; }).reduce(function(s,b){ return s + (b.amount||0); }, 0);
-  var head = el('div','rp_card'); head.style.marginBottom = '10px';
-  head.innerHTML = '<div class="rp_h" style="margin-bottom:4px;">Ежемесячные платежи</div>'+
-    '<div class="rp_muted" style="margin-bottom:8px;">В месяц уходит: <b style="color:var(--text);">'+fmtMoney(total)+'</b>. Платежи списываются сами в свой день по дате истории, а после таймскипа — за все пропущенные месяцы.</div>'+
-    '<div style="display:flex;gap:8px;flex-wrap:wrap;"><div class="rp_btn rp_sm" id="rp_bill_add"><span>Добавить платёж</span></div><div class="rp_btn rp_sm rp_ghost" id="rp_bill_ctx"><span>Обновить по контексту</span></div></div>';
-  wrap.appendChild(head);
-  var form = el('div','rp_card'); form.style.cssText = 'margin-bottom:10px;display:none;';
-  form.innerHTML = '<input class="rp_input" id="rp_bill_name" placeholder="Название (аренда, интернет, подписка…)" style="margin-bottom:6px;">'+
-    '<div style="display:flex;gap:6px;margin-bottom:8px;"><input class="rp_input" type="number" id="rp_bill_amount" placeholder="Сумма" min="0" style="flex:1;"><input class="rp_input" type="number" id="rp_bill_day" placeholder="День (1-28)" min="1" max="28" style="flex:1;"></div>'+
-    '<div style="display:flex;gap:8px;"><div class="rp_btn rp_sm" id="rp_bill_save"><span>Сохранить</span></div><div class="rp_btn rp_sm rp_ghost" id="rp_bill_cancel"><span>Отмена</span></div></div>';
-  wrap.appendChild(form);
-  var openForm = function(b){
-    editId = b ? b.id : null; form.style.display = 'block';
-    $('#rp_bill_name', form).value = b ? b.name : ''; $('#rp_bill_amount', form).value = b ? b.amount : ''; $('#rp_bill_day', form).value = b ? b.day : '';
-    $('#rp_bill_name', form).focus();
-  };
-  $('#rp_bill_add', head).addEventListener('click', function(){ openForm(null); });
-  $('#rp_bill_cancel', form).addEventListener('click', function(){ form.style.display = 'none'; });
-  $('#rp_bill_save', form).addEventListener('click', async function(){
-    var name = $('#rp_bill_name', form).value.trim(), amount = Math.abs(Number($('#rp_bill_amount', form).value)||0), day = Math.max(1, Math.min(28, Math.round(Number($('#rp_bill_day', form).value)||1)));
-    if (!name || amount <= 0){ toast('Нужны название и сумма'); return; }
-    var all = await bankBillsLoad();
-    if (editId){ var b = all.find(function(x){ return x.id === editId; }); if (b){ if (b.day !== day) b.lastKey = ''; b.name = name; b.amount = Math.round(amount); b.day = day; } }
-    else all.push({ id: uid(), name: name, amount: Math.round(amount), day: day, active: true, lastKey: await bankBillInitKey(day), source:'manual' });
-    await rpSet('rp_bank_bills', all);
-    await maybeAutoPayBills();
-    await renderBankBody(scope);
-  });
-  wireBusyButton($('#rp_bill_ctx', head), 'bank-bills-ctx', async function(){
-    var found = await generateBankBillsFromContext();
-    if (!found.length){ toast('Не удалось выделить платежи из контекста'); return; }
-    var all = await bankBillsLoad(), added = 0;
-    for (var i = 0; i < found.length; i++){
-      var f = found[i], low = f.name.toLowerCase();
-      var ex = all.find(function(x){ return String(x.name||'').toLowerCase() === low; });
-      if (ex){ if (ex.source === 'context'){ ex.amount = f.amount; if (ex.day !== f.day){ ex.day = f.day; ex.lastKey = ''; } } continue; }
-      all.push({ id: uid(), name: f.name, amount: f.amount, day: f.day, active: true, lastKey: await bankBillInitKey(f.day), source:'context' }); added++;
-    }
-    await rpSet('rp_bank_bills', all);
-    toast(added ? 'Добавлено платежей: '+added : 'Новых платежей нет, суммы обновлены');
-    await renderBankBody(scope);
-  });
-  var listWrap = el('div'); wrap.appendChild(listWrap);
-  if (!list.length){ listWrap.innerHTML = '<div class="rp_empty">Платежей пока нет. Добавь свои или нажми «Обновить по контексту».</div>'; return; }
-  listWrap.innerHTML = list.slice().sort(function(a,b){ return (a.day||1)-(b.day||1); }).map(function(b){
-    return '<div class="rp_bank_deposit_card'+(b.active?'':' rp_note_hidden')+'" data-id="'+b.id+'">'+
-      '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
-      '<div class="rp_bank_deposit_head"><span class="rp_bank_deposit_name">'+escapeHtml(b.name)+'</span><span class="rp_bank_deposit_rate">'+b.day+'-го числа</span></div>'+
-      '<div class="rp_bank_deposit_balance">'+fmtMoney(b.amount)+'</div>'+
-      '<div class="rp_bank_deposit_meta">'+(b.source==='context'?'из контекста · ':'')+(b.active?'списывается автоматически':'выключен')+'</div>'+
-      '<div class="rp_bank_deposit_actions" style="display:flex;gap:6px;"><div class="rp_btn rp_ghost rp_xs" data-act="edit"><span>Изменить</span></div><div class="rp_btn rp_ghost rp_xs" data-act="tog"><span>'+(b.active?'Выключить':'Включить')+'</span></div></div>'+
-    '</div>';
-  }).join('');
-  listWrap.querySelectorAll('.rp_bank_deposit_card').forEach(function(card){
-    var id = card.getAttribute('data-id');
-    $('[data-act="edit"]', card).addEventListener('click', function(){ var b = list.find(function(x){ return x.id === id; }); if (b){ openForm(b); form.scrollIntoView({ block:'center' }); } });
-    $('[data-act="tog"]', card).addEventListener('click', async function(){
-      var all = await bankBillsLoad(), b = all.find(function(x){ return x.id === id; });
-      if (b){ b.active = !b.active; if (b.active) b.lastKey = await bankBillInitKey(b.day); await rpSet('rp_bank_bills', all); await renderBankBody(scope); }
-    });
-  });
-  rpWireLongPressDelete(listWrap, '.rp_bank_deposit_card', async function(id){
-    var all = await bankBillsLoad(); await rpSet('rp_bank_bills', all.filter(function(x){ return x.id !== id; }));
-    await renderBankBody(scope);
-  });
-}
-async function renderBankNotifications(wrap, scope){
-  wrap.innerHTML = '';
-  var actions = el('div'); actions.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;';
-  actions.innerHTML = '<div class="rp_btn rp_sm" id="rp_bank_notif_gen"><span>Сгенерировать уведомление</span></div>';
-  wrap.appendChild(actions);
-  var listWrap = el('div');
-  wrap.appendChild(listWrap);
-  await renderBankNotificationsList(listWrap);
-  wireBusyButton($('#rp_bank_notif_gen', actions), 'bank-notif-gen', async function(){
-    var n = await generateBankFlavorNotification();
-    if (!n){ toast('Не удалось сгенерировать'); return; }
-    await pushBankNotification(n);
-    await renderBankNotificationsList(listWrap);
-    toast('Новое уведомление');
-  });
 }
 async function generateBankFlavorNotification(){
   try{
@@ -5243,38 +4328,841 @@ async function generateBankFlavorNotification(){
     return { bank:'Банк', ntype: ntype, amount: amount, place: parts[1]||'—', message:'', balanceAfter: null, time:'', dateLabel: today, source:'manual' };
   }catch(e){ console.error('RP generateBankFlavorNotification failed', e); return null; }
 }
-async function renderBankNotificationsList(wrap){
+var BK = { period:'month', owner:'all', cat:'all', q:'', more:0, gtab:'goals', root:null, profBusy:false, taskBusy:false };
+var BK_IC = {
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  receipt:'<path d="M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  home:'<path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  bills:'<rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9 15l2 2 4-4"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>',
+  link:'<path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',
+  sliders:'<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/>',
+  gauge:'<path d="M12 14l4-4"/><path d="M3.3 19a10 10 0 1 1 17.4 0"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  spark:'<path d="M12 3l1.9 5.6 5.6 1.9-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9z"/>',
+  check:'<path d="M20 6L9 17l-5-5"/>',
+  x:'<path d="M18 6L6 18M6 6l12 12"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  basket:'<path d="M5 9h14l-1.5 10.5a1 1 0 0 1-1 .5h-9a1 1 0 0 1-1-.5z"/><path d="M9 9l3-5 3 5"/>',
+  cup:'<path d="M4 8h13v6a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2v3M12 2v3"/>',
+  box:'<path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  car:'<path d="M5 17h14v-5l-2-5H7l-2 5z"/><circle cx="8" cy="17" r="2"/><circle cx="16" cy="17" r="2"/>',
+  bag:'<path d="M6 7h12l1 14H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
+  ticket:'<path d="M4 6h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4z"/><path d="M14 6v12"/>',
+  pill:'<path d="M10.5 20.5a5 5 0 0 1-7-7l10-10a5 5 0 0 1 7 7z"/><path d="M8.5 8.5l7 7"/>',
+  wifi:'<path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0"/><circle cx="12" cy="19.5" r="1"/>',
+  gift:'<rect x="3" y="8" width="18" height="5" rx="1"/><path d="M12 8v13M5 13v8h14v-8M12 8S10 3 7.5 4.5 9 8 12 8zM12 8s2-5 4.5-3.5S15 8 12 8z"/>',
+  swap:'<path d="M7 7h13l-3-3M17 17H4l3 3"/>',
+  coin:'<circle cx="12" cy="12" r="9"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.7 0-3 .9-3 2s1.3 1.7 3 2 3 .9 3 2-1.3 2-3 2c-1 0-2-.5-2.5-1.5M12 6.5v11"/>',
+  cap:'<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>',
+  dots:'<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
+  snow:'<path d="M12 2v20M4.9 4.9l14.2 14.2M2 12h20M4.9 19.1L19.1 4.9"/>',
+  wallet:'<path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15V7"/><circle cx="16" cy="14" r="1.2"/>',
+  card:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/>',
+  flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>'
+};
+function bkI(n, cls){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (cls ? ' class="' + cls + '"' : '') + '>' + (BK_IC[n] || '') + '</svg>'; }
+var BK_CATS = [
+  { id:'subs', n:'Подписки и связь', ic:'wifi', c:'#8b5cf6', re:/подписк|spotify|netflix|кинопоиск|яндекс\s*плюс|okko|ivi|youtube|интернет|связь|мобильн|мтс|билайн|мегафон|теле2|tele2|icloud|apple|google one|vk музык|сотов/i },
+  { id:'home', n:'Жильё', ic:'home', c:'#60a5fa', re:/аренд|квартир|коммунал|жкх|ипотек|управляющ|электроэнерг|отоплен/i },
+  { id:'loan', n:'Кредиты', ic:'receipt', c:'#ef4444', re:/кредит|займ|рассрочк|долг|микрофин/i },
+  { id:'edu', n:'Учёба', ic:'cap', c:'#38bdf8', re:/учёб|учеб|курс[ыа]?\b|универ|институт|школ|репетит|обучен|колледж/i },
+  { id:'gift', n:'Подарки', ic:'gift', c:'#f472b6', re:/подар|gift|цвет[ыо]|букет/i },
+  { id:'dlv', n:'Доставка', ic:'box', c:'#fb923c', re:/доставк|delivery|самокат|яндекс\s*еда|деливери|курьер|wolt|glovo|uber\s*eats|кухня на районе/i },
+  { id:'cafe', n:'Кафе и рестораны', ic:'cup', c:'#f59e0b', re:/кафе|кофе|coffee|ресторан|\bбар\b|паб|бургер|пицц|суши|роллы|столов|бистро|starbucks|шоколадниц|макдон|kfc|вкусно и точка|restaurant|cafe|кофейн|пекарн|шаурм/i },
+  { id:'food', n:'Продукты', ic:'basket', c:'#10b981', re:/продукт|магнит|пят[её]рочк|перекр[её]ст|ашан|\bлента\b|вкусвилл|азбука вкуса|супермаркет|гипермаркет|grocery|дикси|spar|окей|fix price|светофор|walmart|tesco|aldi|lidl/i },
+  { id:'taxi', n:'Транспорт', ic:'car', c:'#06b6d4', re:/такси|taxi|uber|метро|транспорт|бензин|азс|заправк|парковк|каршеринг|самол[её]т|авиа|ржд|поезд|автобус|электричк|проезд|тройк/i },
+  { id:'health', n:'Здоровье', ic:'pill', c:'#34d399', re:/аптек|клиник|врач|стомат|анализ|больниц|медиц|фитнес|спортзал|бассейн|\bзал\b|йога|массаж/i },
+  { id:'fun', n:'Развлечения', ic:'ticket', c:'#d946ef', re:/кино|театр|концерт|клуб|игр[аы]|steam|казино|боулинг|квест|музей|rave|афиша|выставк|парк аттракц|караоке|twitch|донат/i },
+  { id:'shop', n:'Шопинг', ic:'bag', c:'#f43f5e', re:/zara|h&m|магазин|шопинг|одежд|обув|маркет|wildberries|ozon|озон|вайлдб|цум|гум|косметик|парфюм|золотое яблоко|л[еэ]туаль|ikea|икеа|mall|бутик|ювелир/i },
+  { id:'xfer', n:'Переводы', ic:'swap', c:'#a78bfa' },
+  { id:'other', n:'Другое', ic:'dots', c:'#94a3b8' }
+];
+var BK_CAT_BY = {}; BK_CATS.forEach(function(c){ BK_CAT_BY[c.id] = c; });
+var BK_SPECIAL = { income:{ id:'income', n:'Поступления', ic:'coin', c:'#10b981' }, save:{ id:'save', n:'Накопления', ic:'target', c:'#22d3ee' }, bonus:{ id:'bonus', n:'Бонусы', ic:'spark', c:'#fbbf24' } };
+var BK_CB_NO = { xfer:1, home:1, loan:1, edu:1 };
+function bkCatMeta(id){ return BK_CAT_BY[id] || BK_SPECIAL[id] || BK_CAT_BY.other; }
+function bkCat(t){
+  if (t.cat && (BK_CAT_BY[t.cat] || BK_SPECIAL[t.cat])) return t.cat;
+  var ty = t.type;
+  if (ty === 'deposit_open' || ty === 'deposit_close' || ty === 'goal_in' || ty === 'goal_out') return 'save';
+  if (ty === 'reward' || ty === 'cashback') return 'bonus';
+  if (ty === 'salary' || (t.amount > 0 && ty !== 'bill')) return 'income';
+  var h = (t.counterparty || '') + ' ' + (t.note || '');
+  for (var i = 0; i < BK_CATS.length; i++){ var c = BK_CATS[i]; if (c.re && c.re.test(h)) return c.id; }
+  if (/перевод/i.test(h) || (t.source === 'manual' && ty === 'out')) return 'xfer';
+  return 'other';
+}
+function bkCatByName(n){
+  var s = String(n || '').toLowerCase().trim(); if (!s) return '';
+  for (var i = 0; i < BK_CATS.length; i++){ var c = BK_CATS[i]; if (c.id === s || c.n.toLowerCase() === s || c.n.toLowerCase().indexOf(s) === 0 || s.indexOf(c.n.toLowerCase().split(' ')[0]) === 0) return c.id; }
+  var t = bkCat({ type:'out', amount:-1, counterparty:s });
+  return t === 'other' || t === 'xfer' ? '' : t;
+}
+var BK_BILL_CAT = [['аренд','home'],['жиль','home'],['коммун','home'],['ипотек','home'],['квартир','home'],['связ','subs'],['интернет','subs'],['подписк','subs'],['телефон','subs'],['мобильн','subs'],['кредит','loan'],['займ','loan'],['учёб','edu'],['учеб','edu'],['курс','edu'],['здоров','health'],['спорт','health'],['фитнес','health'],['транспорт','taxi'],['проезд','taxi']];
+function bkBillCat(c, name){
+  var s = String(c || '').toLowerCase();
+  for (var i = 0; i < BK_BILL_CAT.length; i++){ if (s.indexOf(BK_BILL_CAT[i][0]) >= 0) return BK_BILL_CAT[i][1]; }
+  var t = bkCat({ type:'out', amount:-1, counterparty: name });
+  return t === 'xfer' ? 'other' : t;
+}
+function bkMonthOf(d){ var m = /^(\d{4})-(\d{2})/.exec(String(d || '')); return m ? m[1] + '-' + m[2] : ''; }
+function bkDaysTo(day, iso){
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || '')); if (!m) return 0;
+  var y = +m[1], mo = +m[2], d = +m[3], dim = new Date(y, mo, 0).getDate();
+  day = Math.max(1, Math.min(28, day || 1));
+  return d < day ? day - d : dim - d + day;
+}
+function bkHash(s){ var h = 7; s = String(s || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 1000003; return h; }
+function bkLast4(seed){ return String(1000 + bkHash(seed) % 9000); }
+function bkExp(seed){ var h = bkHash(seed + 'exp'); return pad2(1 + h % 12) + '/' + (28 + h % 4); }
+var BK_LAT = { а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya' };
+function bkLatin(n){ return String(n || '').toLowerCase().split('').map(function(ch){ return BK_LAT[ch] !== undefined ? BK_LAT[ch] : ch; }).join('').replace(/[^a-z \-.]/g, '').trim().toUpperCase().slice(0, 24) || 'CARDHOLDER'; }
+function bkAv(name, av){ var u = av ? String(av) : ''; return '<span class="bk_av"' + (u ? ' style="background-image:' + rpCssUrl(u) + '"' : '') + '>' + (u ? '' : escapeHtml(String(name || '?').trim().charAt(0).toUpperCase())) + '</span>'; }
+function bkDays(n){ return cxPlural(n, 'день', 'дня', 'дней'); }
+function bkSheet(html){
+  var host = (BK.root && BK.root.isConnected) ? BK.root : $('#rp_screen');
+  var bg = el('div', 'bk_sbg'); bg.innerHTML = '<div class="bk_sheet"><div class="bk_grab"></div>' + html + '</div>';
+  host.appendChild(bg);
+  bg.addEventListener('click', function(e){ if (e.target === bg) bg.remove(); });
+  return bg;
+}
+async function bkLinkGet(){ var v = await rpGet('rp_bank_link', null); return Object.assign({ on:false, limit: rpLocIsRu() ? 5000 : 100, frozen:false, day:'', spent:0 }, v && typeof v === 'object' ? v : {}); }
+async function bkLinkRoute(tx){
+  if (tx.acct !== 'bot' || !(tx.amount < 0) || !/^(bridge|gift|delivery)$/.test(tx.source || '')) return tx;
+  var lk = await bkLinkGet(); if (!lk.on) return tx;
+  var nm = await getNames();
+  if (bankNameHit(tx.counterparty, nm.userName)) return tx;
+  var a = Math.abs(tx.amount), today = await getStoryDate();
+  await setBankBalance((await getBankBalance('bot')) + a, 'bot');
+  var spent = lk.day === today ? (lk.spent || 0) : 0;
+  var out = Object.assign({}, tx, { acct: undefined, by:'bot' });
+  if (lk.frozen || spent + a > lk.limit){
+    out.amount = 0; out.want = a; out.declined = lk.frozen ? 'frozen' : 'limit';
+    await pushBankNotification({ bank:'Банк', ntype:'ОТКАЗ', amount:a, place: tx.counterparty, message: lk.frozen ? 'доп. карта заморожена' : 'превышен суточный лимит доп. карты', balanceAfter:null, time:'', dateLabel: today, source:'system' });
+    return out;
+  }
+  var mb = await getBankBalance(); await setBankBalance(mb - a);
+  lk.day = today; lk.spent = spent + a; await rpSet('rp_bank_link', lk);
+  await pushBankNotification({ bank:'Банк', ntype:'СПИСАНИЕ', amount:a, place: tx.counterparty, message:'доп. карта: ' + nm.charName, balanceAfter: mb - a, time:'', dateLabel: tx.dateLabel || today, source:'bridge' });
+  return out;
+}
+async function bkCbGet(){ var v = await rpGet('rp_bank_cb', null); return Object.assign({ cat:'cafe' }, v && typeof v === 'object' ? v : {}); }
+async function bkCashbackPayout(){
   try{
-    var list = (await rpGet('rp_bank_notifications', [])).slice(-60).slice().reverse();
-    if (!list.length){ wrap.innerHTML = '<div class="rp_empty">Уведомлений пока нет.</div>'; return; }
-    wrap.innerHTML = list.map(function(n){
-      var sign = n.ntype==='ПОПОЛНЕНИЕ' ? '+' : (n.ntype==='СПИСАНИЕ' ? '-' : '');
-      return '<div class="rp_bank_notif_row'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'">'+
-        '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
-        '<div class="rp_bank_notif_icon"><svg><use href="#rpi-bank"/></svg></div>'+
-        '<div class="rp_bank_notif_body">'+
-          '<div class="rp_bank_notif_title"><span>'+escapeHtml(n.bank||'Банк')+(n.card?(' •'+escapeHtml(n.card)):'')+'</span><span class="rp_bank_notif_time">'+escapeHtml(n.dateLabel||'')+'</span></div>'+
-          '<div class="rp_bank_notif_text">'+(n.ntype?escapeHtml(n.ntype)+': ':'')+sign+fmtMoney(n.amount)+(n.place?(' · '+escapeHtml(n.place)):'')+(n.message?(' · '+escapeHtml(n.message)):'')+'</div>'+
-          (n.source==='bridge' ? '<span class="rp_dlv_receipt_src">из основной сцены</span>' : (n.source==='system' ? '<span class="rp_bank_salary_badge">авто</span>' : ''))+
-        '</div>'+
-      '</div>';
-    }).join('');
-    rpWireLongPressDelete(wrap, '.rp_bank_notif_row', async function(id){
-      var list2 = await rpGet('rp_bank_notifications', []);
-      var next = list2.filter(function(x){ return x.id !== id; });
-      await rpSet('rp_bank_notifications', next);
-      await renderBankNotificationsList(wrap);
+    var today = await getStoryDate(), cur = bkMonthOf(today); if (!cur) return 0;
+    var list = await rpGet('rp_bank_tx', []), sum = 0, ch = false;
+    list.forEach(function(t){ if (t.cb > 0 && !t.cbPaid){ var mk = bkMonthOf(t.dateLabel); if (mk && mk < cur){ sum += t.cb; t.cbPaid = 1; ch = true; } } });
+    if (!ch) return 0;
+    await rpSet('rp_bank_tx', list);
+    if (sum > 0){
+      var bal = (await getBankBalance()) + sum; await setBankBalance(bal);
+      await pushBankTx({ type:'cashback', amount: sum, counterparty:'Кэшбэк за прошлый месяц', note:'', dateLabel: today, source:'system', cat:'bonus' });
+      await pushBankNotification({ bank:'Банк', ntype:'ПОПОЛНЕНИЕ', amount: sum, place:'Кэшбэк', message:'', balanceAfter: bal, time:'', dateLabel: today, source:'system' });
+    }
+    return sum;
+  }catch(e){ console.error('RP cashback failed', e); return 0; }
+}
+async function bkGoals(){ var l = await rpGet('rp_bank_goals', []); return Array.isArray(l) ? l : []; }
+async function bkTasks(){ var v = await rpGet('rp_bank_tasks', null); return v && Array.isArray(v.list) ? v : { list:[], at:0 }; }
+async function bkTasksEval(){
+  var v = await bkTasks(); if (!v.list.some(function(k){ return k.status === 'active'; })) return v;
+  var today = await getStoryDate(), tx = await rpGet('rp_bank_tx', []), bal = await getBankBalance(), nm = await getNames(), done = [];
+  var sum = function(l){ return l.reduce(function(s, t){ return s + Math.abs(t.amount || 0); }, 0); };
+  v.list.forEach(function(k){
+    if (k.status !== 'active') return;
+    var since = tx.filter(function(t){ return (t.ts || 0) >= (k.ts || 0) && !t.declined; });
+    var days = daysBetweenISO(k.start, today);
+    var spentCat = function(){ return sum(since.filter(function(t){ return t.amount < 0 && (t.type === 'out' || t.type === 'bill') && bkCat(t) === k.cat; })); };
+    if (k.type === 'save'){ k.val = sum(since.filter(function(t){ return t.type === 'goal_in' || t.type === 'deposit_open'; })); k.prog = Math.min(1, k.val / Math.max(1, k.amount)); if (k.val >= k.amount) k.status = 'done'; }
+    else if (k.type === 'transfer'){ k.val = sum(since.filter(function(t){ return t.type === 'out' && t.amount < 0 && bankNameHit(t.counterparty, nm.charName); })); k.prog = Math.min(1, k.val / Math.max(1, k.amount)); if (k.val >= k.amount) k.status = 'done'; }
+    else if (k.type === 'nospend'){ k.val = spentCat(); k.prog = Math.min(1, days / k.days); if (k.val > 0) k.status = 'failed'; else if (days >= k.days) k.status = 'done'; }
+    else if (k.type === 'cap'){ k.val = spentCat(); k.prog = Math.min(1, days / k.days); if (k.val > k.amount) k.status = 'failed'; else if (days >= k.days) k.status = 'done'; }
+    else if (k.type === 'keep'){ k.val = bal; k.prog = Math.min(1, days / k.days); if (bal < k.amount) k.status = 'failed'; else if (days >= k.days) k.status = 'done'; }
+    if (k.status === 'done') done.push(k);
+  });
+  await rpSet('rp_bank_tasks', v);
+  if (done.length && !(panelOpen && currentScreen === 'bank')){ unreadCount++; updateBadge(); pushHomeNotification('Банк', 'Задание выполнено: ' + done[0].title); }
+  return v;
+}
+async function bkSpend(daysBack, who){
+  var today = await getStoryDate(), lk = await bkLinkGet();
+  var main = await rpGet('rp_bank_tx', []), bot = await rpGet('rp_bot_tx', []);
+  var src = who === 'bot' ? (lk.on ? main.filter(function(t){ return t.by === 'bot'; }).concat(bot) : bot) : main;
+  var by = {}, total = 0;
+  src.forEach(function(t){
+    if (!(t.amount < 0) || t.declined || t.hidden) return;
+    if (t.type !== 'out' && t.type !== 'bill') return;
+    if (t.dateLabel && daysBetweenISO(t.dateLabel, today) >= daysBack) return;
+    var c = bkCat(t), a = Math.abs(t.amount);
+    by[c] = (by[c] || 0) + a; total += a;
+  });
+  var rows = Object.keys(by).map(function(k){ var m = bkCatMeta(k); return { id:k, n:m.n, c:m.c, ic:m.ic, sum: by[k] }; }).sort(function(a, b){ return b.sum - a.sum; });
+  rows.forEach(function(r){ r.pct = total ? Math.round(r.sum / total * 100) : 0; });
+  return { rows: rows, total: total };
+}
+async function bkFeed(){
+  var lk = await bkLinkGet(), out = [];
+  (await rpGet('rp_bank_tx', [])).forEach(function(t){ out.push({ t:t, acct:'me', who: t.by === 'bot' ? 'bot' : 'me' }); });
+  (await rpGet('rp_bot_tx', [])).forEach(function(t){ out.push({ t:t, acct:'bot', who:'bot' }); });
+  return out.sort(function(a, b){ return (b.t.ts || 0) - (a.t.ts || 0); });
+}
+async function bkMoney(){
+  var conf = await getBankConfig(), today = await getStoryDate(), bal = await getBankBalance();
+  var bills = (await bankBillsLoad()).filter(function(b){ return b.active && b.amount > 0; });
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(today);
+  var dim = m ? new Date(+m[1], +m[2], 0).getDate() : 30, td = m ? +m[3] : 1;
+  var dPay = conf.income > 0 ? bkDaysTo(conf.payday || 1, today) : dim - td + 1;
+  var soon = bills.filter(function(b){ return bkDaysTo(b.day, today) < dPay; }).sort(function(a, b){ return bkDaysTo(a.day, today) - bkDaysTo(b.day, today); });
+  var soonSum = soon.reduce(function(s, b){ return s + b.amount; }, 0);
+  var monthly = bills.reduce(function(s, b){ return s + b.amount; }, 0);
+  return { conf: conf, bal: bal, bills: bills, dPay: dPay, soon: soon, soonSum: soonSum, monthly: monthly, free: bal - soonSum, today: today };
+}
+SCREENS.bank = {
+  title: 'Банк',
+  async render(container){
+    container.innerHTML = '';
+    container.style.padding = '0'; container.style.display = 'flex'; container.style.flexDirection = 'column'; container.style.height = '100%'; container.style.minHeight = '0';
+    var scope = el('div', 'rp_bank_scope bk_app');
+    container.appendChild(scope);
+    BK.root = scope;
+    if (!bankUnlocked){ renderBankLock(scope); return; }
+    bankActiveTab = 'home'; BK.more = 0;
+    await buildBankMenu(scope);
+    await maybeAutoPaySalary();
+    await maybeAutoPayBills();
+    await accrueDepositInterest();
+    await bkCashbackPayout();
+    await bkTasksEval();
+    await renderBankBody(scope);
+  }
+};
+function renderBankLock(scope){
+  $('#rp_appbar_menu_btn').style.display = 'none';
+  bankPuzzle = generateBankPuzzle();
+  scope.innerHTML = '<div class="bk_lock"><div class="bk_lockic">' + bkI('lock') + '</div><b>Вход в банк</b><p>Реши пример, чтобы открыть приложение</p><div class="bk_lockq" id="bk_lq"></div><div class="bk_lockch" id="bk_lc"></div></div>';
+  var lock = $('.bk_lock', scope), q = $('#bk_lq', scope), wrap = $('#bk_lc', scope);
+  var draw = function(){
+    q.textContent = bankPuzzle.question + ' = ?';
+    wrap.innerHTML = bankPuzzle.choices.map(function(c){ return '<div class="bk_lockb" data-v="' + c + '">' + c + '</div>'; }).join('');
+    wrap.querySelectorAll('[data-v]').forEach(function(b){
+      b.addEventListener('click', async function(){
+        if (Number(b.getAttribute('data-v')) === bankPuzzle.answer){ bankUnlocked = true; await SCREENS.bank.render($('#rp_screens')); return; }
+        lock.classList.remove('bk_shake'); void lock.offsetWidth; lock.classList.add('bk_shake');
+        toast('Неверно — другой пример');
+        bankPuzzle = generateBankPuzzle(); draw();
+      });
     });
-  }catch(e){ console.error(e); wrap.innerHTML = '<div class="rp_empty">Не удалось загрузить уведомления.</div>'; }
+  };
+  draw();
+}
+async function buildBankMenu(scope){
+  $('#rp_appbar_menu_btn').style.display = 'flex';
+  var menu = buildAppbarMenu();
+  menu.innerHTML =
+    '<div class="rp_btn rp_sm" id="rp_bank_menu_lore"><svg><use href="#rpi-note"/></svg><span>Саммари в лорбук</span></div>'+
+    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_set"><svg><use href="#rpi-gear"/></svg><span>Настройки банка</span></div>'+
+    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_hide"><svg><use href="#rpi-eyeoff"/></svg><span>Хайд</span></div>'+
+    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_unhide"><svg><use href="#rpi-eye"/></svg><span>Анхайд</span></div>'+
+    '<div class="rp_btn rp_ghost rp_xs" id="rp_bank_menu_lock"><svg><use href="#rpi-lock"/></svg><span>Заблокировать</span></div>';
+  menu.appendChild(buildOocButton('ooc-bank', gatherOocBank));
+  wireBusyButton($('#rp_bank_menu_lore', menu), 'bank-lore', async function(){
+    var parts = await gatherOocBank();
+    if (!parts.length){ toast('Пока нечего сохранять'); closeAppbarMenu(); return; }
+    await upsertLorebookEntry('rp-bank', 'Финансы и банк', parts.join('\n'));
+    toast('Финансы сохранены в лорбук');
+    closeAppbarMenu();
+  });
+  $('#rp_bank_menu_set', menu).addEventListener('click', function(){ closeAppbarMenu(); bkSettingsSheet(); });
+  wireBusyButton($('#rp_bank_menu_hide', menu), 'bank-hide', async function(){
+    var changed = await hideBankLists();
+    toast(changed ? 'Скрыто (кроме последней записи в каждом разделе)' : 'Нечего скрывать');
+    closeAppbarMenu();
+    await renderBankBody(scope);
+  });
+  wireBusyButton($('#rp_bank_menu_unhide', menu), 'bank-unhide', async function(){
+    var changed = await unhideBankLists();
+    toast(changed ? 'Показано всё скрытое' : 'Нечего показывать');
+    closeAppbarMenu();
+    await renderBankBody(scope);
+  });
+  wireBusyButton($('#rp_bank_menu_lock', menu), 'bank-lock', async function(){
+    bankUnlocked = false;
+    closeAppbarMenu();
+    await SCREENS.bank.render($('#rp_screens'));
+  });
+}
+async function renderBankBody(scope){
+  scope = (scope && scope.isConnected) ? scope : BK.root;
+  if (!scope || !scope.isConnected || !bankUnlocked) return;
+  var oldBody = $('#bk_body', scope), st = oldBody ? oldBody.scrollTop : 0, sameTab = scope.getAttribute('data-tab') === bankActiveTab;
+  await cxWho();
+  var nm = CX.names, lk = await bkLinkGet();
+  var notifs = await rpGet('rp_bank_notifications', []), seen = await rpGet('rp_bank_nseen', 0);
+  var unseen = (Array.isArray(notifs) ? notifs : []).some(function(n){ return !n.hidden && (n.ts || 0) > seen; });
+  var nav = [['home','home','Главная'],['stats','chart','Аналитика'],['fab','',''],['bills','bills','Платежи'],['goals','target','Цели']];
+  scope.setAttribute('data-tab', bankActiveTab);
+  scope.innerHTML = '<div class="bk_head"><div class="bk_duo">' + bkAv(nm.user, nm.userAv) + bkAv(nm.char, nm.charAv) + '</div><div class="bk_ht"><span>' + (lk.on ? 'Семейный счёт' : 'Мой банк') + '</span><b>' + escapeHtml(nm.user) + ' &amp; ' + escapeHtml(nm.char) + '</b></div><div class="bk_ib" id="bk_bell">' + bkI('bell') + (unseen ? '<i></i>' : '') + '</div></div>' +
+    '<div class="bk_body" id="bk_body"></div>' +
+    '<div class="bk_nav">' + nav.map(function(n){ return n[0] === 'fab' ? '<div class="bk_fab" id="bk_fab">' + bkI('plus') + '</div>' : '<div class="bk_nb' + (bankActiveTab === n[0] ? ' on' : '') + '" data-nav="' + n[0] + '">' + bkI(n[1]) + '<span>' + n[2] + '</span></div>'; }).join('') + '</div>';
+  var body = $('#bk_body', scope);
+  $('#bk_bell', scope).addEventListener('click', bkNotifSheet);
+  $('#bk_fab', scope).addEventListener('click', bkFabSheet);
+  scope.querySelectorAll('[data-nav]').forEach(function(b){ b.addEventListener('click', async function(){
+    var k = b.getAttribute('data-nav');
+    if (k === 'stats'){ if (bankActiveTab !== 'home'){ bankActiveTab = 'home'; await renderBankBody(scope); } var an = $('#bk_an', scope); if (an) an.scrollIntoView({ behavior:'smooth', block:'start' }); return; }
+    if (k === 'home' && bankActiveTab === 'home'){ var bd = $('#bk_body', scope); if (bd) bd.scrollTo({ top:0, behavior:'smooth' }); return; }
+    bankActiveTab = k; BK.more = 0; await renderBankBody(scope);
+  }); });
+  if (bankActiveTab === 'bills') await bkBills(body);
+  else if (bankActiveTab === 'goals') await bkGoalsTab(body);
+  else await bkHome(body);
+  if (sameTab && st) body.scrollTop = st;
+}
+async function bkHome(body){
+  var nm = CX.names, lk = await bkLinkGet(), bot = bankWho === 'bot', seed = String(RP_CHAT_ID || 'chat');
+  var h = '<div class="bk_sel"><div data-who="me" class="' + (bot ? '' : 'on') + '">' + bkI('wallet') + 'Мой счёт</div><div data-who="bot" class="' + (bot ? 'on cy' : '') + '">' + bkI(lk.on ? 'link' : 'card') + escapeHtml(nm.char) + '</div></div>';
+  if (!bot){
+    var mo = await bkMoney(), c = mo.conf, foot;
+    if (lk.on) foot = '<span>' + bkI('link') + 'Доп. карта привязана: ' + escapeHtml(nm.char) + '</span>';
+    else if (c.income > 0) foot = '<span>' + bkI('coin') + 'Зарплата ' + fmtMoney(c.income) + '</span><em>через ' + bkDays(mo.dPay) + '</em>';
+    else foot = '<span class="bk_cta" data-prof="1">' + bkI('spark') + 'Узнать зарплату и платежи по истории</span>';
+    h += '<div class="bk_card fam"><div class="bk_ct"><div><span class="bk_cl">Основной счёт</span><span class="bk_badge">Главный</span></div><div class="bk_mc"><i></i><i></i></div></div>' +
+      '<div class="bk_cbal">' + fmtMoney(mo.bal) + '</div>' +
+      '<div class="bk_cnum"><span>•••• •••• ••••</span><b>' + bkLast4(seed + 'me') + '</b></div><div class="bk_chold"><span>' + escapeHtml(bkLatin(nm.user)) + '</span><span>' + bkExp(seed + 'me') + '</span></div>' +
+      '<div class="bk_cfoot">' + foot + '</div></div>';
+    h += '<div class="bk_qa"><div data-q="in"><i class="mg">' + bkI('plus') + '</i>Пополнить</div><div data-q="out"><i class="vi">' + bkI('send') + '</i>Перевести</div><div data-q="stmt"><i class="cy">' + bkI('receipt') + '</i>Выписка</div></div>';
+    h += bkMoneyHtml(mo);
+    var tv = await bkTasks(), act = tv.list.filter(function(k){ return k.status === 'active' || k.status === 'done'; });
+    if (act.length) h += '<div class="bk_glass bk_tprev" data-go="tasks">' + bkTaskHtml(act[0], true) + '</div>';
+  } else if (lk.on){
+    var today = await getStoryDate(), spent = lk.day === today ? (lk.spent || 0) : 0, avail = Math.max(0, lk.limit - spent), pct = Math.min(100, Math.round(spent / Math.max(1, lk.limit) * 100));
+    h += '<div class="bk_card ptn"><div class="bk_ct"><div><span class="bk_pill">' + bkI('link') + 'С основного счёта</span><div class="bk_csub">Доступно по лимиту</div></div><div class="bk_lockb2' + (lk.frozen ? ' fr' : '') + '" data-q="freeze">' + bkI(lk.frozen ? 'lock' : 'unlock') + (lk.frozen ? 'Заморожена' : 'Активна') + '</div></div>' +
+      '<div class="bk_cbal">' + fmtMoney(avail) + '</div>' +
+      '<div class="bk_cnum"><span>•••• •••• ••••</span><b>' + bkLast4(seed + 'bot') + '</b></div><div class="bk_chold"><span>' + escapeHtml(bkLatin(nm.char)) + ' · доп.</span><span>' + bkExp(seed + 'bot') + '</span></div>' +
+      '<div class="bk_cfoot"><span>Суточный лимит: <b>' + fmtMoney(lk.limit) + '</b></span><em class="bk_cta" data-q="limit">Изменить</em></div></div>';
+    h += '<div class="bk_qa"><div data-q="limit"><i class="am">' + bkI('sliders') + '</i>Лимит</div><div data-q="freeze"><i class="cy">' + bkI('snow') + '</i>' + (lk.frozen ? 'Разморозить' : 'Заморозить') + '</div><div data-q="unlink"><i class="ro">' + bkI('x') + '</i>Отвязать</div></div>';
+    h += '<div class="bk_glass bk_lim"><div class="bk_limh"><span>' + bkI('gauge') + 'Потрачено сегодня</span><b>' + pct + '%</b></div><div class="bk_limbar"><i style="width:' + pct + '%"></i></div><div class="bk_limf"><span>Потратил: <b>' + fmtMoney(spent) + '</b></span><span>Лимит: <b>' + fmtMoney(lk.limit) + '</b></span></div></div>';
+  } else {
+    var known = await botBalanceKnown(), bb = await getBankBalance('bot'), bc = (await rpGet('rp_bot_conf', null)) || {};
+    h += '<div class="bk_card ptn"><div class="bk_ct"><div><span class="bk_pill">' + bkI('card') + 'Свой счёт</span><div class="bk_csub">' + escapeHtml(known ? (bc.note || 'Его деньги и его траты') : 'Баланс ещё не известен') + '</div></div><div class="bk_mc"><i></i><i></i></div></div>' +
+      '<div class="bk_cbal">' + (known ? fmtMoney(bb) : '—') + '</div>' +
+      '<div class="bk_cnum"><span>•••• •••• ••••</span><b>' + bkLast4(seed + 'bot') + '</b></div><div class="bk_chold"><span>' + escapeHtml(bkLatin(nm.char)) + '</span><span>' + bkExp(seed + 'bot') + '</span></div>' +
+      '<div class="bk_cfoot">' + (bc.income ? '<span>' + bkI('coin') + 'Доход ' + fmtMoney(bc.income) + ' в месяц</span>' : '<span>' + bkI('spark') + 'Оценка по истории — кнопка «Баланс»</span>') + '</div></div>';
+    h += '<div class="bk_qa"><div data-q="tochar"><i class="vi">' + bkI('send') + '</i>Перевести</div><div data-q="fromchar"><i class="mg">' + bkI('plus') + '</i>Получить</div><div data-q="botbal"><i class="cy">' + bkI('spark') + '</i>Баланс</div></div>';
+    h += '<div class="bk_glass bk_promo"><div class="bk_promoi">' + bkI('link') + '</div><div><b>Доп. карта к твоему счёту</b><p>Его покупки из сцены будут списываться с твоего счёта в пределах суточного лимита. Заморозить можно в любой момент.</p><div class="bk_btn sm" data-q="link">Выпустить карту</div></div></div>';
+  }
+  var sp = await bkSpend(BK.period === 'week' ? 7 : 30, bot ? 'bot' : 'me');
+  h += '<div class="bk_glass bk_an" id="bk_an"><div class="bk_anh"><div><b>' + bkI('chart') + 'Аналитика расходов</b><span>Всего за ' + (BK.period === 'week' ? 'неделю' : 'месяц') + ': <em>' + fmtMoney(sp.total) + '</em></span></div><div class="bk_seg2"><div data-per="week" class="' + (BK.period === 'week' ? 'on' : '') + '">Неделя</div><div data-per="month" class="' + (BK.period === 'month' ? 'on' : '') + '">Месяц</div></div></div>' +
+    (sp.rows.length ? sp.rows.slice(0, 7).map(function(r){ return '<div class="bk_bar"><div class="bk_barh"><span><i style="color:' + r.c + '">' + bkI(r.ic) + '</i>' + escapeHtml(r.n) + '</span><em>' + fmtMoney(r.sum) + ' · ' + r.pct + '%</em></div><div class="bk_bart"><i style="width:' + Math.max(2, r.pct) + '%;background:' + r.c + '"></i></div></div>'; }).join('') : '<div class="bk_empty">Трат за этот период нет</div>') + '</div>';
+  h += '<div class="bk_hist"><div class="bk_histh"><b>История операций</b><label class="bk_search">' + bkI('search') + '<input id="bk_q" placeholder="Поиск…" value="' + escapeHtml(BK.q) + '"></label></div>' +
+    '<div class="bk_seg3"><div data-own="all" class="' + (BK.owner === 'all' ? 'on' : '') + '">Все</div><div data-own="me" class="' + (BK.owner === 'me' ? 'on' : '') + '">Мои</div><div data-own="bot" class="' + (BK.owner === 'bot' ? 'on' : '') + '">' + escapeHtml(nm.char) + '</div></div><div class="bk_pills" id="bk_pills"></div><div id="bk_feed"></div></div>';
+  body.innerHTML = h;
+  body.querySelectorAll('[data-who]').forEach(function(b){ b.addEventListener('click', async function(){ bankWho = b.getAttribute('data-who'); await renderBankBody(); }); });
+  body.querySelectorAll('[data-per]').forEach(function(b){ b.addEventListener('click', async function(){ BK.period = b.getAttribute('data-per'); await renderBankBody(); }); });
+  body.querySelectorAll('[data-own]').forEach(function(b){ b.addEventListener('click', function(){ BK.owner = b.getAttribute('data-own'); body.querySelectorAll('[data-own]').forEach(function(x){ x.classList.toggle('on', x === b); }); bkDrawFeed(body); }); });
+  body.querySelectorAll('[data-prof]').forEach(function(b){ b.addEventListener('click', bkProfileRun); });
+  body.querySelectorAll('[data-go="tasks"]').forEach(function(b){ b.addEventListener('click', async function(e){ if (e.target.closest('[data-claim]')) return; BK.gtab = 'tasks'; bankActiveTab = 'goals'; await renderBankBody(); }); });
+  body.querySelectorAll('[data-claim]').forEach(function(b){ b.addEventListener('click', function(){ bkClaim(b.getAttribute('data-claim')); }); });
+  body.querySelectorAll('[data-q]').forEach(function(b){ b.addEventListener('click', function(){ bkQuick(b.getAttribute('data-q')); }); });
+  var qi = $('#bk_q', body); qi.addEventListener('input', function(){ BK.q = qi.value; bkDrawFeed(body); });
+  await bkDrawFeed(body);
+}
+function bkMoneyHtml(mo){
+  var c = mo.conf;
+  if (!(c.income > 0) && !mo.bills.length) return '<div class="bk_glass bk_money empty"><div class="bk_promoi mg">' + bkI('spark') + '</div><div><b>Деньги до зарплаты</b><p>Банк прочитает историю и поймёт, кем ты работаешь, сколько получаешь и за что платишь каждый месяц: жильё, связь, подписки, кредиты.</p><div class="bk_btn sm" data-prof="1">' + bkI('spark') + 'Найти по истории</div></div></div>';
+  var rows = '';
+  if (c.income > 0) rows += '<div class="bk_mrow"><span>Зарплата' + (c.job ? '<small>' + escapeHtml(c.job) + '</small>' : '') + '</span><b class="pos">+' + fmtMoney(c.income) + '<small>' + (c.payday || 1) + '-го, через ' + bkDays(mo.dPay) + '</small></b></div>';
+  if (mo.bills.length) rows += '<div class="bk_mrow"><span>Обязательства<small>' + cxPlural(mo.bills.length, 'платёж', 'платежа', 'платежей') + ' в месяц</small></span><b>' + fmtMoney(mo.monthly) + '<small>' + (c.income > 0 ? Math.round(mo.monthly / c.income * 100) + '% зарплаты' : 'в месяц') + '</small></b></div>';
+  if (mo.soon.length) rows += '<div class="bk_mrow"><span>Спишется ' + (c.income > 0 ? 'до зарплаты' : 'до конца месяца') + '<small>' + escapeHtml(mo.soon.slice(0, 3).map(function(b){ return b.name; }).join(', ')) + (mo.soon.length > 3 ? '…' : '') + '</small></span><b class="neg">−' + fmtMoney(mo.soonSum) + '</b></div>';
+  return '<div class="bk_glass bk_money"><div class="bk_moneyh"><b>' + bkI('clock') + (c.income > 0 ? 'Деньги до зарплаты' : 'Деньги до конца месяца') + '</b><em class="bk_cta" data-prof="1">' + bkI('spark') + 'По истории</em></div>' + rows +
+    '<div class="bk_free"><span>Свободно</span><b class="' + (mo.free < 0 ? 'neg' : '') + '">' + fmtMoney(mo.free) + '</b></div></div>';
+}
+async function bkDrawFeed(body){
+  var nm = CX.names, feed = await bkFeed(), q = String(BK.q || '').toLowerCase().trim(), seed = String(RP_CHAT_ID || 'chat');
+  var base = feed.filter(function(f){ return !f.t.hidden && (BK.owner === 'all' || f.who === BK.owner); });
+  var cats = {}; base.forEach(function(f){ cats[bkCat(f.t)] = 1; });
+  if (BK.cat !== 'all' && !cats[BK.cat]) BK.cat = 'all';
+  var pills = $('#bk_pills', body);
+  pills.innerHTML = '<div data-cat="all" class="' + (BK.cat === 'all' ? 'on' : '') + '">Все</div>' + Object.keys(cats).map(function(k){ return '<div data-cat="' + k + '" class="' + (BK.cat === k ? 'on' : '') + '">' + escapeHtml(bkCatMeta(k).n) + '</div>'; }).join('');
+  pills.querySelectorAll('[data-cat]').forEach(function(p){ p.addEventListener('click', function(){ BK.cat = p.getAttribute('data-cat'); bkDrawFeed(body); }); });
+  var list = base.filter(function(f){ return (BK.cat === 'all' || bkCat(f.t) === BK.cat) && (!q || (String(f.t.counterparty || '') + ' ' + String(f.t.note || '')).toLowerCase().indexOf(q) >= 0); });
+  var lim = 25 + BK.more * 25, shown = list.slice(0, lim), wrap = $('#bk_feed', body);
+  if (!shown.length){ wrap.innerHTML = '<div class="bk_empty">' + (feed.length ? 'Ничего не найдено' : 'Операций пока нет') + '</div>'; return; }
+  wrap.innerHTML = shown.map(function(f, i){
+    var t = f.t, cm = bkCatMeta(bkCat(t)), pos = t.amount > 0;
+    var tag = f.who === 'bot' ? '<em class="cy">' + escapeHtml(nm.char) + '</em>' : '<em class="mg">Я</em>';
+    var sub = t.declined ? '<small class="neg">Отклонено</small>' : (t.cb > 0 ? '<small class="pos">+' + fmtMoney(t.cb) + ' кэшбэк</small>' : '');
+    return '<div class="bk_tx" data-i="' + i + '"><span class="bk_txi" style="color:' + cm.c + ';background:' + cm.c + '22">' + bkI(cm.ic) + '</span><div class="bk_txm"><b><span>' + escapeHtml(t.counterparty || '—') + '</span>' + tag + '</b><small>' + escapeHtml(cm.n) + (t.dateLabel ? ' · ' + escapeHtml(t.dateLabel) : '') + '</small></div><div class="bk_txa"><b class="' + (t.declined ? 'dec' : (pos ? 'pos' : '')) + '">' + (t.declined ? fmtMoney(t.want || 0) : (pos ? '+' : '') + fmtMoney(t.amount)) + '</b>' + sub + '</div></div>';
+  }).join('') + (list.length > lim ? '<div class="bk_more" id="bk_more">Показать ещё</div>' : '');
+  wrap.querySelectorAll('[data-i]').forEach(function(r){ r.addEventListener('click', function(){ var f = shown[+r.getAttribute('data-i')]; if (f) bkReceipt(f); }); });
+  var mb = $('#bk_more', wrap); if (mb) mb.addEventListener('click', function(){ BK.more++; bkDrawFeed(body); });
+}
+function bkReceipt(f){
+  var nm = CX.names, t = f.t, cm = bkCatMeta(bkCat(t)), seed = String(RP_CHAT_ID || 'chat'), pos = t.amount > 0;
+  var payer = f.who === 'bot' ? escapeHtml(nm.char) + (t.by === 'bot' ? ', доп. карта' : '') + ' *' + bkLast4(seed + 'bot') : escapeHtml(nm.user) + ' *' + bkLast4(seed + 'me');
+  var src = { bridge:'Из сцены', system:'Автоматически', manual:'Вручную', delivery:'Доставка', gift:'Подарок' }[t.source] || 'Банк';
+  var bg = bkSheet('<div class="bk_rc"><div class="bk_rch"><span>Электронный чек</span></div><span class="bk_rci" style="color:' + cm.c + ';background:' + cm.c + '22">' + bkI(cm.ic) + '</span><b>' + escapeHtml(t.counterparty || '—') + '</b><div class="bk_rca' + (pos ? ' pos' : '') + (t.declined ? ' dec' : '') + '">' + (t.declined ? 'Отклонено ' + fmtMoney(t.want || 0) : (pos ? '+' : '') + fmtMoney(t.amount)) + '</div><small>' + escapeHtml(t.dateLabel || '') + '</small></div>' +
+    '<div class="bk_rcl">' +
+      '<div><span>Плательщик</span><b>' + payer + '</b></div>' +
+      '<div><span>Счёт</span><b>' + (f.acct === 'bot' ? 'Карта: ' + escapeHtml(nm.char) : 'Основной счёт') + '</b></div>' +
+      '<div><span>Категория</span><b class="bk_cta" id="bk_rc_cat">' + escapeHtml(cm.n) + '</b></div>' +
+      (t.cb > 0 ? '<div><span>Кэшбэк</span><b class="pos">+' + fmtMoney(t.cb) + (t.cbPaid ? ', начислен' : ', придёт 1-го') + '</b></div>' : '') +
+      (t.note ? '<div><span>Комментарий</span><b>' + escapeHtml(t.note) + '</b></div>' : '') +
+      '<div><span>Источник</span><b>' + src + '</b></div>' +
+    '</div><div class="bk_btns"><div class="bk_btn ghost red" id="bk_rc_del">' + bkI('trash') + 'Удалить</div><div class="bk_btn ghost" id="bk_rc_x">Закрыть</div></div>');
+  $('#bk_rc_x', bg).addEventListener('click', function(){ bg.remove(); });
+  $('#bk_rc_cat', bg).addEventListener('click', function(){
+    bg.remove();
+    var b2 = bkSheet('<div class="bk_sht">Категория</div><div class="bk_chips">' + BK_CATS.map(function(c){ return '<div data-c="' + c.id + '" class="' + (bkCat(t) === c.id ? 'on' : '') + '"><i style="color:' + c.c + '">' + bkI(c.ic) + '</i>' + escapeHtml(c.n) + '</div>'; }).join('') + '</div>');
+    b2.querySelectorAll('[data-c]').forEach(function(x){ x.addEventListener('click', async function(){
+      var key = bankAcctKey(f.acct === 'bot' ? 'bot' : undefined).tx, l = await rpGet(key, []), it = l.filter(function(y){ return y.id === t.id; })[0];
+      if (it){ it.cat = x.getAttribute('data-c'); if (f.acct !== 'bot' && it.type === 'out' && it.amount < 0 && !it.cbPaid){ var cbc = await bkCbGet(); it.cb = BK_CB_NO[it.cat] ? 0 : Math.round(Math.abs(it.amount) * (cbc.cat === it.cat ? 0.05 : 0.01)); } await rpSet(key, l); }
+      b2.remove(); await renderBankBody();
+    }); });
+  });
+  $('#bk_rc_del', bg).addEventListener('click', async function(){
+    var ch = await showChoiceModal({ title:'Удалить операцию?', message:'Баланс не изменится — пропадёт только запись в истории.', buttons:[{ label:'Удалить', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return;
+    var key = bankAcctKey(f.acct === 'bot' ? 'bot' : undefined).tx, l = await rpGet(key, []);
+    await rpSet(key, l.filter(function(y){ return y.id !== t.id; }));
+    bg.remove(); await renderBankBody();
+  });
+}
+async function bkQuick(q){
+  if (q === 'in' || q === 'out' || q === 'tochar' || q === 'fromchar') return bkMoveSheet(q);
+  if (q === 'stmt') return bkStatement();
+  if (q === 'botbal') return bkBotBalSheet();
+  if (q === 'limit') return bkLimitSheet();
+  var lk = await bkLinkGet(), nm = await getNames();
+  if (q === 'freeze'){ lk.frozen = !lk.frozen; await rpSet('rp_bank_link', lk); toast(lk.frozen ? 'Доп. карта заморожена — списания недоступны' : 'Карта снова активна'); return renderBankBody(); }
+  if (q === 'link'){ lk.on = true; lk.frozen = false; await rpSet('rp_bank_link', lk); toast('Доп. карта выпущена: ' + nm.charName); await renderBankBody(); return bkLimitSheet(); }
+  if (q === 'unlink'){
+    var ch = await showChoiceModal({ title:'Отвязать доп. карту?', message:'Его покупки снова будут идти с его собственного счёта.', buttons:[{ label:'Отвязать', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return; lk.on = false; await rpSet('rp_bank_link', lk); return renderBankBody();
+  }
+}
+function bkFabSheet(){
+  var nm = CX.names;
+  var acts = [['in','plus','mg','Пополнить счёт'],['out','send','vi','Перевести'],['tochar','swap','cy','Перевести: ' + nm.char],['goal','target','em','Отложить в копилку'],['prof','spark','am','Финансы по истории']];
+  var bg = bkSheet('<div class="bk_sht">Быстрые действия</div>' + acts.map(function(a){ return '<div class="bk_act" data-a="' + a[0] + '"><i class="' + a[2] + '">' + bkI(a[1]) + '</i>' + escapeHtml(a[3]) + '</div>'; }).join(''));
+  bg.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', async function(){
+    var a = b.getAttribute('data-a'); bg.remove();
+    if (a === 'goal'){ var gs = await bkGoals(); if (!gs.length) bkGoalSheet(null); else bkGoalMoveSheet(gs.filter(function(g){ return !g.done; })[0] || gs[0], 'in'); return; }
+    if (a === 'prof') return bkProfileRun();
+    bkMoveSheet(a);
+  }); });
+}
+async function bkMoveSheet(mode){
+  var nm = await getNames(), lk = await bkLinkGet(), ru = rpLocIsRu();
+  var T = { in:'Пополнение счёта', out:'Перевод', tochar:'Перевод: ' + nm.charName, fromchar:'Получить от: ' + nm.charName }[mode];
+  var presets = ru ? [5000, 15000, 50000] : [50, 150, 500];
+  var cs = []; try{ cs = (await cxContacts()).slice(0, 6); }catch(e){}
+  var h = '<div class="bk_sht">' + escapeHtml(T) + '</div>';
+  if (mode === 'out') h += '<div class="bk_fld"><label>Кому</label><input id="bk_m_who" placeholder="Имя получателя"></div><div class="bk_chips sm">' + [nm.charName].concat(cs.map(function(c){ return c.name; })).map(function(n){ return '<div data-who="' + escapeHtml(n) + '">' + escapeHtml(n) + '</div>'; }).join('') + '</div>';
+  if (mode === 'in') h += '<div class="bk_fld"><label>Откуда</label><input id="bk_m_who" placeholder="Например: перевод от мамы"></div>';
+  h += '<div class="bk_fld"><label>Сумма</label><input id="bk_m_amt" class="bk_big" type="number" min="0" placeholder="0"></div>';
+  if (mode === 'in') h += '<div class="bk_chips sm">' + presets.map(function(p){ return '<div data-p="' + p + '">+' + fmtMoney(p) + '</div>'; }).join('') + '</div>';
+  h += '<div class="bk_fld"><label>Комментарий</label><input id="bk_m_note" placeholder="Необязательно"></div><div class="bk_btn" id="bk_m_ok">' + bkI(mode === 'in' || mode === 'fromchar' ? 'plus' : 'send') + (mode === 'in' ? 'Пополнить' : (mode === 'fromchar' ? 'Получить' : 'Отправить')) + '</div>';
+  var bg = bkSheet(h);
+  bg.querySelectorAll('[data-who]').forEach(function(c){ c.addEventListener('click', function(){ $('#bk_m_who', bg).value = c.getAttribute('data-who'); }); });
+  bg.querySelectorAll('[data-p]').forEach(function(c){ c.addEventListener('click', function(){ $('#bk_m_amt', bg).value = c.getAttribute('data-p'); }); });
+  $('#bk_m_ok', bg).addEventListener('click', async function(){
+    var a = Math.abs(Number($('#bk_m_amt', bg).value) || 0), note = $('#bk_m_note', bg).value.trim(), wi = $('#bk_m_who', bg), who = wi ? wi.value.trim() : '';
+    if (a <= 0){ toast('Укажи сумму'); return; }
+    var today = await getStoryDate(), my = await getBankBalance();
+    if (mode === 'out' && who && bankNameHit(who, nm.charName)) mode = 'tochar';
+    if (mode === 'in'){ await setBankBalance(my + a); await pushBankTx({ type:'in', amount:a, counterparty: who || 'Пополнение', note:note, dateLabel:today, source:'manual' }); toast('Счёт пополнен'); }
+    else if (mode === 'out'){
+      if (a > my){ toast('Недостаточно средств'); return; }
+      await setBankBalance(my - a); await pushBankTx({ type:'out', amount:-a, counterparty: who || 'Получатель', note: note || 'Перевод', dateLabel:today, source:'manual', cat:'xfer' }); toast('Перевод отправлен');
+    } else if (mode === 'tochar'){
+      if (a > my){ toast('Недостаточно средств'); return; }
+      await setBankBalance(my - a);
+      await pushBankTx({ type:'out', amount:-a, counterparty: nm.charName, note: note || 'Перевод', dateLabel:today, source:'manual', cat:'xfer' });
+      if (!lk.on){ await setBankBalance((await getBankBalance('bot')) + a, 'bot'); await pushBankTx({ type:'in', amount:a, counterparty: nm.userName, note: note || 'Перевод', dateLabel:today, source:'manual', acct:'bot' }); }
+      toast('Переведено: ' + nm.charName);
+    } else {
+      var bb = await getBankBalance('bot');
+      if (a > bb){ toast('На его счёте не хватает денег'); return; }
+      await setBankBalance(bb - a, 'bot'); await setBankBalance(my + a);
+      await pushBankTx({ type:'out', amount:-a, counterparty: nm.userName, note: note || 'Перевод', dateLabel:today, source:'manual', acct:'bot', cat:'xfer' });
+      await pushBankTx({ type:'in', amount:a, counterparty: nm.charName, note: note || 'Перевод', dateLabel:today, source:'manual' });
+      toast('Получено');
+    }
+    bg.remove(); await bkTasksEval(); await renderBankBody();
+  });
+}
+async function bkBotBalSheet(){
+  var nm = await getNames();
+  var bg = bkSheet('<div class="bk_sht">Баланс: ' + escapeHtml(nm.charName) + '</div><div class="bk_shs">Можно оценить по истории — кто он, чем зарабатывает и как живёт — или ввести вручную.</div><div class="bk_btn" id="bk_bb_ctx">' + bkI('spark') + 'Оценить по истории</div><div class="bk_fld" style="margin-top:12px;"><label>Или вручную</label><input id="bk_bb_v" type="number" min="0" placeholder="0"></div><div class="bk_btn ghost" id="bk_bb_ok">Сохранить</div>');
+  wireBusyButton($('#bk_bb_ctx', bg), 'bot-balance', async function(){
+    try{ var v = await estimateBotBalance(); if (!v){ toast('Не получилось оценить — введи вручную'); return; } toast('Баланс определён'); bg.remove(); await renderBankBody(); }
+    catch(e){ toast('Ошибка: ' + (e.message || e)); }
+  });
+  $('#bk_bb_ok', bg).addEventListener('click', async function(){ var v = Math.abs(Number($('#bk_bb_v', bg).value) || 0); await setBankBalance(v, 'bot'); toast('Баланс обновлён'); bg.remove(); await renderBankBody(); });
+}
+async function bkLimitSheet(){
+  var lk = await bkLinkGet(), nm = await getNames(), ru = rpLocIsRu(), mn = ru ? 1000 : 10, mx = ru ? 100000 : 2000, stp = ru ? 500 : 10;
+  var bg = bkSheet('<div class="bk_sht">Лимит доп. карты</div><div class="bk_shs">Карта списывает деньги с твоего основного счёта в пределах суточного лимита. Его покупки из сцены сверх лимита банк отклонит.</div>' +
+    '<div class="bk_limv"><span>Суточный лимит</span><b id="bk_lv">' + fmtMoney(lk.limit) + '</b></div><input type="range" class="bk_range" id="bk_lr" min="' + mn + '" max="' + mx + '" step="' + stp + '" value="' + Math.max(mn, Math.min(mx, lk.limit)) + '"><div class="bk_limf"><span>' + fmtMoney(mn) + '</span><span>' + fmtMoney(mx) + '</span></div>' +
+    '<div class="bk_btn" id="bk_l_ok">Сохранить</div>');
+  var r = $('#bk_lr', bg); r.addEventListener('input', function(){ $('#bk_lv', bg).textContent = fmtMoney(+r.value); });
+  $('#bk_l_ok', bg).addEventListener('click', async function(){ var l2 = await bkLinkGet(); l2.limit = +r.value; await rpSet('rp_bank_link', l2); toast('Лимит сохранён: ' + fmtMoney(l2.limit)); bg.remove(); await renderBankBody(); });
+}
+async function bkStatement(){
+  var today = await getStoryDate(), mk = bkMonthOf(today), tx = await rpGet('rp_bank_tx', []), cbc = await bkCbGet();
+  var inM = tx.filter(function(t){ return !t.declined && bkMonthOf(t.dateLabel || today) === mk; });
+  var inc = inM.filter(function(t){ return t.amount > 0 && t.type !== 'goal_out' && t.type !== 'deposit_close'; }).reduce(function(s, t){ return s + t.amount; }, 0);
+  var out = inM.filter(function(t){ return t.amount < 0 && (t.type === 'out' || t.type === 'bill'); }).reduce(function(s, t){ return s - t.amount; }, 0);
+  var bills = inM.filter(function(t){ return t.type === 'bill'; }).reduce(function(s, t){ return s - t.amount; }, 0);
+  var saved = inM.filter(function(t){ return t.type === 'goal_in' || t.type === 'deposit_open'; }).reduce(function(s, t){ return s - t.amount; }, 0);
+  var cb = inM.reduce(function(s, t){ return s + (t.cb > 0 && !t.cbPaid ? t.cb : 0); }, 0);
+  var sp = await bkSpend(31, 'me');
+  var bg = bkSheet('<div class="bk_sht">Выписка за месяц</div><div class="bk_shs">' + escapeHtml(mk) + ', по дате истории</div><div class="bk_rcl">' +
+    '<div><span>Пришло</span><b class="pos">+' + fmtMoney(inc) + '</b></div><div><span>Потрачено</span><b>' + fmtMoney(out) + '</b></div><div><span>Из них обязательства</span><b>' + fmtMoney(bills) + '</b></div><div><span>Отложено</span><b>' + fmtMoney(saved) + '</b></div><div><span>Кэшбэк копится</span><b class="pos">+' + fmtMoney(cb) + '</b></div><div><span>Категория 5%</span><b>' + escapeHtml(bkCatMeta(cbc.cat).n) + '</b></div>' +
+    '</div>' + (sp.rows.length ? '<div class="bk_shs" style="margin-top:12px;">Больше всего ушло: ' + escapeHtml(sp.rows.slice(0, 3).map(function(r){ return r.n + ' ' + fmtMoney(r.sum); }).join(', ')) + '</div>' : '') + '<div class="bk_btn ghost" id="bk_st_x">Закрыть</div>');
+  $('#bk_st_x', bg).addEventListener('click', function(){ bg.remove(); });
+}
+async function bkNotifSheet(){
+  var list = ((await rpGet('rp_bank_notifications', [])) || []).filter(function(n){ return !n.hidden; }).slice(-60).reverse();
+  await rpSet('rp_bank_nseen', Date.now());
+  var bell = BK.root && $('#bk_bell i', BK.root); if (bell) bell.remove();
+  var bg = bkSheet('<div class="bk_sht">' + bkI('bell') + 'Уведомления</div><div class="bk_nlist">' + (list.length ? list.map(function(n){
+    var neg = n.ntype === 'СПИСАНИЕ' || n.ntype === 'ОТКАЗ', sign = n.ntype === 'ПОПОЛНЕНИЕ' ? '+' : (n.ntype === 'СПИСАНИЕ' ? '−' : '');
+    return '<div class="bk_n"><span class="bk_txi ' + (n.ntype === 'ОТКАЗ' ? 'ro' : (neg ? 'mg' : 'em')) + '">' + bkI(n.ntype === 'ОТКАЗ' ? 'x' : (neg ? 'bag' : 'coin')) + '</span><div class="bk_txm"><b><span>' + escapeHtml((n.place || n.bank || 'Банк')) + '</span><time>' + escapeHtml(n.dateLabel || '') + '</time></b><small>' + escapeHtml((n.ntype ? n.ntype.charAt(0) + n.ntype.slice(1).toLowerCase() + ': ' : '') + sign + fmtMoney(n.amount || 0) + (n.message ? ' · ' + n.message : '')) + '</small>' + (n.source === 'bridge' ? '<em class="bk_src">из сцены</em>' : '') + '</div></div>';
+  }).join('') : '<div class="bk_empty">Уведомлений пока нет</div>') + '</div><div class="bk_btn ghost" id="bk_n_gen">' + bkI('spark') + 'Придумать уведомление</div>');
+  wireBusyButton($('#bk_n_gen', bg), 'bank-notif-gen', async function(){
+    var n = await generateBankFlavorNotification();
+    if (!n){ toast('Не удалось сгенерировать'); return; }
+    await pushBankNotification(n); await rpSet('rp_bank_nseen', Date.now()); bg.remove(); bkNotifSheet();
+  });
+}
+async function bkSettingsSheet(){
+  var payer = await rpGet('rp_bank_scene_payer', 'auto'), cbc = await bkCbGet(), nm = await getNames();
+  var bg = bkSheet('<div class="bk_sht">Настройки банка</div>' +
+    '<div class="bk_fld"><label>Чьи траты из сцены</label></div><div class="bk_seg3 wide" id="bk_s_pay">' + [['auto','Авто'],['bot', nm.charName],['me','Мои']].map(function(o){ return '<div data-v="' + o[0] + '" class="' + (payer === o[0] ? 'on' : '') + '">' + escapeHtml(o[1]) + '</div>'; }).join('') + '</div>' +
+    '<div class="bk_shs" style="margin-top:6px;">Авто: чеки и подарки — с его карты, банковские уведомления — по имени в них.</div>' +
+    '<div class="bk_fld" style="margin-top:14px;"><label>Кэшбэк 5% в этом месяце</label></div><div class="bk_chips">' + BK_CATS.filter(function(c){ return !BK_CB_NO[c.id] && c.id !== 'other'; }).map(function(c){ return '<div data-cb="' + c.id + '" class="' + (cbc.cat === c.id ? 'on' : '') + '"><i style="color:' + c.c + '">' + bkI(c.ic) + '</i>' + escapeHtml(c.n) + '</div>'; }).join('') + '</div>' +
+    '<div class="bk_shs">На остальные покупки — 1%. Кэшбэк приходит на счёт в начале следующего месяца по дате истории.</div>');
+  bg.querySelectorAll('[data-v]').forEach(function(b){ b.addEventListener('click', async function(){ await rpSet('rp_bank_scene_payer', b.getAttribute('data-v')); bg.querySelectorAll('[data-v]').forEach(function(x){ x.classList.toggle('on', x === b); }); }); });
+  bg.querySelectorAll('[data-cb]').forEach(function(b){ b.addEventListener('click', async function(){ var v = await bkCbGet(); v.cat = b.getAttribute('data-cb'); await rpSet('rp_bank_cb', v); bg.querySelectorAll('[data-cb]').forEach(function(x){ x.classList.toggle('on', x === b); }); toast('Кэшбэк 5%: ' + bkCatMeta(v.cat).n); }); });
+}
+async function bkBills(body){
+  var mo = await bkMoney(), c = mo.conf, all = await bankBillsLoad();
+  var lockLeft = c.lastIncomeSetAt && c.src !== 'context' ? Math.max(0, 3600000 - (Date.now() - c.lastIncomeSetAt)) : 0;
+  var h = '<div class="bk_glass bk_sal"><div class="bk_salh"><span class="bk_txi em">' + bkI('coin') + '</span><div><small>Зарплата' + (c.job ? ' · ' + escapeHtml(c.job) : '') + '</small><b>' + (c.income > 0 ? fmtMoney(c.income) : 'не указана') + '</b></div><div class="bk_ib sm" id="bk_sal_ed">' + bkI('sliders') + '</div></div>' +
+    (c.income > 0 ? '<div class="bk_salr"><span>' + bkI('clock') + (c.payday || 1) + '-го числа · через ' + bkDays(mo.dPay) + '</span>' + (c.src === 'context' ? '<em>по истории</em>' : '') + '</div>' : '') +
+    (c.why ? '<p class="bk_why">' + escapeHtml(c.why) + '</p>' : '') + '</div>';
+  h += '<div class="bk_row2"><div class="bk_btn" data-prof="1">' + bkI('spark') + 'Найти по истории</div><div class="bk_btn ghost" id="bk_bill_add">' + bkI('plus') + 'Платёж</div></div>';
+  if (all.length){
+    var act = all.filter(function(b){ return b.active; }), tot = act.reduce(function(s, b){ return s + (b.amount || 0); }, 0), byc = {};
+    act.forEach(function(b){ var k = b.cat || bkBillCat('', b.name); byc[k] = (byc[k] || 0) + b.amount; });
+    h += '<div class="bk_glass bk_obl"><div class="bk_anh"><div><b>' + bkI('bills') + 'Обязательства</b><span>В месяц: <em>' + fmtMoney(tot) + '</em>' + (c.income > 0 ? ' · ' + Math.round(tot / c.income * 100) + '% зарплаты' : '') + '</span></div></div><div class="bk_stack">' + Object.keys(byc).map(function(k){ return '<i style="flex:' + byc[k] + ';background:' + bkCatMeta(k).c + '"></i>'; }).join('') + '</div>' +
+      '<div class="bk_legend">' + Object.keys(byc).map(function(k){ return '<span><i style="background:' + bkCatMeta(k).c + '"></i>' + escapeHtml(bkCatMeta(k).n) + '</span>'; }).join('') + '</div></div>';
+    if (mo.soon.length) h += '<div class="bk_sec">Ближайшие списания</div><div class="bk_soon">' + mo.soon.slice(0, 6).map(function(b){ var d = bkDaysTo(b.day, mo.today); return '<div><em>' + (d === 1 ? 'завтра' : 'через ' + bkDays(d)) + '</em><b>' + escapeHtml(b.name) + '</b><span>' + fmtMoney(b.amount) + '</span></div>'; }).join('') + '</div>';
+    var groups = {};
+    all.forEach(function(b){ var k = b.cat || bkBillCat('', b.name); (groups[k] = groups[k] || []).push(b); });
+    Object.keys(groups).sort(function(a, b){ return (a === 'subs' ? 1 : 0) - (b === 'subs' ? 1 : 0); }).forEach(function(k){
+      var cm = bkCatMeta(k);
+      h += '<div class="bk_sec">' + escapeHtml(k === 'subs' ? 'Подписки и связь' : cm.n) + '</div>' + groups[k].sort(function(a, b){ return (a.day || 1) - (b.day || 1); }).map(function(b){
+        return '<div class="bk_bill' + (b.active ? '' : ' off') + '" data-bill="' + escapeHtml(b.id) + '"><span class="bk_txi" style="color:' + cm.c + ';background:' + cm.c + '22">' + escapeHtml(String(b.name || '?').charAt(0).toUpperCase()) + '</span><div class="bk_txm"><b><span>' + escapeHtml(b.name) + '</span></b><small>' + (b.day || 1) + '-го' + (b.source === 'context' ? ' · по истории' : '') + (b.active ? '' : ' · ' + (k === 'subs' ? 'отменена' : 'выключен')) + '</small></div><div class="bk_txa"><b>' + fmtMoney(b.amount) + '</b></div><div class="bk_sw' + (b.active ? ' on' : '') + '" data-tog="' + escapeHtml(b.id) + '"></div></div>';
+      }).join('');
+    });
+  } else h += '<div class="bk_empty big">Платежей пока нет. Нажми «Найти по истории» — банк сам выпишет аренду, связь, подписки и кредиты.</div>';
+  body.innerHTML = h;
+  body.querySelectorAll('[data-prof]').forEach(function(b){ b.addEventListener('click', bkProfileRun); });
+  $('#bk_sal_ed', body).addEventListener('click', function(){ bkSalarySheet(lockLeft); });
+  $('#bk_bill_add', body).addEventListener('click', function(){ bkBillSheet(null); });
+  body.querySelectorAll('[data-bill]').forEach(function(r){ r.addEventListener('click', function(e){ if (e.target.closest('[data-tog]')) return; var b = all.filter(function(x){ return x.id === r.getAttribute('data-bill'); })[0]; if (b) bkBillSheet(b); }); });
+  body.querySelectorAll('[data-tog]').forEach(function(t){ t.addEventListener('click', async function(){
+    var l = await bankBillsLoad(), b = l.filter(function(x){ return x.id === t.getAttribute('data-tog'); })[0]; if (!b) return;
+    b.active = !b.active; if (b.active) b.lastKey = await bankBillInitKey(b.day);
+    await rpSet('rp_bank_bills', l); await renderBankBody();
+  }); });
+}
+function bkSalarySheet(lockLeft){
+  getBankConfig().then(function(c){
+    var locked = lockLeft > 0;
+    var bg = bkSheet('<div class="bk_sht">Зарплата</div><div class="bk_shs">Банк сам зачислит её в этот день месяца по дате истории. Вручную менять можно раз в час.' + (locked ? ' Сейчас можно будет через ' + Math.ceil(lockLeft / 60000) + ' мин.' : '') + '</div>' +
+      '<div class="bk_fld"><label>Кем работаешь</label><input id="bk_s_job" maxlength="60" value="' + escapeHtml(c.job || '') + '" placeholder="Например: бариста"></div>' +
+      '<div class="bk_row2"><div class="bk_fld"><label>Сумма в месяц</label><input id="bk_s_inc" type="number" min="0" value="' + (c.income || '') + '"' + (locked ? ' disabled' : '') + '></div><div class="bk_fld"><label>День (1–28)</label><input id="bk_s_day" type="number" min="1" max="28" value="' + (c.payday || 1) + '"' + (locked ? ' disabled' : '') + '></div></div>' +
+      '<div class="bk_btn" id="bk_s_ok">Сохранить</div>');
+    $('#bk_s_ok', bg).addEventListener('click', async function(){
+      var c2 = await getBankConfig();
+      c2.job = $('#bk_s_job', bg).value.trim().slice(0, 60);
+      if (!locked){
+        var inc = Math.max(0, Number($('#bk_s_inc', bg).value) || 0), day = Math.max(1, Math.min(28, Math.round(Number($('#bk_s_day', bg).value) || 1)));
+        if (inc !== c2.income || day !== c2.payday){ c2.income = inc; c2.payday = day; c2.lastIncomeSetAt = Date.now(); c2.src = 'manual'; }
+      }
+      await rpSet('rp_bank_config', c2); bg.remove(); toast('Сохранено'); await renderBankBody();
+    });
+  });
+}
+function bkBillSheet(b){
+  var cat = b ? (b.cat || bkBillCat('', b.name)) : 'home';
+  var bg = bkSheet('<div class="bk_sht">' + (b ? 'Платёж' : 'Новый платёж') + '</div>' +
+    '<div class="bk_fld"><label>Название</label><input id="bk_b_n" maxlength="40" value="' + escapeHtml(b ? b.name : '') + '" placeholder="Аренда, интернет, Spotify…"></div>' +
+    '<div class="bk_row2"><div class="bk_fld"><label>Сумма в месяц</label><input id="bk_b_a" type="number" min="0" value="' + (b ? b.amount : '') + '"></div><div class="bk_fld"><label>День (1–28)</label><input id="bk_b_d" type="number" min="1" max="28" value="' + (b ? b.day : '') + '"></div></div>' +
+    '<div class="bk_chips sm" id="bk_b_c">' + ['home','subs','loan','edu','health','taxi','other'].map(function(k){ var m = bkCatMeta(k); return '<div data-c="' + k + '" class="' + (cat === k ? 'on' : '') + '"><i style="color:' + m.c + '">' + bkI(m.ic) + '</i>' + escapeHtml(m.n) + '</div>'; }).join('') + '</div>' +
+    (b && b.why ? '<p class="bk_why">' + escapeHtml(b.why) + '</p>' : '') +
+    '<div class="bk_btns">' + (b ? '<div class="bk_btn ghost red" id="bk_b_del">' + bkI('trash') + 'Удалить</div>' : '') + '<div class="bk_btn" id="bk_b_ok">Сохранить</div></div>');
+  bg.querySelectorAll('[data-c]').forEach(function(x){ x.addEventListener('click', function(){ cat = x.getAttribute('data-c'); bg.querySelectorAll('[data-c]').forEach(function(y){ y.classList.toggle('on', y === x); }); }); });
+  $('#bk_b_ok', bg).addEventListener('click', async function(){
+    var name = $('#bk_b_n', bg).value.trim(), amount = Math.round(Math.abs(Number($('#bk_b_a', bg).value) || 0)), day = Math.max(1, Math.min(28, Math.round(Number($('#bk_b_d', bg).value) || 1)));
+    if (!name || amount <= 0){ toast('Нужны название и сумма'); return; }
+    var l = await bankBillsLoad();
+    if (b){ var x = l.filter(function(y){ return y.id === b.id; })[0]; if (x){ if (x.day !== day) x.lastKey = ''; x.name = name; x.amount = amount; x.day = day; x.cat = cat; } }
+    else l.push({ id:uid(), name:name, amount:amount, day:day, cat:cat, active:true, lastKey: await bankBillInitKey(day), source:'manual' });
+    await rpSet('rp_bank_bills', l); await maybeAutoPayBills(); bg.remove(); await renderBankBody();
+  });
+  var del = $('#bk_b_del', bg);
+  if (del) del.addEventListener('click', async function(){ var l = await bankBillsLoad(); await rpSet('rp_bank_bills', l.filter(function(y){ return y.id !== b.id; })); bg.remove(); await renderBankBody(); });
+}
+async function bkGoalsTab(body){
+  var h = '<div class="bk_seg3 wide"><div data-g="goals" class="' + (BK.gtab === 'goals' ? 'on' : '') + '">Копилки</div><div data-g="tasks" class="' + (BK.gtab === 'tasks' ? 'on' : '') + '">Задания</div><div data-g="deps" class="' + (BK.gtab === 'deps' ? 'on' : '') + '">Вклады</div></div><div id="bk_gbody" class="bk_gb"></div>';
+  body.innerHTML = h;
+  body.querySelectorAll('[data-g]').forEach(function(b){ b.addEventListener('click', async function(){ BK.gtab = b.getAttribute('data-g'); await bkGoalsTab(body); }); });
+  var gb = $('#bk_gbody', body);
+  if (BK.gtab === 'tasks') await bkTasksView(gb);
+  else if (BK.gtab === 'deps') await bkDepsView(gb);
+  else await bkGoalsView(gb);
+}
+async function bkGoalsView(gb){
+  var gs = await bkGoals(), total = gs.reduce(function(s, g){ return s + (g.saved || 0); }, 0);
+  gb.innerHTML = '<div class="bk_glass bk_gsum"><div><small>Всего в копилках</small><b>' + fmtMoney(total) + '</b></div><div class="bk_btn sm" id="bk_g_new">' + bkI('plus') + 'Новая цель</div></div>' +
+    (gs.length ? gs.map(function(g){
+      var p = Math.min(100, Math.round((g.saved || 0) / Math.max(1, g.target) * 100)), done = (g.saved || 0) >= g.target;
+      return '<div class="bk_goal' + (done ? ' done' : '') + '" data-gid="' + escapeHtml(g.id) + '"><div class="bk_goalh"><span class="bk_gem">' + escapeHtml(g.emoji || '🎯') + '</span><div class="bk_txm"><b><span>' + escapeHtml(g.name) + '</span></b><small>' + fmtMoney(g.saved || 0) + ' из ' + fmtMoney(g.target) + (done ? ' · цель достигнута' : '') + '</small></div><em>' + p + '%</em></div><div class="bk_limbar g"><i style="width:' + p + '%"></i></div><div class="bk_row2"><div class="bk_btn sm" data-gin="' + escapeHtml(g.id) + '">' + bkI('plus') + 'Пополнить</div><div class="bk_btn sm ghost" data-gout="' + escapeHtml(g.id) + '">Снять</div></div></div>';
+    }).join('') : '<div class="bk_empty big">Копилок нет. Заведи цель — на подарок, поездку или новый телефон, — и откладывай понемногу.</div>');
+  $('#bk_g_new', gb).addEventListener('click', function(){ bkGoalSheet(null); });
+  gb.querySelectorAll('[data-gin]').forEach(function(b){ b.addEventListener('click', function(){ var g = gs.filter(function(x){ return x.id === b.getAttribute('data-gin'); })[0]; if (g) bkGoalMoveSheet(g, 'in'); }); });
+  gb.querySelectorAll('[data-gout]').forEach(function(b){ b.addEventListener('click', function(){ var g = gs.filter(function(x){ return x.id === b.getAttribute('data-gout'); })[0]; if (g) bkGoalMoveSheet(g, 'out'); }); });
+  gb.querySelectorAll('.bk_goalh').forEach(function(hd){ hd.addEventListener('click', function(){ var id = hd.parentNode.getAttribute('data-gid'), g = gs.filter(function(x){ return x.id === id; })[0]; if (g) bkGoalSheet(g); }); });
+}
+var BK_EMO = ['🎁','✈️','🏠','💻','📱','🚗','🐶','💍','🎓','🎮','💄','🌴','🎸','👗','🛋️','❤️'];
+function bkGoalSheet(g){
+  var emo = g ? g.emoji : BK_EMO[0];
+  var bg = bkSheet('<div class="bk_sht">' + (g ? 'Копилка' : 'Новая цель') + '</div><div class="bk_emos">' + BK_EMO.map(function(e){ return '<span data-e="' + e + '" class="' + (e === emo ? 'on' : '') + '">' + e + '</span>'; }).join('') + '</div>' +
+    '<div class="bk_fld"><label>На что копим</label><input id="bk_g_n" maxlength="40" value="' + escapeHtml(g ? g.name : '') + '" placeholder="Например: подарок на годовщину"></div><div class="bk_fld"><label>Сколько нужно</label><input id="bk_g_t" type="number" min="1" value="' + (g ? g.target : '') + '"></div>' +
+    '<div class="bk_btns">' + (g ? '<div class="bk_btn ghost red" id="bk_g_del">' + bkI('trash') + 'Разбить</div>' : '') + '<div class="bk_btn" id="bk_g_ok">Сохранить</div></div>');
+  bg.querySelectorAll('[data-e]').forEach(function(x){ x.addEventListener('click', function(){ emo = x.getAttribute('data-e'); bg.querySelectorAll('[data-e]').forEach(function(y){ y.classList.toggle('on', y === x); }); }); });
+  $('#bk_g_ok', bg).addEventListener('click', async function(){
+    var n = $('#bk_g_n', bg).value.trim(), t = Math.round(Math.abs(Number($('#bk_g_t', bg).value) || 0));
+    if (!n || t <= 0){ toast('Нужны название и сумма'); return; }
+    var l = await bkGoals();
+    if (g){ var x = l.filter(function(y){ return y.id === g.id; })[0]; if (x){ x.name = n; x.target = t; x.emoji = emo; } }
+    else l.push({ id:uid(), name:n, target:t, saved:0, emoji:emo, ts:Date.now() });
+    await rpSet('rp_bank_goals', l); bg.remove(); BK.gtab = 'goals'; bankActiveTab = 'goals'; await renderBankBody();
+  });
+  var del = $('#bk_g_del', bg);
+  if (del) del.addEventListener('click', async function(){
+    var ch = await showChoiceModal({ title:'Разбить копилку «' + g.name + '»?', message: g.saved > 0 ? fmtMoney(g.saved) + ' вернутся на основной счёт.' : 'Копилка удалится.', buttons:[{ label:'Разбить', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return;
+    var l = await bkGoals(), x = l.filter(function(y){ return y.id === g.id; })[0];
+    if (x && x.saved > 0){ await setBankBalance((await getBankBalance()) + x.saved); await pushBankTx({ type:'goal_out', amount: x.saved, counterparty:'Копилка «' + x.name + '»', note:'Копилка разбита', dateLabel: await getStoryDate(), source:'manual' }); }
+    await rpSet('rp_bank_goals', l.filter(function(y){ return y.id !== g.id; })); bg.remove(); await renderBankBody();
+  });
+}
+function bkGoalMoveSheet(g, dir){
+  var bg = bkSheet('<div class="bk_sht">' + escapeHtml((g.emoji || '🎯') + ' ' + g.name) + '</div><div class="bk_shs">' + (dir === 'in' ? 'Перевести с основного счёта в копилку.' : 'Вернуть из копилки на основной счёт. В копилке: ' + fmtMoney(g.saved || 0)) + '</div><div class="bk_fld"><label>Сумма</label><input id="bk_gm_a" class="bk_big" type="number" min="0" placeholder="0"></div>' +
+    (dir === 'in' ? '<div class="bk_chips sm">' + [0.1, 0.25, 0.5].map(function(k){ var v = Math.max(1, Math.round((g.target - (g.saved || 0)) * k)); return '<div data-p="' + v + '">' + fmtMoney(v) + '</div>'; }).join('') + '</div>' : '') +
+    '<div class="bk_btn" id="bk_gm_ok">' + (dir === 'in' ? 'Отложить' : 'Снять') + '</div>');
+  bg.querySelectorAll('[data-p]').forEach(function(c){ c.addEventListener('click', function(){ $('#bk_gm_a', bg).value = c.getAttribute('data-p'); }); });
+  $('#bk_gm_ok', bg).addEventListener('click', async function(){
+    var a = Math.round(Math.abs(Number($('#bk_gm_a', bg).value) || 0)); if (a <= 0){ toast('Укажи сумму'); return; }
+    var l = await bkGoals(), x = l.filter(function(y){ return y.id === g.id; })[0]; if (!x) return;
+    var my = await getBankBalance(), today = await getStoryDate();
+    if (dir === 'in'){ if (a > my){ toast('На счёте не хватает денег'); return; } x.saved = (x.saved || 0) + a; await setBankBalance(my - a); await pushBankTx({ type:'goal_in', amount:-a, counterparty:'Копилка «' + x.name + '»', note:'', dateLabel:today, source:'manual' }); }
+    else { if (a > (x.saved || 0)){ toast('В копилке меньше'); return; } x.saved -= a; await setBankBalance(my + a); await pushBankTx({ type:'goal_out', amount:a, counterparty:'Копилка «' + x.name + '»', note:'', dateLabel:today, source:'manual' }); }
+    await rpSet('rp_bank_goals', l); bg.remove();
+    if (dir === 'in' && x.saved >= x.target) toast('Цель «' + x.name + '» достигнута 🎉');
+    await bkTasksEval(); await renderBankBody();
+  });
+}
+function bkTaskHtml(k, mini){
+  var nmc = (CX.names && CX.names.char) || '';
+  var goal = k.type === 'save' ? 'Отложить ' + fmtMoney(k.amount) : (k.type === 'transfer' ? 'Перевести ' + fmtMoney(k.amount) + ': ' + nmc : (k.type === 'nospend' ? bkDays(k.days) + ' без трат: ' + bkCatMeta(k.cat).n.toLowerCase() : (k.type === 'cap' ? 'Не больше ' + fmtMoney(k.amount) + ' на ' + bkCatMeta(k.cat).n.toLowerCase() + ' за ' + bkDays(k.days) : 'Не меньше ' + fmtMoney(k.amount) + ' на счету ' + bkDays(k.days))));
+  var pv = Math.round((k.prog || 0) * 100), st = k.status;
+  var right = st === 'done' ? '<div class="bk_btn sm gold" data-claim="' + escapeHtml(k.id) + '">' + bkI('trophy') + '+' + fmtMoney(k.reward) + '</div>' : (st === 'claimed' ? '<em class="bk_tk ok">' + bkI('check') + 'Получено</em>' : (st === 'failed' ? '<em class="bk_tk no">Не вышло</em>' : '<em class="bk_tk">+' + fmtMoney(k.reward) + '</em>'));
+  return '<div class="bk_task ' + st + '" data-tid="' + escapeHtml(k.id) + '"><div class="bk_taskh"><span class="bk_txi am">' + bkI(st === 'done' || st === 'claimed' ? 'trophy' : 'flag') + '</span><div class="bk_txm"><b><span>' + escapeHtml(k.title) + '</span></b><small>' + escapeHtml(goal) + '</small></div>' + right + '</div>' +
+    (!mini && k.desc ? '<p class="bk_why">' + escapeHtml(k.desc) + '</p>' : '') +
+    (st === 'active' ? '<div class="bk_limbar t"><i style="width:' + Math.max(3, pv) + '%"></i></div><div class="bk_limf"><span>' + (k.type === 'save' || k.type === 'transfer' ? fmtMoney(k.val || 0) + ' из ' + fmtMoney(k.amount) : (k.type === 'cap' ? 'Потрачено ' + fmtMoney(k.val || 0) : 'Прошло ' + Math.round((k.prog || 0) * k.days) + ' из ' + bkDays(k.days))) + '</span><span>' + pv + '%</span></div>' : '') + '</div>';
+}
+async function bkTasksView(gb){
+  var v = await bkTasksEval(), list = v.list.slice().reverse();
+  gb.innerHTML = '<div class="bk_glass bk_gsum"><div><small>Задания банка</small><b>' + cxPlural(list.filter(function(k){ return k.status === 'active'; }).length, 'активное', 'активных', 'активных') + '</b></div><div class="bk_btn sm" id="bk_t_gen">' + bkI('spark') + 'Новые по истории</div></div>' +
+    '<p class="bk_why" style="margin:0 2px 12px;">Банк придумывает задания под твою жизнь и историю: накопить, не тратить, перевести. Выполняются сами по операциям и дате истории — награда приходит на счёт.</p>' +
+    (list.length ? list.map(function(k){ return bkTaskHtml(k, false); }).join('') : '<div class="bk_empty big">Заданий пока нет. Нажми «Новые по истории».</div>');
+  wireBusyButton($('#bk_t_gen', gb), 'bank-tasks', async function(){
+    try{
+      var add = await bkTasksGen();
+      if (!add.length){ toast('Не получилось придумать — попробуй ещё раз'); return; }
+      var v2 = await bkTasks(); v2.list = v2.list.filter(function(k){ return k.status === 'active' || k.status === 'done'; }).concat(add).slice(-12); v2.at = Date.now();
+      await rpSet('rp_bank_tasks', v2); toast('Новых заданий: ' + add.length); await renderBankBody();
+    }catch(e){ toast('Ошибка: ' + (e && e.message ? e.message : e)); }
+  });
+  gb.querySelectorAll('[data-claim]').forEach(function(b){ b.addEventListener('click', function(){ bkClaim(b.getAttribute('data-claim')); }); });
+  gb.querySelectorAll('.bk_task.failed, .bk_task.claimed').forEach(function(t){ t.addEventListener('click', async function(){ var ch = await showChoiceModal({ title:'Убрать задание?', message:'', buttons:[{ label:'Убрать', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; var v3 = await bkTasks(); v3.list = v3.list.filter(function(k){ return k.id !== t.getAttribute('data-tid'); }); await rpSet('rp_bank_tasks', v3); await renderBankBody(); }); });
+}
+async function bkClaim(id){
+  var v = await bkTasks(), k = v.list.filter(function(x){ return x.id === id; })[0];
+  if (!k || k.status !== 'done') return;
+  k.status = 'claimed';
+  await rpSet('rp_bank_tasks', v);
+  var bal = (await getBankBalance()) + k.reward, today = await getStoryDate();
+  await setBankBalance(bal);
+  await pushBankTx({ type:'reward', amount:k.reward, counterparty:'Награда банка', note:k.title, dateLabel:today, source:'system', cat:'bonus' });
+  await pushBankNotification({ bank:'Банк', ntype:'ПОПОЛНЕНИЕ', amount:k.reward, place:'Награда за задание', message:k.title, balanceAfter:bal, time:'', dateLabel:today, source:'system' });
+  toast('Награда: +' + fmtMoney(k.reward));
+  await renderBankBody();
+}
+async function bkTasksGen(){
+  var nm = await getNames(), conf = await getBankConfig(), bills = (await bankBillsLoad()).filter(function(b){ return b.active; }), bal = await getBankBalance();
+  var sp = await bkSpend(30, 'me'), gs = await bkGoals();
+  var ctx = await getContext(Math.min(cfg('contextRange', 24), 12));
+  var cur = rpLocIsRu() ? 'рублях' : rpLocInfo().cur;
+  var cats = BK_CATS.filter(function(c){ return !BK_CB_NO[c.id] && c.id !== 'other'; }).map(function(c){ return c.n; }).join(', ');
+  var raw = await callModel('Ты — банковское приложение с геймификацией. Придумай 3 разных финансовых задания для ' + nm.userName + ' (не для ' + nm.charName + ') на ближайшие дни. Они должны быть выполнимы и связаны с её жизнью и историей: накопить на то, о чём шла речь, неделю не заказывать доставку, перевести ' + nm.charName + ' на кофе, не опускаться ниже суммы до зарплаты.\n\n' +
+    '[ФИНАНСЫ]\nБаланс: ' + fmtMoney(bal) + '\n' + (conf.income ? 'Зарплата: ' + fmtMoney(conf.income) + ', ' + (conf.payday || 1) + '-го' + (conf.job ? ', работа: ' + conf.job : '') + '\n' : '') +
+    (bills.length ? 'Обязательства: ' + bills.map(function(b){ return b.name + ' ' + fmtMoney(b.amount); }).join(', ') + '\n' : '') +
+    (sp.rows.length ? 'Траты за месяц: ' + sp.rows.map(function(r){ return r.n + ' ' + fmtMoney(r.sum); }).join(', ') + '\n' : '') +
+    (gs.length ? 'Копилки: ' + gs.map(function(g){ return g.name + ' ' + fmtMoney(g.saved || 0) + ' из ' + fmtMoney(g.target); }).join(', ') + '\n' : '') +
+    (ctx ? '\n[ИСТОРИЯ]\n' + ctx + '\n' : '') +
+    '\nТипы заданий — только эти:\n- save — отложить в копилку или на вклад сумму amount\n- nospend — days дней не тратить на категорию cat\n- cap — за days дней потратить на категорию cat не больше amount\n- transfer — перевести ' + nm.charName + ' сумму amount\n- keep — days дней держать на счету не меньше amount (меньше текущего баланса)\n' +
+    'Категории cat: ' + cats + '.\nСуммы в ' + cur + ', реалистичные для её денег. days от 2 до 14.\nreward — небольшая награда банка в ' + cur + ': 2–5% от суммы задания.\n' +
+    'title — короткое живое название, desc — одна фраза с привязкой к истории.\n' +
+    'Ответь только JSON: {"tasks":[{"title":"","desc":"","type":"save","cat":"","amount":0,"days":0,"reward":0}]}');
+  var items = cxJsonItems(raw, 'tasks'), today = await getStoryDate(), out = [];
+  var base = conf.income > 0 ? conf.income : Math.max(bal, rpLocIsRu() ? 30000 : 1000);
+  items.forEach(function(x){
+    if (!x || typeof x !== 'object') return;
+    var ty = String(x.type || '').toLowerCase().trim(); if (!/^(save|nospend|cap|transfer|keep)$/.test(ty)) return;
+    var cat = bkCatByName(x.cat); if ((ty === 'nospend' || ty === 'cap') && !cat) return;
+    var amount = Math.round(Math.abs(+x.amount || 0)), days = Math.max(2, Math.min(14, Math.round(+x.days || 0) || 7));
+    if (ty !== 'nospend' && !amount) return;
+    if (ty === 'keep' && amount > bal) amount = Math.round(bal * 0.6);
+    if (ty === 'keep' && amount <= 0) return;
+    var maxR = Math.max(rpLocIsRu() ? 50 : 1, Math.round(base * 0.04));
+    var rw = Math.max(1, Math.min(maxR, Math.round(Math.abs(+x.reward || 0)) || Math.round(maxR / 3)));
+    out.push({ id:uid(), title: cxClip(String(x.title || 'Задание'), 60), desc: cxClip(String(x.desc || ''), 180), type:ty, cat:cat || '', amount:amount, days: ty === 'save' || ty === 'transfer' ? 0 : days, reward:rw, start:today, ts:Date.now(), status:'active', prog:0, val:0 });
+  });
+  return out.slice(0, 3);
+}
+async function bkDepsView(gb){
+  var bal = await getBankBalance(), deps = (await rpGet('rp_bank_deposits', [])).filter(function(d){ return !d.closed; }), prog = BK.dprog || 'standard';
+  gb.innerHTML = '<div class="bk_glass"><div class="bk_anh"><div><b>' + bkI('coin') + 'Открыть вклад</b><span>На счёте: <em>' + fmtMoney(bal) + '</em></span></div></div><div class="bk_seg3 wide">' + DEPOSIT_PROGRAMS.map(function(p){ return '<div data-p="' + p.id + '" class="' + (p.id === prog ? 'on' : '') + '">' + escapeHtml(p.label) + ' · ' + p.apr + '%</div>'; }).join('') + '</div><div class="bk_fld" style="margin-top:10px;"><input id="bk_d_a" type="number" min="0" placeholder="Сумма вклада"></div><div class="bk_btn" id="bk_d_ok">Открыть вклад</div></div>' +
+    (deps.length ? deps.slice().reverse().map(function(d){ var earned = Math.round((d.balance - d.principal) * 100) / 100; return '<div class="bk_goal"><div class="bk_goalh"><span class="bk_txi cy">' + bkI('coin') + '</span><div class="bk_txm"><b><span>Вклад «' + escapeHtml(d.name) + '»</span></b><small>Вложено ' + fmtMoney(d.principal) + ' · начислено +' + fmtMoney(earned) + '</small></div><em>' + d.apr + '%</em></div><div class="bk_dbal">' + fmtMoney(d.balance) + '</div><div class="bk_btn sm ghost" data-dclose="' + escapeHtml(d.id) + '">Закрыть и забрать</div></div>'; }).join('') : '<div class="bk_empty big">Открытых вкладов нет. Проценты начисляются каждый день по дате истории.</div>');
+  gb.querySelectorAll('[data-p]').forEach(function(b){ b.addEventListener('click', function(){ BK.dprog = b.getAttribute('data-p'); gb.querySelectorAll('[data-p]').forEach(function(x){ x.classList.toggle('on', x === b); }); }); });
+  $('#bk_d_ok', gb).addEventListener('click', async function(){
+    var amount = Math.abs(Number($('#bk_d_a', gb).value) || 0); if (amount <= 0){ toast('Укажи сумму'); return; }
+    var cur = await getBankBalance(); if (amount > cur){ toast('Недостаточно средств'); return; }
+    var p = DEPOSIT_PROGRAMS.filter(function(x){ return x.id === (BK.dprog || 'standard'); })[0] || DEPOSIT_PROGRAMS[1], today = await getStoryDate();
+    await setBankBalance(cur - amount);
+    var l = await rpGet('rp_bank_deposits', []);
+    l.push({ id:uid(), name:p.label, apr:p.apr, principal:amount, balance:amount, openedDate:today, lastAccrualDate:today, closed:false, hidden:false, source:'manual' });
+    await rpSet('rp_bank_deposits', l);
+    await pushBankTx({ type:'deposit_open', amount:-amount, counterparty:'Вклад «' + p.label + '»', note: p.apr + '% годовых', dateLabel:today, source:'manual' });
+    toast('Вклад открыт'); await bkTasksEval(); await renderBankBody();
+  });
+  gb.querySelectorAll('[data-dclose]').forEach(function(b){ b.addEventListener('click', async function(){ await closeBankDeposit(b.getAttribute('data-dclose')); await renderBankBody(); }); });
+}
+async function bkProfileFind(){
+  await cxWho();
+  var nm = await getNames(), card = await cxCardFull(), cf = {}; try{ cf = await getCharCard() || {}; }catch(e){}
+  var per = await cxPersonaText(card.chat);
+  var ctx = await getContext(Math.min(cfg('contextRange', 24), 24));
+  var lore = await cxLore(card.chat, card.c, ctx + ' работа работает зарплата стипендия аренда квартира ипотека кредит подписка учёба универ', 3000);
+  var lmem = await cxLongMem(1500);
+  var apps = await cxAppsText([['profile', 'Мой профиль'], ['delivery', 'Доставка'], ['calendar', 'Календарь']], 500, 1500);
+  var bills = await bankBillsLoad(), conf = await getBankConfig(), bal = await getBankBalance();
+  var cur = rpLocIsRu() ? 'рублях' : rpLocInfo().cur;
+  var raw = await callModel('Ты — аналитик банка. По истории ролевой определи финансовую картину ' + nm.userName + ' — это владелица телефона, не ' + nm.charName + '.\n\n' +
+    (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userName + ']\n' + per + '\n\n' : '') +
+    (cf.facts ? '[МИР И ' + nm.charName + ']\n' + cxClip(cf.facts, 1800) + '\n\n' : '') +
+    (lore ? '[ЛОРБУК]\n' + lore + '\n\n' : '') +
+    (lmem ? '[ПАМЯТЬ]\n' + lmem + '\n\n' : '') +
+    (apps ? '[ТЕЛЕФОН]\n' + apps + '\n\n' : '') +
+    (ctx ? '[ИСТОРИЯ]\n' + ctx + '\n\n' : '') +
+    (bills.length ? '[УЖЕ ЗАПИСАНО В БАНКЕ]\n' + bills.map(function(b){ return '- ' + b.name + ': ' + fmtMoney(b.amount) + ', ' + b.day + '-го'; }).join('\n') + '\n\n' : '') +
+    'Что нужно:\n- job — кем работает или на что живёт (учёба и стипендия, родители, фриланс, пособие), коротко.\n' +
+    '- salary — доход в месяц на руки, числом в ' + cur + '. Правдоподобно для этой работы, города и мира истории. Если дохода нет — 0.\n' +
+    '- payday — день месяца, когда приходят деньги, 1–28.\n- why — одной фразой, на чём основана оценка.\n' +
+    '- balance — сколько примерно сейчас на счету, числом.\n' +
+    '- bills — регулярные ежемесячные обязательства: жильё (аренда, ипотека, коммуналка), связь и интернет, подписки с названиями сервисов, кредиты, учёба, спорт, проезд. Только правдоподобное для этого человека; что упоминалось в истории — обязательно. До 10 штук. Для каждого: name, amount (число), day (1–28), cat (жильё, связь, подписка, кредит, учёба, здоровье, транспорт, другое), why — откуда это известно, коротко.\n' +
+    'Ответь только JSON: {"job":"","salary":0,"payday":10,"why":"","balance":0,"bills":[{"name":"","amount":0,"day":5,"cat":"жильё","why":""}]}');
+  var o = cxJson(raw, false);
+  if (!o){ var s0 = String(raw || ''), a = s0.indexOf('{'), b = s0.lastIndexOf('}'); if (a >= 0 && b > a){ try{ o = JSON.parse(cxJsonFix(s0.slice(a, b + 1))); }catch(e){ o = null; } } }
+  if (!o) return null;
+  var num = function(v){ return Math.round(Math.abs(parseFloat(String(v == null ? '' : v).replace(/\s/g, '').replace(',', '.')) || 0)); };
+  var list = (Array.isArray(o.bills) ? o.bills : []).map(function(x){ return x && x.name ? { name: cxClip(String(x.name), 40), amount: num(x.amount), day: Math.max(1, Math.min(28, Math.round(+x.day || 1))), cat: bkBillCat(x.cat, x.name), why: cxClip(String(x.why || ''), 140) } : null; }).filter(function(x){ return x && x.amount > 0; }).slice(0, 10);
+  return { job: cxClip(String(o.job || ''), 60), salary: num(o.salary), payday: Math.max(1, Math.min(28, Math.round(+o.payday || 1))), why: cxClip(String(o.why || ''), 220), balance: num(o.balance), bills: list, fresh: bal === 0 && !(await rpGet('rp_bank_tx', [])).length, conf: conf };
+}
+async function bkProfileRun(){
+  if (BK.profBusy){ toast('Банк уже читает историю…'); return; }
+  BK.profBusy = true;
+  var wait = bkSheet('<div class="bk_wait"><svg class="rp_spin"><use href="#rpi-spinner"/></svg><b>Банк читает историю</b><p>Карточка, персона, лорбуки, ролевая и приложения телефона — ищу работу, доход и регулярные платежи.</p></div>');
+  var p = null;
+  try{ p = await bkProfileFind(); }catch(e){ console.error('RP bank profile failed', e); }
+  BK.profBusy = false;
+  if (wait.isConnected) wait.remove();
+  if (!p){ toast('Не получилось разобрать — попробуй ещё раз'); return; }
+  bkProfileSheet(p);
+}
+async function bkProfileSheet(p){
+  var have = await bankBillsLoad();
+  var same = function(n){ var low = String(n).toLowerCase(); return have.filter(function(x){ return String(x.name || '').toLowerCase() === low; })[0]; };
+  p.bills.forEach(function(b){ b.on = true; b.ex = !!same(b.name); });
+  var bg = bkSheet('<div class="bk_sht">' + bkI('spark') + 'Финансы по истории</div>' +
+    '<div class="bk_glass bk_sal"><div class="bk_fld"><label>Кем работаешь</label><input id="bk_p_job" maxlength="60" value="' + escapeHtml(p.job) + '"></div><div class="bk_row2"><div class="bk_fld"><label>Зарплата в месяц</label><input id="bk_p_inc" type="number" min="0" value="' + p.salary + '"></div><div class="bk_fld"><label>День (1–28)</label><input id="bk_p_day" type="number" min="1" max="28" value="' + p.payday + '"></div></div>' + (p.why ? '<p class="bk_why">' + escapeHtml(p.why) + '</p>' : '') + '</div>' +
+    (p.fresh && p.balance > 0 ? '<label class="bk_chk"><input type="checkbox" id="bk_p_bal" checked><span>Поставить остаток на счёте: <b>' + fmtMoney(p.balance) + '</b></span></label>' : '') +
+    (p.bills.length ? '<div class="bk_sec">Обязательства и подписки</div>' + p.bills.map(function(b, i){ var cm = bkCatMeta(b.cat); return '<div class="bk_bill pick" data-i="' + i + '"><span class="bk_txi" style="color:' + cm.c + ';background:' + cm.c + '22">' + bkI(cm.ic) + '</span><div class="bk_txm"><b><span>' + escapeHtml(b.name) + '</span></b><small>' + b.day + '-го · ' + escapeHtml(cm.n) + (b.ex ? ' · уже есть, обновлю' : '') + (b.why ? ' — ' + escapeHtml(b.why) : '') + '</small></div><div class="bk_txa"><b>' + fmtMoney(b.amount) + '</b></div><span class="bk_ck on">' + bkI('check') + '</span></div>'; }).join('') : '<div class="bk_empty">Регулярных платежей в истории не нашлось.</div>') +
+    '<div class="bk_btn" id="bk_p_ok">' + bkI('check') + 'Применить</div>');
+  bg.querySelectorAll('.bk_bill.pick').forEach(function(r){ r.addEventListener('click', function(){ var b = p.bills[+r.getAttribute('data-i')]; b.on = !b.on; r.classList.toggle('off', !b.on); $('.bk_ck', r).classList.toggle('on', b.on); }); });
+  $('#bk_p_ok', bg).addEventListener('click', async function(){
+    var c = await getBankConfig();
+    var inc = Math.max(0, Math.round(Number($('#bk_p_inc', bg).value) || 0)), day = Math.max(1, Math.min(28, Math.round(Number($('#bk_p_day', bg).value) || 1)));
+    if (inc !== c.income || day !== c.payday){ c.income = inc; c.payday = day; c.lastIncomeSetAt = Date.now(); }
+    c.job = $('#bk_p_job', bg).value.trim().slice(0, 60); c.why = p.why; c.src = 'context';
+    await rpSet('rp_bank_config', c);
+    var bc = $('#bk_p_bal', bg);
+    if (bc && bc.checked){ await setBankBalance(p.balance); await pushBankTx({ type:'in', amount:p.balance, counterparty:'Остаток на счёте', note:'По истории', dateLabel: await getStoryDate(), source:'system', cat:'income' }); }
+    var l = await bankBillsLoad(), added = 0, upd = 0;
+    for (var i = 0; i < p.bills.length; i++){
+      var b = p.bills[i]; if (!b.on) continue;
+      var low = b.name.toLowerCase(), ex = l.filter(function(x){ return String(x.name || '').toLowerCase() === low; })[0];
+      if (ex){ ex.amount = b.amount; if (ex.day !== b.day){ ex.day = b.day; ex.lastKey = ''; } ex.cat = b.cat; ex.why = b.why; upd++; continue; }
+      l.push({ id:uid(), name:b.name, amount:b.amount, day:b.day, cat:b.cat, why:b.why, active:true, lastKey: await bankBillInitKey(b.day), source:'context' }); added++;
+    }
+    await rpSet('rp_bank_bills', l);
+    await maybeAutoPaySalary(); await maybeAutoPayBills();
+    bg.remove(); toast('Готово: зарплата' + (added ? ', платежей новых: ' + added : '') + (upd ? ', обновлено: ' + upd : ''));
+    await renderBankBody();
+  });
 }
 async function gatherOocBank(){
   var parts = [];
   var tx = (await rpGet('rp_bank_tx', [])).filter(function(t){ return !t.hidden; });
   var deps = (await rpGet('rp_bank_deposits', [])).filter(function(d){ return !d.hidden; });
   var notifs = (await rpGet('rp_bank_notifications', [])).filter(function(n){ return !n.hidden; });
-  if (!tx.length && !deps.length && !notifs.length) return [];
+  var bconf = await getBankConfig(), bbills = (await bankBillsLoad()).filter(function(b){ return b.active; }), bgoals = await bkGoals(), btasks = (await bkTasks()).list.filter(function(k){ return k.status === 'active'; }), blink = await bkLinkGet();
+  if (!tx.length && !deps.length && !notifs.length && !bconf.income && !bbills.length && !bgoals.length) return [];
   var bal = await getBankBalance();
   parts.push('Баланс счёта: '+fmtMoney(bal));
+  if (bconf.income > 0) parts.push('Работа и доход: '+(bconf.job ? bconf.job+', ' : '')+fmtMoney(bconf.income)+' в месяц, зарплата '+(bconf.payday||1)+'-го');
+  if (bbills.length) parts.push('Ежемесячные обязательства ('+fmtMoney(bbills.reduce(function(s2, b){ return s2 + (b.amount||0); }, 0))+' в месяц):\n'+bbills.slice(0, 10).map(function(b){ return '- '+b.name+': '+fmtMoney(b.amount)+', '+b.day+'-го'; }).join('\n'));
+  if (bgoals.length) parts.push('Копилки: '+bgoals.map(function(g){ return g.name+' — '+fmtMoney(g.saved||0)+' из '+fmtMoney(g.target); }).join('; '));
+  if (btasks.length) parts.push('Финансовые задания: '+btasks.map(function(k){ return k.title; }).join('; '));
+  if (blink.on){ var nmL = await getNames(); parts.push('У '+nmL.charName+' есть доп. карта к этому счёту, суточный лимит '+fmtMoney(blink.limit)+(blink.frozen ? ', сейчас заморожена' : '')); }
   if (await botBalanceKnown()){ var nmB = await getNames(); parts.push('Баланс карты '+nmB.charName+': '+fmtMoney(await getBankBalance('bot'))); }
   if (tx.length) parts.push('Последние банковские операции:\n'+tx.slice(-8).map(function(t){ return '- '+t.counterparty+': '+(t.amount>=0?'+':'')+fmtMoney(t.amount)+(t.note?(' ('+t.note+')'):''); }).join('\n'));
   if (deps.length) parts.push('Вклады:\n'+deps.map(function(d){ return '- '+d.name+' ('+d.apr+'%): '+fmtMoney(d.balance)+(d.closed?' — закрыт':' — активен'); }).join('\n'));
@@ -6190,6 +6078,7 @@ async function renderCalendarDayPanel(wrap, scope, iso){
     toast('Событие добавлено');
     await renderCalendarBody(scope);
   });
+  rpWireEdit(wrap, '.rp_cal_event_row', 'rp_calendar_events', [{k:'text',label:'Событие',line:true}], function(){ return renderCalendarBody(scope); }, 'Событие');
   rpWireLongPressDelete(wrap, '.rp_cal_event_row', async function(id){
     var list = await rpGet('rp_calendar_events', []);
     var next = list.filter(function(x){ return x.id !== id; });
@@ -6519,8 +6408,8 @@ function chPostRowHtml(p, channel){
   '</div>';
 }
 function chCommentsHtml(comments){
-  var list = comments && comments.length ? comments.map(function(c){
-    return '<div class="rp_ch_comment'+(c.isChar?' char':'')+'"><b>'+escapeHtml(c.author)+(c.isChar?'<svg class="rp_ch_verified"><use href="#rpi-check"/></svg>':'')+':</b> '+escapeHtml(c.text)+'</div>';
+  var list = comments && comments.length ? comments.map(function(c, i){
+    return '<div class="rp_ch_comment'+(c.isChar?' char':'')+'"><b>'+escapeHtml(c.author)+(c.isChar?'<svg class="rp_ch_verified"><use href="#rpi-check"/></svg>':'')+':</b> '+escapeHtml(c.text)+'<span class="rp_cm_edit" data-ci="'+i+'">✎</span></div>';
   }).join('') : '<div class="rp_muted" style="padding:4px 0;">Пока без комментариев.</div>';
   return '<div class="rp_ch_comments">'+list+'</div>'+
     '<div class="rp_ch_comment_form"><input type="text" placeholder="Комментировать..."><div class="rp_ch_comment_send" data-act="send-comment">➤</div></div>';
@@ -6599,6 +6488,7 @@ function wireChPostRows(wrap, scope, refreshFn){
       });
     }
   });
+  rpWireEdit(wrap, '.rp_ch_post', 'rp_tg_posts', [{k:'text',label:'Текст поста',rows:8}], function(){ return refreshFn(); }, 'Пост');
   rpWireLongPressDelete(wrap, '.rp_ch_post', async function(id){
     var posts = await rpGet('rp_tg_posts', []);
     var next = posts.filter(function(x){ return x.id !== id; });
@@ -6737,6 +6627,7 @@ async function renderChChannelRows(wrap, scope){
       await renderChChannelRows(wrap, scope);
     });
   });
+  rpWireEdit(wrap, '.rp_ch_channel_row', 'rp_tg_channels', [{k:'name',label:'Название',line:true},{k:'description',label:'Описание',rows:3}], function(){ return renderChChannelRows(wrap, scope); }, 'Канал');
   rpWireLongPressDelete(wrap, '.rp_ch_channel_row', async function(id){
     var list = await rpGet('rp_tg_channels', []);
     var next = list.filter(function(x){ return x.id !== id; });
@@ -9098,8 +8989,9 @@ function bbMoveGhost(e){
   if (!bbGhostEl) return;
   var rpScreen = $('#rp_screen');
   var srect = rpScreen.getBoundingClientRect();
-  bbGhostEl.style.left = (e.clientX - srect.left) + 'px';
-  bbGhostEl.style.top = (e.clientY - 40 - srect.top) + 'px';
+  var zz = rpZoom();
+  bbGhostEl.style.left = ((e.clientX - srect.left) / zz) + 'px';
+  bbGhostEl.style.top = ((e.clientY - srect.top) / zz - 40) + 'px';
   bbClearHighlights();
   var boardEl = $('#rp_bb_board');
   if (!boardEl) return;
@@ -9682,22 +9574,22 @@ function pHue(h,deg){
 }
 var PET_RARITY = { c:{ n:'Обычный', col:'#94a3b8', price:300 }, u:{ n:'Необычный', col:'#34d399', price:500 }, r:{ n:'Редкий', col:'#60a5fa', price:900 }, e:{ n:'Эпический', col:'#c084fc', price:1600 }, l:{ n:'Легендарный', col:'#fbbf24', gems:30 } };
 var PET_DATABASE = [
-  { id:'cat',      name:'Снежок', title:'Котёнок',     rarity:'c', c:['#f5b9a8','#fff1ea','#f27c9a'] },
-  { id:'dog',      name:'Барни',  title:'Щенок',       rarity:'c', c:['#e0a468','#fff0d9','#8a5530'] },
-  { id:'bunny',    name:'Клевер', title:'Зайчонок',    rarity:'c', c:['#f4d9e6','#ffffff','#f78fb3'] },
-  { id:'hamster',  name:'Орешек', title:'Хомячок',     rarity:'c', c:['#f0c27a','#fff4dc','#c07a3a'] },
-  { id:'duck',     name:'Дакл',   title:'Утёнок',      rarity:'c', c:['#ffd84d','#fff3a8','#ff9f1c'] },
-  { id:'frog',     name:'Квака',  title:'Лягушонок',   rarity:'c', c:['#7ddc6c','#e8ffd6','#f58fa8'] },
-  { id:'bear',     name:'Миша',   title:'Медвежонок',  rarity:'u', c:['#c98a52','#f6dcb8','#8a5a34'] },
-  { id:'fox',      name:'Фокси',  title:'Лисёнок',     rarity:'u', c:['#ff9a3d','#fff4e6','#3b2a24'] },
-  { id:'penguin',  name:'Пико',   title:'Пингвинёнок', rarity:'u', c:['#4f6fa8','#ffffff','#ff9f1c'] },
-  { id:'owl',      name:'Букли',  title:'Совёнок',     rarity:'u', c:['#b58be8','#f6ecff','#ffb02e'] },
-  { id:'panda',    name:'Бамбу',  title:'Пандочка',    rarity:'r', c:['#ffffff','#f4f4f4','#2b2b36'] },
-  { id:'capybara', name:'Капи',   title:'Капибара',    rarity:'r', c:['#b9814f','#e6c9a0','#ff9f1c'] },
-  { id:'axolotl',  name:'Луна',   title:'Аксолотль',   rarity:'r', c:['#ffb3c7','#fff0f4','#ff6f98'] },
-  { id:'dragon',   name:'Драко',  title:'Дракончик',   rarity:'e', c:['#4fd4a0','#e4fff3','#ffc83d'] },
-  { id:'demon',    name:'Люци',   title:'Демонёнок',   rarity:'e', c:['#a65df0','#f0e0ff','#2a1245'] },
-  { id:'unicorn',  name:'Звёздочка', title:'Единорожка', rarity:'l', c:['#ffffff','#fff0fb','#ffd54a'] }
+  { id:'cat',      name:'Снежок', title:'Котёнок',     rarity:'c', emoji:'🐱', c:['#f5b9a8','#fff1ea','#f27c9a'] },
+  { id:'dog',      name:'Барни',  title:'Щенок',       rarity:'c', emoji:'🐶', c:['#e0a468','#fff0d9','#8a5530'] },
+  { id:'bunny',    name:'Клевер', title:'Зайчонок',    rarity:'c', emoji:'🐰', c:['#f4d9e6','#ffffff','#f78fb3'] },
+  { id:'hamster',  name:'Орешек', title:'Хомячок',     rarity:'c', emoji:'🐹', c:['#f0c27a','#fff4dc','#c07a3a'] },
+  { id:'duck',     name:'Дакл',   title:'Утёнок',      rarity:'c', emoji:'🐥', c:['#ffd84d','#fff3a8','#ff9f1c'] },
+  { id:'frog',     name:'Квака',  title:'Лягушонок',   rarity:'c', emoji:'🐸', c:['#7ddc6c','#e8ffd6','#f58fa8'] },
+  { id:'bear',     name:'Миша',   title:'Медвежонок',  rarity:'u', emoji:'🐻', c:['#c98a52','#f6dcb8','#8a5a34'] },
+  { id:'fox',      name:'Фокси',  title:'Лисёнок',     rarity:'u', emoji:'🦊', c:['#ff9a3d','#fff4e6','#3b2a24'] },
+  { id:'penguin',  name:'Пико',   title:'Пингвинёнок', rarity:'u', emoji:'🐧', c:['#4f6fa8','#ffffff','#ff9f1c'] },
+  { id:'owl',      name:'Букли',  title:'Совёнок',     rarity:'u', emoji:'🦉', c:['#b58be8','#f6ecff','#ffb02e'] },
+  { id:'panda',    name:'Бамбу',  title:'Пандочка',    rarity:'r', emoji:'🐼', c:['#ffffff','#f4f4f4','#2b2b36'] },
+  { id:'capybara', name:'Капи',   title:'Капибара',    rarity:'r', emoji:'🦫', c:['#b9814f','#e6c9a0','#ff9f1c'] },
+  { id:'axolotl',  name:'Луна',   title:'Аксолотль',   rarity:'r', emoji:'🦎', c:['#ffb3c7','#fff0f4','#ff6f98'] },
+  { id:'dragon',   name:'Драко',  title:'Дракончик',   rarity:'e', emoji:'🐲', c:['#4fd4a0','#e4fff3','#ffc83d'] },
+  { id:'demon',    name:'Люци',   title:'Демонёнок',   rarity:'e', emoji:'😈', c:['#a65df0','#f0e0ff','#2a1245'] },
+  { id:'unicorn',  name:'Звёздочка', title:'Единорожка', rarity:'l', emoji:'🦄', c:['#ffffff','#fff0fb','#ffd54a'] }
 ];
 var PET_BY_ID = {}; PET_DATABASE.forEach(function(p){ PET_BY_ID[p.id] = p; });
 var PET_VARIANTS = [ { n:'Классика', h:0 }, { n:'Закат', h:38 }, { n:'Лаванда', h:150 }, { n:'Мята', h:-95 } ];
@@ -9707,6 +9599,29 @@ function petPalette(sp, v){
   return [pHue(sp.c[0],h), pHue(sp.c[1],h*0.5), sp.c[2]];
 }
 function pMir(s){ return '<g transform="translate(200 0) scale(-1 1)">'+s+'</g>'; }
+function pfStar(cx, cy, r, D){
+  var pts = [];
+  for (var i = 0; i < 10; i++){ var a = -Math.PI/2 + i*Math.PI/5, rr = i % 2 ? r*0.45 : r; pts.push((cx + rr*Math.cos(a)).toFixed(1)+','+(cy + rr*Math.sin(a)).toFixed(1)); }
+  return '<polygon points="'+pts.join(' ')+'" fill="#ffd54a" stroke="'+D+'" stroke-width="2" stroke-linejoin="round"/>';
+}
+function pfHeart(x, D){ return '<path d="M'+x+' 109 C '+(x-17)+' 98 '+(x-12)+' 82 '+x+' 91 C '+(x+12)+' 82 '+(x+17)+' 98 '+x+' 109 Z" fill="#ff3d71" stroke="'+D+'" stroke-width="2.2" stroke-linejoin="round"/><ellipse cx="'+(x-6)+'" cy="92" rx="3" ry="2" fill="#fff" opacity=".85"/>'; }
+var PF_OPEN = function(D){ return '<path d="M88 113 Q100 133 112 113 Z" fill="#7a2840" stroke="'+D+'" stroke-width="2.6" stroke-linejoin="round"/><path d="M93 121 Q100 129 107 121 Q100 125 93 121Z" fill="#ff8fab"/>'; };
+var PF_ARCS = function(D){ return '<path d="M64 101 Q76 87 88 101 M112 101 Q124 87 136 101" fill="none" stroke="'+D+'" stroke-width="4.2" stroke-linecap="round"/>'; };
+var PET_FACES = {
+  happy: function(D){ return { e: PF_ARCS(D), m: PF_OPEN(D) }; },
+  love: function(D){ return { e: pfHeart(76, D) + pfHeart(124, D), m: '<path d="M90 115 Q100 127 110 115" fill="none" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/>' }; },
+  cry: function(D){ return { e: '<path d="M64 96 Q76 105 88 96 M112 96 Q124 105 136 96" fill="none" stroke="'+D+'" stroke-width="4" stroke-linecap="round"/><path d="M72 104 Q65 126 72 148 M128 104 Q135 126 128 148" fill="none" stroke="#7cc7ff" stroke-width="7" stroke-linecap="round" opacity=".95"/>', m: '<path d="M88 126 Q94 114 100 120 Q106 114 112 126 Q100 122 88 126Z" fill="#7a2840" stroke="'+D+'" stroke-width="2.4" stroke-linejoin="round"/>' }; },
+  angry: function(D){ return { e: '<path d="M62 84 L88 94 M138 84 L112 94" stroke="'+D+'" stroke-width="5" stroke-linecap="round"/><ellipse cx="78" cy="102" rx="7" ry="8" fill="#231a33"/><ellipse cx="122" cy="102" rx="7" ry="8" fill="#231a33"/><circle cx="76" cy="99" r="2.2" fill="#fff"/><circle cx="120" cy="99" r="2.2" fill="#fff"/>', m: '<path d="M88 124 Q100 112 112 124" fill="none" stroke="'+D+'" stroke-width="3.2" stroke-linecap="round"/>' }; },
+  shock: function(D){ return { e: '<circle cx="76" cy="98" r="12" fill="#fff" stroke="'+D+'" stroke-width="2.6"/><circle cx="76" cy="99" r="4.2" fill="#231a33"/><circle cx="124" cy="98" r="12" fill="#fff" stroke="'+D+'" stroke-width="2.6"/><circle cx="124" cy="99" r="4.2" fill="#231a33"/>', m: '<ellipse cx="100" cy="123" rx="7.5" ry="9.5" fill="#7a2840" stroke="'+D+'" stroke-width="2.4"/>' }; },
+  smug: function(D){ return { e: '<path d="M64 96 H88 M112 96 H136" stroke="'+D+'" stroke-width="4" stroke-linecap="round"/><path d="M67 97 Q76 108 85 97 Z M115 97 Q124 108 133 97 Z" fill="#231a33"/>', m: '<path d="M90 119 Q104 124 113 111" fill="none" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/>' }; },
+  wink: function(D){ return { e: '<path d="M64 101 Q76 89 88 101" fill="none" stroke="'+D+'" stroke-width="4.2" stroke-linecap="round"/><ellipse cx="124" cy="98" rx="9" ry="11" fill="#231a33"/><circle cx="121" cy="94" r="3.4" fill="#fff"/>', m: '<path d="M90 115 Q100 126 110 115" fill="none" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/><path d="M101 120 Q106 131 111 120" fill="#ff7e9d" stroke="'+D+'" stroke-width="1.8"/>' }; },
+  dead: function(D){ return { e: '<path d="M67 89 L85 107 M85 89 L67 107 M115 89 L133 107 M133 89 L115 107" stroke="'+D+'" stroke-width="4.4" stroke-linecap="round"/>', m: '<path d="M88 121 Q94 116 100 121 Q106 126 112 121" fill="none" stroke="'+D+'" stroke-width="2.8" stroke-linecap="round"/><path d="M100 122 Q103 134 108 124" fill="#ff7e9d" stroke="'+D+'" stroke-width="1.8"/>' }; },
+  star: function(D){ return { e: pfStar(76, 98, 13, D) + pfStar(124, 98, 13, D), m: PF_OPEN(D) }; },
+  sad: function(D){ return { e: '<path d="M62 90 L86 84 M138 90 L114 84" stroke="'+D+'" stroke-width="4" stroke-linecap="round"/><ellipse cx="76" cy="100" rx="8" ry="10" fill="#231a33"/><ellipse cx="124" cy="100" rx="8" ry="10" fill="#231a33"/><circle cx="73" cy="96" r="3" fill="#fff"/><circle cx="121" cy="96" r="3" fill="#fff"/>', m: '<path d="M90 123 Q100 115 110 123" fill="none" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/>' }; },
+  blush: function(D){ return { e: PF_ARCS(D), m: '<path d="M93 117 Q100 123 107 117" fill="none" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/>', x: '<g stroke="#ff5c8a" stroke-width="2.4" stroke-linecap="round" opacity=".85"><path d="M46 116 l6 -7 M54 118 l6 -7 M62 120 l6 -7 M132 120 l6 -7 M140 118 l6 -7 M148 116 l6 -7"/></g>' }; },
+  meh: function(D){ return { e: '<circle cx="76" cy="99" r="6.5" fill="#231a33"/><circle cx="124" cy="99" r="6.5" fill="#231a33"/><circle cx="74" cy="97" r="2" fill="#fff"/><circle cx="122" cy="97" r="2" fill="#fff"/>', m: '<path d="M92 120 H108" stroke="'+D+'" stroke-width="3" stroke-linecap="round"/>' }; },
+  side: function(D){ return { e: '<path d="M64 97 H88 M112 97 H136" stroke="'+D+'" stroke-width="3.4" stroke-linecap="round"/><path d="M78 98 Q84 107 89 98 Z M126 98 Q132 107 137 98 Z" fill="#231a33"/>', m: '<path d="M93 120 Q100 117 107 121" fill="none" stroke="'+D+'" stroke-width="2.8" stroke-linecap="round"/>' }; }
+};
 function petRenderSVG(g, isSleeping, opts){
   opts = opts || {};
   var sp = PET_BY_ID[(g && g.id)] || PET_BY_ID.cat;
@@ -9872,6 +9787,7 @@ function petRenderSVG(g, isSleeping, opts){
   }
   var cheekSvg = (cheeks && id!=='panda') ? '<ellipse cx="56" cy="112" rx="10" ry="6" fill="#ff7aa8" opacity=".38"/><ellipse cx="144" cy="112" rx="10" ry="6" fill="#ff7aa8" opacity=".38"/>' : (id==='panda' ? '<ellipse cx="52" cy="116" rx="9" ry="5" fill="#ff7aa8" opacity=".45"/><ellipse cx="148" cy="116" rx="9" ry="5" fill="#ff7aa8" opacity=".45"/>' : '');
   if (isSleeping) mouth = id==='duck' ? mouth : '<path d="M94 118 Q100 122 106 118" fill="none" stroke="'+D+'" stroke-width="2.6" stroke-linecap="round"/>';
+  if (opts.face && PET_FACES[opts.face]){ var pfz = PET_FACES[opts.face](D); eyeSvg = pfz.e; if (pfz.m) mouth = pfz.m; if (pfz.x) cheekSvg += pfz.x; }
   var acc = petAccSVG(g && g.acc, headCy - headRy);
   var wrap = opts.noAnim ? '' : ' class="pt_pet_body"';
   return '<svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">'+defs+
@@ -9986,6 +9902,14 @@ var PET_ICONS = {
   pencil:'<path d="M8 34l-2 9 9-2 24-24-7-7z" fill="#fbbf24"/><path d="M32 10l7 7 3-3a3 3 0 000-4l-3-3a3 3 0 00-4 0z" fill="#f472b6"/><path d="M8 34l7 7" stroke="#92400e" stroke-width="2"/>',
   g_catch:'<path d="M8 28h32l-4 14H12z" fill="#f59e0b"/><path d="M13 28v14M20 28v14M28 28v14M35 28v14" stroke="#b45309" stroke-width="1.8"/><circle cx="16" cy="14" r="6" fill="#ef4444"/><circle cx="30" cy="9" r="5" fill="#f43f5e"/><path d="M16 8c0-3 2-4 4-4" stroke="#22c55e" stroke-width="2.4" fill="none" stroke-linecap="round"/>',
   g_fly:'<path d="M6 30c4-10 14-14 22-8l10-6-4 12c0 10-8 14-16 12z" fill="#a78bfa"/><circle cx="29" cy="22" r="2.4" fill="#fff"/><path d="M10 33c-4 0-6 4-6 7 4 0 6-2 8-4" fill="#7c3aed"/><path d="M20 24l-10 6" stroke="#fff" stroke-opacity=".5" stroke-width="3" stroke-linecap="round"/>',
+  cam:'<rect x="6" y="14" width="36" height="26" rx="6" fill="#60a5fa"/><path d="M17 14l3-5h8l3 5z" fill="#3b82f6"/><circle cx="24" cy="27" r="8" fill="#e0f2fe" stroke="#1e3a8a" stroke-width="2.4"/><circle cx="24" cy="27" r="3.4" fill="#1e3a8a"/><circle cx="36" cy="19" r="2" fill="#fde68a"/>',
+  scroll:'<rect x="11" y="8" width="26" height="32" rx="4" fill="#fde68a"/><path d="M11 12a4 4 0 0 1-4-4 4 4 0 0 1 4-4h24" fill="#fcd34d"/><path d="M17 17h14M17 23h14M17 29h9" stroke="#b45309" stroke-width="2.6" stroke-linecap="round"/><circle cx="35" cy="35" r="7" fill="#34d399"/><path d="M31.5 35l2.4 2.4 4.2-4.6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  leash:'<path d="M7 44c6-6 4-14 14-19s14-11 18-20" stroke="#a78bfa" stroke-width="2.6" fill="none" stroke-dasharray="2.5 4.5" stroke-linecap="round"/><g fill="#f472b6" transform="translate(14 33) rotate(-35) scale(.46) translate(-24 -24)"><ellipse cx="24" cy="32" rx="11" ry="9"/><ellipse cx="11" cy="22" rx="4.5" ry="6" transform="rotate(-20 11 22)"/><ellipse cx="20" cy="13" rx="4.5" ry="6.5"/><ellipse cx="30" cy="13" rx="4.5" ry="6.5"/><ellipse cx="38" cy="22" rx="4.5" ry="6" transform="rotate(20 38 22)"/></g><g fill="#fb923c" transform="translate(33 15) rotate(-35) scale(.46) translate(-24 -24)"><ellipse cx="24" cy="32" rx="11" ry="9"/><ellipse cx="11" cy="22" rx="4.5" ry="6" transform="rotate(-20 11 22)"/><ellipse cx="20" cy="13" rx="4.5" ry="6.5"/><ellipse cx="30" cy="13" rx="4.5" ry="6.5"/><ellipse cx="38" cy="22" rx="4.5" ry="6" transform="rotate(20 38 22)"/></g>',
+  g_stack:'<rect x="10" y="34" width="28" height="8" rx="2" fill="#fbbf24"/><rect x="13" y="25" width="23" height="8" rx="2" fill="#f472b6"/><rect x="15" y="16" width="20" height="8" rx="2" fill="#86efac"/><rect x="20" y="6" width="20" height="8" rx="2" fill="#93c5fd"/><path d="M8 44h32" stroke="#000" stroke-opacity=".2" stroke-width="2"/>',
+  g_snake:'<path d="M10 34c0-8 8-8 12-8s12 0 12-8-8-8-12-8" fill="none" stroke="#f472b6" stroke-width="7" stroke-linecap="round"/><circle cx="22" cy="10" r="5" fill="#f472b6"/><circle cx="20.5" cy="9" r="1.4" fill="#fff"/><circle cx="36" cy="38" r="5" fill="#ef4444"/><path d="M36 33c0-2 1-3 3-3" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/>',
+  g_mole:'<ellipse cx="24" cy="38" rx="17" ry="6" fill="#7c4a2a"/><circle cx="24" cy="26" r="11" fill="#c4b5fd"/><circle cx="16" cy="17" r="5" fill="#c4b5fd"/><circle cx="32" cy="17" r="5" fill="#c4b5fd"/><circle cx="20" cy="25" r="1.8" fill="#1f2937"/><circle cx="28" cy="25" r="1.8" fill="#1f2937"/><circle cx="24" cy="29" r="2" fill="#f472b6"/><ellipse cx="24" cy="38" rx="17" ry="3" fill="#5b3a1f"/>',
+  g_merge:'<rect x="6" y="6" width="16" height="16" rx="4" fill="#fde68a"/><rect x="26" y="6" width="16" height="16" rx="4" fill="#fde68a"/><rect x="6" y="26" width="36" height="16" rx="4" fill="#f9a8d4"/><path d="M24 14h0" stroke="#000"/><ellipse cx="14" cy="15" rx="4" ry="5" fill="#fff"/><ellipse cx="34" cy="15" rx="4" ry="5" fill="#fff"/><path d="M18 34l6-4 6 4-6 4z" fill="#fff"/>',
+  g_simon:'<path d="M24 24V6a18 18 0 0118 18z" fill="#fbbf24"/><path d="M24 24h18a18 18 0 01-18 18z" fill="#38bdf8"/><path d="M24 24v18A18 18 0 016 24z" fill="#a78bfa"/><path d="M24 24H6A18 18 0 0124 6z" fill="#ef4444"/><circle cx="24" cy="24" r="6" fill="#1f2937"/>',
   g_cards:'<rect x="6" y="10" width="20" height="28" rx="3" fill="#f472b6" transform="rotate(-12 16 24)"/><rect x="20" y="9" width="20" height="28" rx="3" fill="#fff" stroke="#c4b5fd" stroke-width="2.4" transform="rotate(10 30 23)"/><path d="M30 18c-3-4-8 0-4 5l4 4 4-4c4-5-1-9-4-5z" fill="#ef4444" transform="rotate(10 30 23)"/>'
 };
 function petIcon(id, size){
@@ -10125,7 +10049,7 @@ function petFxText(fx){
 }
 function petFindIn(list, id){ for (var i=0;i<list.length;i++) if (list[i].id===id) return list[i]; return null; }
 function petDefaultState(){
-  return { ver:2, coins:130, gems:3, egg:null, pets:[], activePetId:null, reveal:null, currentScene:'room', timeOfDay:'day',
+  return { ver:2, coins:130, gems:3, egg:null, pets:[], activePetId:null, reveal:null, currentScene:'room', timeOfDay:'day', timeAuto:true,
     petsData:{}, inventory:{ f_apple:2, w_soap:1 }, owned:{ w_cream:1, f_wood:1 }, room:{ wall:'w_cream', floor:'f_wood' },
     ownedScenes:['room'], lastTickAt: Date.now(), hardMode:false, giftAt:0 };
 }
@@ -10133,11 +10057,35 @@ function petDefaultPartner(){ return { status:'none', message:'', respondedAt:nu
 function petMakeGenome(id){ var sp = PET_BY_ID[id] || PET_BY_ID.cat; return { id:sp.id, name:sp.name, title:sp.title, rarity:sp.rarity, variant:0, acc:'none' }; }
 function petMigrate(state){
   if (!state.owned) state.owned = { w_cream:1, f_wood:1 };
-  if (!state.room) state.room = { wall:'w_cream', floor:'f_wood' };
   if (!state.inventory) state.inventory = {};
   if (!state.petsData) state.petsData = {};
   if (!state.ownedScenes) state.ownedScenes = ['room'];
-  if (state.ver >= 2) return state;
+  if (!Array.isArray(state.pets)) state.pets = [];
+  if (!(state.ver >= 2)) petMigrateV2(state);
+  if (!Array.isArray(state.slots) || state.slots.length < 2) petToSlots(state);
+  petSlotSync(state);
+  return state;
+}
+function petEmptySlot(){ return { pet:null, egg:null, room:{ wall:'w_cream', floor:'f_wood' }, scene:'room' }; }
+function petToSlots(state){
+  var s0 = { pet: state.activePetId || null, egg: null, room: state.room || { wall:'w_cream', floor:'f_wood' }, scene: state.currentScene || 'room' }, s1 = petEmptySlot();
+  if (state.egg){ if (s0.pet) s1.egg = state.egg; else s0.egg = state.egg; }
+  delete state.activePetId; delete state.egg; delete state.room; delete state.currentScene;
+  state.slots = [s0, s1]; state.activeSlot = 0; state.ver = 3;
+}
+function petSlotSync(state){
+  if (!Array.isArray(state.eggInv)) state.eggInv = [];
+  state.slots.forEach(function(sl){ if (!sl.room) sl.room = { wall:'w_cream', floor:'f_wood' }; if (!sl.scene) sl.scene = 'room'; if (sl.pet && state.pets.indexOf(sl.pet) < 0) sl.pet = null; if (sl.pet && sl.egg) sl.egg = null; });
+  if (state.slots[0].pet && state.slots[0].pet === state.slots[1].pet) state.slots[1].pet = null;
+  state.activeSlot = state.activeSlot === 1 ? 1 : 0;
+  if (state.view !== 'swipe') state.view = 'duo';
+  [['activePetId','pet'],['egg','egg'],['room','room'],['currentScene','scene']].forEach(function(pr){
+    Object.defineProperty(state, pr[0], { configurable:true, enumerable:true, get:function(){ return state.slots[state.activeSlot][pr[1]]; }, set:function(v){ state.slots[state.activeSlot][pr[1]] = v; } });
+  });
+}
+function petRoomOf(state, id){ for (var i = 0; i < state.slots.length; i++){ if (state.slots[i].pet === id) return i; } return -1; }
+function petFreeSlot(state){ var a = state.activeSlot, o = 1 - a; if (!state.slots[a].pet && !state.slots[a].egg) return a; if (!state.slots[o].pet && !state.slots[o].egg) return o; return -1; }
+function petMigrateV2(state){
   state.ver = 2;
   var had = Object.keys(state.petsData).filter(function(k){ return PET_BY_ID[k]; });
   state.pets = had.slice();
@@ -10150,7 +10098,6 @@ function petMigrate(state){
     pd.genome = gm;
   });
   state.egg = state.egg || null; state.reveal = null; state.giftAt = state.giftAt || 0;
-  return state;
 }
 function petEnsurePetData(state, id){
   id = id || state.activePetId || 'cat';
@@ -10162,6 +10109,7 @@ function petEnsurePetData(state, id){
   if (pd.potty == null) pd.potty = 20;
   if (!pd.expDay) pd.expDay = { d:'', n:0 };
   if (!pd.genome || !pd.genome.id) pd.genome = Object.assign(petMakeGenome(id), pd.genome || {}, { id:id });
+  if (!pd.trait) pd.trait = PET_TRAITS[hashStr(id + ':' + (state.pets.indexOf(id))) % PET_TRAITS.length].id;
   return pd;
 }
 function petIsSick(ps){ return (ps.health == null ? 100 : ps.health) < 30; }
@@ -10170,24 +10118,28 @@ function petApplyDecay(state){
   var last = state.lastTickAt || now;
   var elapsedMin = (now - last) / 60000;
   state.lastTickAt = now;
-  if (elapsedMin <= 0 || !state.activePetId) return;
+  if (elapsedMin <= 0) return;
   elapsedMin = Math.min(elapsedMin, 600);
-  var ps = petEnsurePetData(state, state.activePetId);
+  state.slots.forEach(function(sl){ if (sl.pet){ var pd = petEnsurePetData(state, sl.pet); if (!pd.walk) petDecayOne(pd, elapsedMin); } });
+}
+function petDecayOne(ps, elapsedMin0){
+  var fx = petTrait(ps).fx || {}, all = fx.all || 1, elapsedMin = elapsedMin0 * all;
+  var H = fx.hunger || 1, J = fx.joy || 1, C = fx.clean || 1, E = fx.energy || 1, HP = fx.health || 1;
   if (ps.isSleeping){
-    ps.energy = Math.min(100, ps.energy + elapsedMin*10);
-    ps.hunger = Math.max(0, ps.hunger - elapsedMin*1.6);
-    ps.happiness = Math.max(0, ps.happiness - elapsedMin*1.0);
-    ps.cleanliness = Math.max(0, ps.cleanliness - elapsedMin*0.8);
+    ps.energy = Math.min(100, ps.energy + elapsedMin*(E > 1 ? 12.5 : 10));
+    ps.hunger = Math.max(0, ps.hunger - elapsedMin*1.6*H);
+    ps.happiness = Math.max(0, ps.happiness - elapsedMin*1.0*J);
+    ps.cleanliness = Math.max(0, ps.cleanliness - elapsedMin*0.8*C);
   } else {
-    ps.hunger = Math.max(0, ps.hunger - elapsedMin*6.5);
-    ps.happiness = Math.max(0, ps.happiness - elapsedMin*5);
-    ps.cleanliness = Math.max(0, ps.cleanliness - elapsedMin*4);
-    ps.energy = Math.max(0, ps.energy - elapsedMin*1.5);
+    ps.hunger = Math.max(0, ps.hunger - elapsedMin*6.5*H);
+    ps.happiness = Math.max(0, ps.happiness - elapsedMin*5*J);
+    ps.cleanliness = Math.max(0, ps.cleanliness - elapsedMin*4*C);
+    ps.energy = Math.max(0, ps.energy - elapsedMin*1.5*E);
   }
   ps.potty = Math.min(100, (ps.potty||0) + elapsedMin*(ps.isSleeping ? 0.6 : 2.2));
   if (ps.potty >= 100){ ps.potty = 35; ps.cleanliness = Math.max(0, ps.cleanliness - 25); ps.happiness = Math.max(0, ps.happiness - 10); ps.accidentAt = Date.now(); }
   var bad = (ps.hunger<=0?1:0) + (ps.cleanliness<=0?1:0) + (ps.happiness<=0?1:0) + (ps.energy<=0 && !ps.isSleeping?1:0);
-  if (bad>0) ps.health = Math.max(0, ps.health - Math.min(70, elapsedMin*1.0*bad));
+  if (bad>0) ps.health = Math.max(0, ps.health - Math.min(70, elapsedMin*1.0*bad*HP));
   else if (ps.hunger>40 && ps.cleanliness>40 && ps.happiness>40) ps.health = Math.min(100, ps.health + elapsedMin*0.25);
 }
 function petExpNeed(level){ return 40 + 30*(level-1); }
@@ -10202,6 +10154,7 @@ function petGainExp(state, ps, n){
     var bonus = 15 + ps.level*5; state.coins += bonus;
     msg = 'Новый уровень: '+ps.level+'! +'+bonus+' монет';
     if (ps.level % 5 === 0){ state.gems += 1; msg += ' и 1 кристалл'; }
+    if (ps.level === 5 || ps.level === 12) msg += '. Подрос: теперь '+petStage(ps.level).n.toLowerCase()+'!';
   }
   return msg;
 }
@@ -10225,26 +10178,48 @@ function petPickSpecies(eggType){
 }
 function petEggLeft(state){ return state.egg ? Math.max(0, state.egg.hatchAt - Date.now()) : 0; }
 function petFmtTime(ms){ var s = Math.ceil(ms/1000), m = Math.floor(s/60); s = s%60; var h = Math.floor(m/60); m = m%60; return (h ? h+':' : '')+(h && m<10 ? '0' : '')+m+':'+(s<10?'0':'')+s; }
+function petEggNew(type){ var egg = petFindIn(PET_EGGS, type) || PET_EGGS[0]; return { type:egg.id, startedAt:Date.now(), hatchAt:Date.now()+(egg.mins||12)*60000, warmAt:0 }; }
+function petStoreEgg(state, type){
+  var i = petFreeSlot(state);
+  if (i < 0){ state.eggInv.push({ type:type, at:Date.now() }); return -1; }
+  state.slots[i].egg = petEggNew(type); state.activeSlot = i; return i;
+}
 async function petBuyEgg(state, eggId){
   var egg = petFindIn(PET_EGGS, eggId); if (!egg) return false;
-  if (state.egg){ toast('Одно яйцо уже греется'); return false; }
   if (egg.price && state.coins < egg.price){ toast('Не хватает монет: нужно '+egg.price); return false; }
   if (egg.gems && state.gems < egg.gems){ toast('Не хватает кристаллов: нужно '+egg.gems); return false; }
   state.coins -= egg.price||0; state.gems -= egg.gems||0;
-  var left = (egg.mins||12)*60000;
-  state.egg = { type:egg.id, startedAt:Date.now(), hatchAt:Date.now()+left, warmAt:0 };
+  var at = petStoreEgg(state, egg.id);
+  petTrack(state, 'buy');
   await rpSet('rp_pet_state', state);
-  await petAddFeedLog('user', 'купил '+egg.name.toLowerCase()+' и положил греться');
+  if (at < 0){ toast('Обе комнаты заняты — яйцо лежит в запасе'); await petAddFeedLog('user', 'купил '+egg.name.toLowerCase()+' и убрал в запас'); }
+  else { toast('Яйцо греется в комнате '+(at+1)); await petAddFeedLog('user', 'купил '+egg.name.toLowerCase()+' и положил греться'); }
   return true;
+}
+async function petPlace(state, id, i){
+  var sl = state.slots[i]; if (!sl) return false;
+  if (sl.egg){ toast('В комнате '+(i+1)+' греется яйцо — сначала вылупи малыша'); return false; }
+  var from = petRoomOf(state, id);
+  if (from === i){ state.activeSlot = i; return true; }
+  if (from >= 0) state.slots[from].pet = sl.pet || null;
+  sl.pet = id; state.activeSlot = i; state.lastTickAt = Date.now();
+  await rpSet('rp_pet_state', state);
+  return true;
+}
+async function petRest(state, id){
+  var i = petRoomOf(state, id); if (i < 0) return false;
+  state.slots[i].pet = null; await rpSet('rp_pet_state', state); return true;
 }
 async function petHatch(state){
   if (!state.egg || petEggLeft(state) > 0) return null;
   var id = petPickSpecies(state.egg.type), dup = state.pets.indexOf(id) >= 0, sp = PET_BY_ID[id], refund = 0;
   if (dup){ refund = 70; state.coins += refund; }
-  else { state.pets.push(id); petEnsurePetData(state, id); }
-  if (!state.activePetId || !dup) state.activePetId = id;
+  else { state.pets.push(id); petEnsurePetData(state, id); petEnsurePetData(state, id).trait = PET_TRAITS[Math.floor(Math.random()*PET_TRAITS.length)].id; }
+  state.egg = null;
+  if (!dup) state.activePetId = id;
+  petTrack(state, 'hatch');
   state.reveal = { id:id, dup:dup, refund:refund };
-  state.egg = null; state.lastTickAt = Date.now();
+  state.lastTickAt = Date.now();
   await rpSet('rp_pet_state', state);
   await petAddFeedLog('user', 'из яйца вылупился '+sp.title.toLowerCase()+' '+sp.name);
   return id;
@@ -10258,7 +10233,11 @@ async function petAdopt(state, id){
     state.pets.push(id); petEnsurePetData(state, id);
     await petAddFeedLog('user', 'приютил малыша: '+sp.title.toLowerCase()+' '+sp.name);
   }
-  state.activePetId = id; state.lastTickAt = Date.now();
+  var cur = petRoomOf(state, id), free = petFreeSlot(state);
+  if (cur >= 0) state.activeSlot = cur;
+  else if (free >= 0){ state.slots[free].pet = id; state.activeSlot = free; }
+  else toast('Обе комнаты заняты — малыш ждёт в разделе «Питомцы»');
+  state.lastTickAt = Date.now();
   await rpSet('rp_pet_state', state);
   return true;
 }
@@ -10282,7 +10261,10 @@ function petRoomSVG(state, g, sleeping, mood){
     s += petFindIn(PET_SCENES, scene).draw(u+'s');
   }
   s += '<ellipse cx="180" cy="246" rx="46" ry="8" fill="#000" opacity=".2"/>';
-  if (g) s += '<svg x="104" y="98" width="152" height="152" viewBox="0 0 200 200" style="overflow:visible">'+petRenderSVG(g, sleeping)+'</svg>';
+  var sc = (mood && mood.scale) || 1, pw = Math.round(152*sc), gx = mood && mood.guest ? 30 : Math.round(180 - pw/2);
+  if (g) s += '<svg x="'+gx+'" y="'+(250 - pw)+'" width="'+pw+'" height="'+pw+'" viewBox="0 0 200 200" style="overflow:visible">'+petRenderSVG(g, sleeping)+'</svg>';
+  if (g && mood && mood.guest) s += '<svg x="'+(330 - Math.round(140*(mood.guestScale || 1)))+'" y="'+(252 - Math.round(140*(mood.guestScale || 1)))+'" width="'+Math.round(140*(mood.guestScale || 1))+'" height="'+Math.round(140*(mood.guestScale || 1))+'" viewBox="0 0 200 200" style="overflow:visible">'+petRenderSVG(mood.guest, false)+'</svg><g fill="#ff6b9a" opacity=".9"><path d="M176 112c-4-6-12-2-8 4l8 7 8-7c4-6-4-10-8-4z"/><path d="M196 92c-3-4-9-1-6 3l6 5 6-5c3-4-3-7-6-3z"/></g>';
+  else if (mood && mood.egg){ var eDef = petFindIn(PET_EGGS, mood.egg.type) || PET_EGGS[0], eLeft = mood.egg.hatchAt - Date.now(); s += '<svg x="132" y="146" width="96" height="100" viewBox="0 0 200 210" style="overflow:visible">'+petEggSVG(eDef.id, Math.max(0, Math.min(1, 1 - eLeft/((eDef.mins||12)*60000))), eLeft <= 0)+'</svg>'; }
   if (mood && mood.dirty) s += '<g stroke="#8a7a5a" stroke-width="2.4" fill="none" stroke-linecap="round" opacity=".75"><path d="M118 118q-6-6 0-12t0-12M244 122q6-6 0-12t0-12"/></g><g fill="#6b6b6b"><circle cx="126" cy="110" r="2"/><circle cx="238" cy="104" r="2"/></g>';
   if (mood && mood.sick) s += '<path d="M232 96c-6 8-9 12-9 17a9 9 0 0018 0c0-5-3-9-9-17z" fill="#7ad7e8" opacity=".9"/>';
   if (t === 'night' || t === 'sunset' || t === 'morning' || sleeping){
@@ -10313,6 +10295,11 @@ function petHearts(ps){
 }
 var petTimer = null;
 function petClearTimer(){ if (petTimer){ clearInterval(petTimer); petTimer = null; } }
+function petRing(icon, label, v, col, inv){
+  v = Math.max(0, Math.min(100, Math.round(v)));
+  var low = inv ? v >= 75 : v < 25, C = 2*Math.PI*18, k = inv ? 100 - v : v;
+  return '<div class="pt_ring'+(low?' low':'')+'" title="'+label+'"><div class="pt_ring_c"><svg class="pt_ring_svg" viewBox="0 0 44 44"><circle cx="22" cy="22" r="18" class="pt_ring_bg"/><circle cx="22" cy="22" r="18" class="pt_ring_fg" stroke="'+(low ? '#ef4444' : col)+'" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+(C*(1 - Math.max(3, k)/100)).toFixed(1)+'"/></svg>'+petIcon(icon,18)+'</div><b>'+v+'</b><span>'+label+'</span></div>';
+}
 function petBar(icon, label, v, color){
   v = Math.max(0, Math.min(100, Math.round(v)));
   return '<div class="pt_stat" title="'+label+'">'+petIcon(icon,16)+'<div class="pt_stat_track"><div class="pt_stat_fill" style="width:'+Math.max(3,v)+'%;background:'+color+'"></div></div><b>'+v+'</b></div>';
@@ -10345,6 +10332,255 @@ var PET_ACH = [
   { id:'a_star', name:'Звезда', icon:'heart', col:'#ef4444', desc:'Сияешь ярче всех' }
 ];
 var PET_ACH_BY = {}; PET_ACH.forEach(function(a){ PET_ACH_BY[a.id] = a; });
+
+var PET_ACH2 = [
+  { id:'b_feed50', name:'Кормилец', icon:'apple', col:'#f59e0b', desc:'Покормить 50 раз', stat:'feed', need:50, rw:{ c:150 } },
+  { id:'b_wash30', name:'Мыльная опера', icon:'soap', col:'#38bdf8', desc:'Искупать 30 раз', stat:'wash', need:30, rw:{ c:150 } },
+  { id:'b_pet100', name:'Гладильщик', icon:'heart', col:'#fb7185', desc:'Погладить 100 раз', stat:'pet', need:100, rw:{ c:120 } },
+  { id:'b_game25', name:'Геймер', icon:'gamepad', col:'#a78bfa', desc:'Сыграть 25 игр', stat:'game', need:25, rw:{ c:200 } },
+  { id:'b_walk10', name:'Турист', icon:'leash', col:'#34d399', desc:'10 прогулок', stat:'walk', need:10, rw:{ c:200, g:1 } },
+  { id:'b_visit10', name:'Душа компании', icon:'house', col:'#f472b6', desc:'10 встреч малышей', stat:'visit', need:10, rw:{ c:200 } },
+  { id:'b_hatch5', name:'Наседка', icon:'egg', col:'#fbbf24', desc:'Вылупить 5 малышей', stat:'hatch', need:5, rw:{ g:2 } },
+  { id:'b_lvl10', name:'Вырастил', icon:'star', col:'#fde047', desc:'Малыш 10 уровня', stat:'maxLevel', need:10, rw:{ c:300, g:1 } },
+  { id:'b_collect8', name:'Зоопарк', icon:'paw', col:'#22c55e', desc:'Собрать 8 видов', stat:'species', need:8, rw:{ g:3 } },
+  { id:'b_streak7', name:'Неделя заботы', icon:'gift', col:'#ec4899', desc:'Заходить 7 дней подряд', stat:'streak', need:7, rw:{ g:2 } },
+  { id:'b_coins', name:'Копилка', icon:'coin', col:'#f59e0b', desc:'Накопить 5000 монет', stat:'coins', need:5000, rw:{ g:1 } },
+  { id:'b_photo5', name:'Фотограф', icon:'cam', col:'#60a5fa', desc:'Сделать 5 фото', stat:'photo', need:5, rw:{ c:100 } },
+  { id:'b_quest15', name:'Исполнитель', icon:'scroll', col:'#10b981', desc:'Выполнить 15 заданий дня', stat:'quest', need:15, rw:{ c:250, g:1 } }
+];
+PET_ACH2.forEach(function(a){ PET_ACH.push(a); PET_ACH_BY[a.id] = a; });
+var PET_TRAITS = [
+  { id:'glutton', n:'Обжора', d:'Голодает быстрее, но еда даёт ему больше сытости', fx:{ hunger:1.35 }, lines:['А когда обед?','Пахнет чем-то вкусным...','Я бы перекусил'] },
+  { id:'sleepy', n:'Соня', d:'Устаёт быстрее, зато во сне восстанавливается сильнее', fx:{ energy:1.35 }, lines:['Ааауф... зеваю','Можно я полежу?','Подушка зовёт'] },
+  { id:'neat', n:'Чистюля', d:'Пачкается медленнее, а купание радует сильнее', fx:{ clean:0.65 }, lines:['Ни пылинки!','Я сегодня блестящий','Только не лужи!'] },
+  { id:'hyper', n:'Непоседа', d:'Скучает быстрее, но от игр получает больше радости', fx:{ joy:1.3 }, lines:['Давай играть!','Бегом-бегом!','Мне скучно сидеть'] },
+  { id:'tender', n:'Неженка', d:'Любит ласку: поглаживания радуют вдвое сильнее', fx:{ joy:1.15 }, lines:['Обними меня','Погладишь?','Ты рядом — и хорошо'] },
+  { id:'brave', n:'Храбрец', d:'Реже болеет, а с прогулок приносит больше монет', fx:{ health:0.6 }, lines:['Пойдём в приключение!','Я ничего не боюсь','Где тут дракон?'] },
+  { id:'calm', n:'Спокойный', d:'Все шкалы тратятся чуть медленнее', fx:{ all:0.85 }, lines:['Хорошо сидим','Всё по плану','Тишина и уют'] }
+];
+function petTrait(pd){ return petFindIn(PET_TRAITS, pd && pd.trait) || PET_TRAITS[PET_TRAITS.length - 1]; }
+function petStage(lv){ return lv >= 12 ? { id:'adult', n:'Взрослый', s:1.08 } : lv >= 5 ? { id:'teen', n:'Подросток', s:0.97 } : { id:'baby', n:'Малыш', s:0.86 }; }
+function petClockTime(){ var h = new Date().getHours(); return h >= 5 && h < 10 ? 'morning' : h >= 10 && h < 17 ? 'day' : h >= 17 && h < 21 ? 'sunset' : 'night'; }
+function petStatOf(state, key){
+  if (key === 'maxLevel') return state.pets.reduce(function(m, id){ return Math.max(m, ((state.petsData || {})[id] || {}).level || 1); }, 0);
+  if (key === 'species') return state.pets.length;
+  if (key === 'coins') return state.coins;
+  if (key === 'streak') return ((petDaily(state).streak) || {}).best || 0;
+  return (state.stats || {})[key] || 0;
+}
+function petCheckAch(state){
+  state.ach = state.ach || {};
+  var got = [];
+  PET_ACH2.forEach(function(a){ if (!state.ach[a.id] && petStatOf(state, a.stat) >= a.need){ state.ach[a.id] = Date.now(); if (a.rw){ state.coins += a.rw.c || 0; state.gems += a.rw.g || 0; } got.push(a); } });
+  got.forEach(function(a, k){ setTimeout(function(){ toast('Достижение «'+a.name+'»'+(a.rw ? ': +'+[a.rw.c ? a.rw.c+' монет' : '', a.rw.g ? a.rw.g+' крист.' : ''].filter(Boolean).join(' и ') : '')); }, 500 + k*1900); });
+  return got;
+}
+var PET_QUESTS = [
+  { id:'feed', t:'Покормить малыша', need:3, c:50 }, { id:'wash', t:'Искупать малыша', need:2, c:50 }, { id:'toy', t:'Поиграть игрушкой', need:2, c:45 },
+  { id:'sleep', t:'Уложить спать', need:1, c:35 }, { id:'potty', t:'Сводить в туалет', need:2, c:40 }, { id:'pet', t:'Погладить малыша', need:10, c:40 },
+  { id:'game', t:'Сыграть в мини-игры', need:2, c:60 }, { id:'score', t:'Набрать 120 очков за одну игру', need:1, c:80 }, { id:'walk', t:'Сходить на прогулку', need:1, c:60 },
+  { id:'visit', t:'Позвать малыша в гости', need:1, c:60, two:true }, { id:'buy', t:'Купить что-нибудь в магазине', need:2, c:40 }, { id:'photo', t:'Сфотографировать малыша', need:1, c:40 }
+];
+var PET_STREAK = [{ c:50 }, { c:70 }, { c:90 }, { g:1 }, { c:120 }, { c:150 }, { g:2, egg:'egg_spot' }];
+function petYesterdayKey(){ var d = new Date(Date.now() - 86400000); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function petDaily(state){
+  var k = petTodayKey(); state.daily = state.daily || {};
+  var d = state.daily;
+  if (d.d !== k){
+    var two = (state.slots || []).filter(function(sl){ return sl.pet; }).length >= 2;
+    var pool = PET_QUESTS.filter(function(q){ return !q.two || two; }).slice(), pick = [];
+    while (pick.length < 3 && pool.length) pick.push(pool.splice(Math.floor(Math.random()*pool.length), 1)[0]);
+    d.d = k; d.q = pick.map(function(q){ return { id:q.id, have:0, done:false, got:false }; }); d.bonus = false;
+  }
+  if (!d.streak) d.streak = { last:'', n:0, run:0, best:0 };
+  return d;
+}
+function petQuestBump(state, key, n, extra){
+  petDaily(state).q.forEach(function(q){
+    var def = petFindIn(PET_QUESTS, q.id); if (!def || q.done) return;
+    var hit = q.id === key || (q.id === 'score' && key === 'game' && extra && extra.score >= 120);
+    if (!hit) return;
+    q.have = Math.min(def.need, q.have + (q.id === 'score' ? 1 : n));
+    if (q.have >= def.need){ q.done = true; setTimeout(function(){ toast('Задание выполнено — забери награду'); }, 250); }
+  });
+}
+function petTrack(state, key, n, extra){
+  state.stats = state.stats || {};
+  state.stats[key] = (state.stats[key] || 0) + (n || 1);
+  petQuestBump(state, key, n || 1, extra);
+  petCheckAch(state);
+  setTimeout(function(){ petRefreshTop(state); }, 0);
+}
+function petStreakInfo(state){
+  var s = petDaily(state).streak, k = petTodayKey();
+  if (s.last === k) return { claimed:true, day:s.n };
+  return { claimed:false, day: s.last === petYesterdayKey() ? (s.n % 7) + 1 : 1 };
+}
+function petQuestBadge(state){
+  var d = petDaily(state), n = petStreakInfo(state).claimed ? 0 : 1;
+  d.q.forEach(function(q){ if (q.done && !q.got) n++; });
+  if (!d.bonus && d.q.length && d.q.every(function(q){ return q.got; })) n++;
+  return n;
+}
+function petQuestsSheet(state, scope){
+  var draw = function(){
+    var d = petDaily(state), si = petStreakInfo(state);
+    var cells = PET_STREAK.map(function(r, i){
+      var day = i + 1, past = si.claimed ? day <= si.day : day < si.day, cur = !si.claimed && day === si.day;
+      return '<div class="pt_sday'+(past?' got':'')+(cur?' cur':'')+'"><span>'+day+'</span><i>'+petIcon(r.egg ? 'egg' : r.g ? 'gem' : 'coin', 20)+'</i><b>'+(r.egg ? 'приз' : r.g ? '+'+r.g : '+'+r.c)+'</b></div>';
+    }).join('');
+    var qs = d.q.map(function(q, i){
+      var def = petFindIn(PET_QUESTS, q.id) || { t:q.id, need:1, c:0 };
+      var pct = Math.round(q.have / def.need * 100);
+      return '<div class="pt_quest'+(q.got?' got':'')+'"><div class="pt_quest_m"><div class="pt_quest_t">'+escapeHtml(def.t)+'</div><div class="pt_quest_bar"><i style="width:'+pct+'%"></i></div><div class="pt_quest_s">'+q.have+' / '+def.need+'</div></div>'+
+        (q.got ? '<div class="pt_quest_ok">Готово</div>' : q.done ? '<div class="pt_quest_btn" data-q="'+i+'">'+petIcon('coin',14)+'+'+def.c+'</div>' : '<div class="pt_quest_rw">'+petIcon('coin',14)+'+'+def.c+'</div>')+'</div>';
+    }).join('');
+    var all = d.q.length && d.q.every(function(q){ return q.got; });
+    sh.querySelector('.pt_qbody').innerHTML =
+      '<div class="pt_qsec">Награда за вход · день '+si.day+' из 7</div><div class="pt_streak">'+cells+'</div><div class="pt_qhint">Заходи каждый день: на 7-й день — пятнистое яйцо и 2 кристалла. Пропустишь день — серия начнётся заново.</div>'+
+      (si.claimed ? '<div class="pt_qhint">Сегодняшняя награда получена. Завтра — следующий день серии.</div>' : '<div class="pt_big" id="pt_sclaim" style="margin:8px 0 0;">Забрать награду дня</div>')+
+      '<div class="pt_qsec" style="margin-top:14px;">Задания на сегодня</div>'+qs+
+      '<div class="pt_quest bonus'+(d.bonus?' got':'')+'"><div class="pt_quest_m"><div class="pt_quest_t">Выполнить все три</div><div class="pt_quest_s">Бонус за день</div></div>'+(d.bonus ? '<div class="pt_quest_ok">Готово</div>' : all ? '<div class="pt_quest_btn" id="pt_qbonus">'+petIcon('gem',14)+'+1</div>' : '<div class="pt_quest_rw">'+petIcon('gem',14)+'+1</div>')+'</div>';
+    var sc = $('#pt_sclaim', sh); if (sc) sc.addEventListener('click', async function(){
+      var info = petStreakInfo(state); if (info.claimed) return;
+      var st = petDaily(state).streak, r = PET_STREAK[info.day - 1], rw = [];
+      st.run = st.last === petYesterdayKey() ? (st.run || 0) + 1 : 1; st.best = Math.max(st.best || 0, st.run); st.n = info.day; st.last = petTodayKey();
+      if (r.c){ state.coins += r.c; rw.push({ ico:'coin', t:'+'+r.c+' монет', s:'день '+info.day }); }
+      if (r.g){ state.gems += r.g; rw.push({ ico:'gem', t:'+'+r.g+' крист.', s:'день '+info.day }); }
+      if (r.egg){ var at = petStoreEgg(state, r.egg); rw.push({ ico:'egg', t:(petFindIn(PET_EGGS, r.egg) || {}).name || 'Яйцо', s: at < 0 ? 'в запас' : 'греется в комнате '+(at+1) }); }
+      petCheckAch(state);
+      await rpSet('rp_pet_state', state); sh.remove();
+      petPlayGiftAnim(rw, 'Награда дня '+info.day, function(){ renderPetBody(scope); });
+    });
+    sh.querySelectorAll('[data-q]').forEach(function(b){ b.addEventListener('click', async function(){
+      var q = petDaily(state).q[+b.getAttribute('data-q')], def = petFindIn(PET_QUESTS, q && q.id); if (!q || !q.done || q.got || !def) return;
+      q.got = true; state.coins += def.c; petTrack(state, 'quest');
+      await rpSet('rp_pet_state', state); toast('+'+def.c+' монет'); draw(); petRefreshTop(state);
+    }); });
+    var bb = $('#pt_qbonus', sh); if (bb) bb.addEventListener('click', async function(){
+      var d2 = petDaily(state); if (d2.bonus) return; d2.bonus = true; state.gems += 1;
+      await rpSet('rp_pet_state', state); toast('+1 кристалл за все задания'); draw(); petRefreshTop(state);
+    });
+  };
+  var sh = thSheet('<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;"><div style="font-weight:900;font-size:15px;">Задания и награды</div><div class="th_btn ghost" id="pt_q_x" style="padding:6px 12px;">Закрыть</div></div><div class="pt_qbody"></div>');
+  $('#pt_q_x', sh).addEventListener('click', function(){ sh.remove(); renderPetBody(scope); });
+  draw();
+}
+function petRefreshTop(state){
+  var c = $('#pt_coins_n'); if (c) c.textContent = state.coins.toLocaleString();
+  var g = $('#pt_gems_n'); if (g) g.textContent = state.gems;
+  var q = $('#pt_quests'); if (q){ var n = petQuestBadge(state); q.classList.toggle('ready', n > 0); q.setAttribute('data-n', n || ''); }
+}
+var PET_WALKS = [
+  { m:15, n:'Вокруг дома', c:[20,45], items:0, e:15, h:12, cl:12 },
+  { m:30, n:'Прогулка в парке', c:[40,85], items:1, e:28, h:22, cl:22 },
+  { m:60, n:'Большое приключение', c:[80,160], items:2, e:45, h:38, cl:35, rare:true }
+];
+function petWalkDef(m){ return PET_WALKS.filter(function(w){ return w.m === m; })[0] || PET_WALKS[0]; }
+function petWalkSheet(state, ps, scope){
+  var name = (ps.genome && ps.genome.name) || 'Малыш';
+  var why = ps.isSleeping ? 'Малыш спит — сначала разбуди его.' : petIsSick(ps) ? 'Малыш болеет — сначала дай лекарство.' : ps.energy < 25 ? 'Слишком мало сил для прогулки — пусть поспит.' : '';
+  var sh = thSheet('<div style="font-weight:900;font-size:15px;margin-bottom:4px;">Куда пойдёт '+escapeHtml(name)+'?</div>'+
+    '<div class="th_hint" style="margin-bottom:10px;">Пока малыш гуляет, он не скучает и не пачкает комнату. Вернётся уставшим и голодным, зато с находками: монетками, едой, игрушками, а с больших прогулок — иногда с вещью для комнаты или даже с яйцом.</div>'+
+    (why ? '<div class="pt_walk_warn">'+escapeHtml(why)+'</div>' : PET_WALKS.map(function(w){ return '<div class="pt_walkopt" data-m="'+w.m+'"><div class="pt_walkopt_i">'+petIcon('leash',30)+'</div><div style="flex:1;min-width:0;"><b>'+w.n+'</b><span>'+w.m+' мин · '+w.c[0]+'–'+w.c[1]+' монет'+(w.items ? ' · находки' : '')+(w.rare ? ' · шанс на редкость' : '')+'</span></div><i>'+petIcon('bolt',14)+'−'+w.e+'</i></div>'; }).join(''))+
+    '<div class="th_btn ghost" id="pt_w_x" style="margin-top:12px;">Закрыть</div>');
+  $('#pt_w_x', sh).addEventListener('click', function(){ sh.remove(); });
+  sh.querySelectorAll('[data-m]').forEach(function(b){ b.addEventListener('click', async function(){
+    var w = petWalkDef(+b.getAttribute('data-m'));
+    ps.walk = { at: Date.now(), until: Date.now() + w.m*60000, m: w.m }; ps.isSleeping = false; petSpeechText = null;
+    await rpSet('rp_pet_state', state); await petAddFeedLog('user', 'отправил(а) малыша гулять: '+w.n.toLowerCase());
+    sh.remove(); toast(name+': прогулка началась'); renderPetBody(scope);
+  }); });
+}
+function petWalkLoot(state, ps){
+  var w = petWalkDef(ps.walk.m), t = petTrait(ps), rw = [];
+  var coins = Math.round((w.c[0] + Math.random()*(w.c[1] - w.c[0])) * (t.id === 'brave' ? 1.3 : 1));
+  state.coins += coins; rw.push({ ico:'coin', t:'+'+coins+' монет', s:'нашёл по дороге' });
+  var pool = PET_CONS.food.slice(0, 8).concat(PET_CONS.toy, PET_CONS.wash.slice(0, 4));
+  for (var i = 0; i < w.items; i++){ var it = pool[Math.floor(Math.random()*pool.length)]; state.inventory[it.id] = (state.inventory[it.id] || 0) + 1; rw.push({ ico:it.icon, t:it.name, s:'в запас' }); }
+  if (w.rare){
+    var r = Math.random();
+    if (r < 0.05){ var at = petStoreEgg(state, 'egg_basic'); rw.push({ ico:'egg', t:'Обычное яйцо', s: at < 0 ? 'в запас' : 'греется в комнате '+(at+1) }); }
+    else if (r < 0.2){ var dec = [].concat(PET_RUGS, PET_ARTS, PET_CEILS, PET_FURN).filter(function(x){ return !state.owned[x.id]; }); if (dec.length){ var dd = dec[Math.floor(Math.random()*dec.length)]; state.owned[dd.id] = 1; rw.push({ ico:'house', t:dd.name, s:'для комнаты' }); } }
+    else if (r < 0.3){ state.gems += 1; rw.push({ ico:'gem', t:'+1 кристалл', s:'блестел в траве' }); }
+  }
+  ps.energy = Math.max(0, ps.energy - w.e); ps.hunger = Math.max(0, ps.hunger - w.h); ps.cleanliness = Math.max(0, ps.cleanliness - w.cl);
+  ps.happiness = Math.min(100, ps.happiness + 25);
+  var lv = petGainExp(state, ps, Math.round(w.m / 3));
+  ps.walk = null;
+  petTrack(state, 'walk');
+  return { rw: rw, lv: lv };
+}
+async function petRenderWalk(container, state, scope, ps, pet){
+  var name = (ps.genome && ps.genome.name) || pet.name, w = petWalkDef(ps.walk.m), sc = petFindIn(PET_SCENES, w.m >= 60 ? 'forest' : w.m >= 30 ? 'garden' : 'city') || PET_SCENES[0];
+  var card = el('div','pt_walk');
+  card.innerHTML = '<div class="pt_walk_pic">'+petRoomSVG({ currentScene: sc.id, room:{}, timeOfDay: state.timeOfDay }, ps.genome, false, { scale: 0.7 })+'</div>'+
+    '<div class="pt_walk_t">'+escapeHtml(name)+' гуляет · '+escapeHtml(w.n.toLowerCase())+'</div><div class="pt_walk_s" id="pt_walk_s"></div><div class="pt_egg_prog"><div id="pt_walk_fill"></div></div><div id="pt_walk_btns" style="margin-top:8px;"></div>';
+  container.appendChild(card);
+  var draw = function(){
+    var left = ps.walk ? ps.walk.until - Date.now() : 0, total = w.m*60000, done = left <= 0;
+    $('#pt_walk_s', card).textContent = done ? 'Прогулка окончена — малыш что-то несёт в зубах!' : 'Вернётся через '+petFmtTime(left);
+    $('#pt_walk_fill', card).style.width = Math.round(Math.max(0, Math.min(1, 1 - left/total))*100)+'%';
+    var btns = $('#pt_walk_btns', card);
+    if (btns.getAttribute('data-done') === String(done)) return;
+    btns.setAttribute('data-done', String(done));
+    btns.innerHTML = done ? '<div class="pt_big" id="pt_walk_meet" style="margin:0;">Встретить</div>' : '<div class="pt_btn2" id="pt_walk_call">'+petIcon('house',18)+'<span>Позвать домой сейчас (без находок)</span></div>';
+    var mb = $('#pt_walk_meet', card); if (mb) mb.addEventListener('click', async function(){
+      if (!ps.walk) return;
+      var res = petWalkLoot(state, ps); petSpeechText = 'Я вернулся! Смотри, что нашёл!';
+      await rpSet('rp_pet_state', state); await petAddFeedLog('user', 'встретил(а) малыша с прогулки');
+      petPlayGiftAnim(res.rw, 'Находки с прогулки', function(){ if (res.lv) toast(res.lv); renderPetBody(scope); });
+    });
+    var cb = $('#pt_walk_call', card); if (cb) cb.addEventListener('click', async function(){
+      ps.walk = null; ps.energy = Math.max(0, ps.energy - 5); petSpeechText = 'Уже домой? Ну ладно';
+      await rpSet('rp_pet_state', state); renderPetBody(scope);
+    });
+  };
+  draw();
+  petTimer = setInterval(function(){ if (!card.isConnected){ petClearTimer(); return; } if (panelOpen) draw(); }, 1000);
+}
+var petGuestShow = null;
+function petFriendKey(a, b){ return [a, b].sort().join('|'); }
+function petFriendLabel(p){ return p >= 18 ? 'лучшие друзья' : p >= 9 ? 'друзья' : p >= 4 ? 'приятели' : p >= 1 ? 'знакомые' : 'ещё не знакомы'; }
+function petVisitCard(container, state, scope, ps){
+  var oi = 1 - state.activeSlot, oid = state.slots[oi].pet; if (!oid) return;
+  var od = petEnsurePetData(state, oid), on = (od.genome && od.genome.name) || (PET_BY_ID[oid] || {}).name || 'Малыш';
+  var key = petFriendKey(state.activePetId, oid), fp = (state.friend || {})[key] || 0, last = (state.visitAt || {})[key] || 0, wait = last + 40*60000 - Date.now();
+  var why = od.walk ? on+' гуляет' : od.isSleeping ? on+' спит' : ps.isSleeping ? 'Твой малыш спит' : wait > 0 ? 'снова через '+petFmtTime(wait) : '';
+  var c = el('div','pt_visit');
+  c.innerHTML = '<div class="pt_visit_av">'+petRenderSVG(od.genome, !!od.isSleeping, { noAnim:true })+'</div><div class="pt_visit_m"><b>'+escapeHtml(on)+'</b><span>комната '+(oi+1)+' · '+petFriendLabel(fp)+'</span></div>'+
+    (why ? '<div class="pt_visit_w">'+escapeHtml(why)+'</div>' : '<div class="pt_visit_b" id="pt_visit_go">Позвать в гости</div>');
+  container.appendChild(c);
+  var b = $('#pt_visit_go', c); if (b) b.addEventListener('click', async function(){
+    if (petBusy) return;
+    state.friend = state.friend || {}; state.visitAt = state.visitAt || {};
+    state.friend[key] = fp + 1; state.visitAt[key] = Date.now();
+    [ps, od].forEach(function(x){ x.happiness = Math.min(100, x.happiness + 15); x.energy = Math.max(0, x.energy - 6); });
+    var lv = petGainExp(state, ps, 6); petGainExp(state, od, 6);
+    petTrack(state, 'visit');
+    petSpeechText = on+' в гостях! Играем вместе!';
+    petGuestShow = { id: oid, until: Date.now() + 4200 };
+    await rpSet('rp_pet_state', state); await petAddFeedLog('user', 'позвал(а) малышей поиграть вместе');
+    if (lv) toast(lv);
+    await petKeepScroll(scope, function(){ return renderPetHome(container, state, scope); });
+    setTimeout(function(){ if (petGuestShow && petGuestShow.until <= Date.now() + 50){ petGuestShow = null; var sc0 = $('.rp_pet_scope'); if (sc0 && currentScreen === 'pet' && petActiveTab === 'home' && !petBusy) petKeepScroll(sc0, function(){ return renderPetBody(sc0); }); } }, 4300);
+  });
+}
+async function petSnap(state, ps){
+  var svg = petRoomSVG(state, ps.genome, ps.isSleeping, { dirty: ps.cleanliness < 35, sick: petIsSick(ps), scale: petStage(ps.level).s }).replace('width="100%"', 'width="720" height="560"');
+  var url = await new Promise(function(res){
+    var im = new Image();
+    im.onload = function(){ try{ var c = document.createElement('canvas'); c.width = 720; c.height = 560; var g = c.getContext('2d'); g.drawImage(im, 0, 0, 720, 560); g.fillStyle = 'rgba(255,255,255,.85)'; g.font = '800 22px sans-serif'; g.fillText(((ps.genome && ps.genome.name) || 'Малыш') + ' · ур. ' + ps.level, 20, 540); res(c.toDataURL('image/jpeg', 0.9)); }catch(e){ res(null); } };
+    im.onerror = function(){ res(null); };
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+  if (!url){ toast('Не получилось сделать фото'); return false; }
+  try{ await rpGalleryAdd(url, 'Мой малыш'); }catch(e){ toast('Не получилось сохранить в Галерею'); return false; }
+  petTrack(state, 'photo');
+  await rpSet('rp_pet_state', state);
+  toast('Фото сохранено в Галерею');
+  return true;
+}
 function petMedal(a, size, locked){
   size = size || 54;
   return '<div class="pt_medal'+(locked?' locked':'')+'" style="width:'+size+'px;height:'+size+'px;--mc:'+a.col+'">'+petIcon(a.icon, Math.round(size*0.56))+'</div>';
@@ -10361,6 +10597,40 @@ var PET_PROMOS = {
   '19c8kutudgd':{c:800,ach:'a_rich'}, 'h97evvit7k':{c:1500,g:3,ach:'a_lucky'}, '360s17yt92':{g:3},
   '2491zly97zj':{g:5,c:200}, '273sc6rqkhp':{c:300,g:2,ach:'a_lucky'}, 'tjj3zhq5rj':{cons:{f_medicine:3,f_potion:1},c:100},
   '1hj1kxetx8f':{c:400,g:1,acc:['cap'],cons:{p_smart:1}}, 'dsrzowuo54':{c:600,g:2,acc:['partyHat','crown'],ach:'a_gift'}, '652fzpieiy':{c:350,g:2,ach:'a_gift'},
+  'hlfoigrgft':{c:100}, '25zgal2iqxv':{c:120,cons:{f_carrot:3}}, 'g1jt3donwu':{c:80,cons:{f_fish:3}},
+  '88bpma0dx5':{c:100,cons:{f_ramen:2}}, '17ko815stw3':{c:120,cons:{f_sushi:2,f_fish:1}}, '27sixlwjopp':{c:90,cons:{f_cake:1,f_cookie:2}},
+  '10e86lfyqbd':{c:80,cons:{f_berry:4}}, '13h9t4rs7ep':{c:100,cons:{f_cookie:4}}, '1couzule3hb':{c:90,cons:{f_macaroon:3}},
+  '1nkk6r21csp':{c:80,cons:{f_apple:5}}, '1tlxsn9jjyn':{g:1,cons:{f_milk:3}}, '1huv09cukr0':{c:120,cons:{f_medicine:2,f_potion:1}},
+  '2790ssl5ul5':{c:100,cons:{w_bath:1,w_duckie:2}}, '8abw37ubi3':{c:90,cons:{w_duckie:3}}, '1wi6duyc6w4':{c:120,cons:{w_rose:2}},
+  '1yct56vljpl':{c:100,cons:{w_towel:2,w_shampoo:1}}, '490qanqz6t':{g:1,cons:{w_bath:1,w_rose:1,w_towel:1}}, '2c9gveu6cvm':{c:100,cons:{s_blanket:2,s_lamp:1}},
+  'un0626n36q':{c:120,cons:{s_music:1,s_pillow:2}}, '2eautfrg60h':{c:80,cons:{s_cocoa:4}}, 'ptosahwnep':{c:120,cons:{t_teddy:2}},
+  '25w8ov2c2op':{c:100,cons:{t_kite:2}}, '1zh9s7598h9':{c:100,cons:{t_drum:2}}, 'do2gacrknq':{c:110,cons:{t_blocks:2}},
+  '1t0u4rwa17o':{c:90,cons:{t_yarn:3,t_ball:2}}, '1d1a0tftbs3':{c:80,cons:{p_potty:1,p_wipes:2,p_paper:3}}, 'nk2k59rh70':{c:100,cons:{p_smart:1}},
+  '1b4xi6qli52':{egg:['egg_golden']}, '6hm84kiypj':{c:50,egg:['egg_spot']}, '2k46na6bqq':{c:80,egg:['egg_basic','egg_basic']},
+  '1wm6eb0c9kf':{egg:['egg_spot'],cons:{f_carrot:3}}, '1hdy3pccaqi':{egg:['egg_basic','egg_spot']}, 'd2ultmbtbs':{g:1,egg:['egg_basic']},
+  '1d0c4g507f2':{egg:['egg_spot','egg_spot']}, '26x4h17f5w5':{g:2,egg:['egg_golden']}, '27vnjxdjc7e':{c:100,sc:['garden']},
+  '1pm0ujzl3ly':{c:80,sc:['beach']}, '13n3b4rcg2a':{c:100,sc:['city']}, '172nvqof4tm':{c:80,sc:['forest']},
+  '20x2kf5b5n':{c:100,sc:['snow']}, '1g4l0zlwxq6':{g:1,sc:['space']}, 'l2cpv8zad7':{dec:['art_moon','ceil_lights'],ach:'a_night'},
+  '16zeriopmu6':{c:120,dec:['w_brick','f_darkwood','armchair']}, 'q3mk3jey1o':{c:100,dec:['w_clouds','bed_cloud']}, 'lkj2bct1vh':{c:120,dec:['w_mintdots','f_grass']},
+  '2bp526i643t':{c:100,dec:['w_lavstars','rug_star']}, '7dpm091mfa':{c:100,dec:['w_hearts','art_heart','rug_heart']}, 'dbv8au3pi6':{c:120,dec:['w_sunset','win_big']},
+  't04qfvil7d':{c:100,dec:['w_wood','f_darkwood','wardrobe']}, '11f1c5ecv2o':{g:1,dec:['f_marble','ceil_chandelier']}, '4ccr9jpzqy':{c:150,dec:['plant','cactus']},
+  '1lys8xuth9c':{c:100,dec:['tv','sofa']}, 'm0mmjfzh0f':{c:120,dec:['toybox','rug_stripe']}, 'x1vko7bl1':{c:120,dec:['art_polaroid','art_paw']},
+  'npjrkea9uf':{c:100,dec:['ceil_lantern','win_arch']}, '7yfi2n2lnm':{c:100,dec:['f_carpetblue','rug_round']}, '4cg2fq8xxf':{c:80,dec:['bookshelf','armchair','lamp']},
+  '22dkd652gjk':{dec:['aquarium'],cons:{f_fish:2}}, '1zz23x5tgou':{g:1,acc:['crown'],ach:'a_star'}, '28yu2fmb9jt':{c:120,acc:['glasses']},
+  '1yst0pgs4ld':{c:80,acc:['cap','sunglasses']}, '12j8a0t5lvw':{c:150,acc:['bandana']}, '12dexhpzusj':{c:100,acc:['bow','flower']},
+  'xicf8cljco':{acc:['headphones'],cons:{t_drum:1}}, 'geqsx1jfvu':{c:150,acc:['magicHat']}, '1icjokvsa5f':{acc:['scarf'],cons:{s_cocoa:2}},
+  '1ctry7q4qcp':{c:100,acc:['partyHat'],cons:{f_cake:1}}, '1x74peyuo3v':{c:150,acc:['halo']}, '23z0ivvcnhe':{c:250},
+  'v68rk2bm82':{c:350}, 'q5qfedxvg1':{c:150}, '1uae0yy6vho':{c:700,ach:'a_rich'},
+  'd9iatoby2p':{c:500,g:1}, 'r7mlynuhka':{g:2}, '1zussd61lpc':{c:100,g:3},
+  '1h82gxbrttu':{c:200,g:1}, 'fqxnybel3q':{c:900,g:2}, '28qxg31v8pp':{c:300,cons:{t_ball:2}},
+  '19f2jryqtv6':{c:200,cons:{s_cocoa:2,f_cookie:2}}, '1i2bj83vtq0':{c:400}, '1058vb3d8x5':{c:150,cons:{f_milk:2,f_apple:2}},
+  'o4xf5c47ub':{c:150,cons:{s_pillow:1,s_blanket:1}}, '1rvizvry1gm':{c:250,ach:'a_friend'}, '14j7uqyyxf3':{cons:{f_ramen:1,f_sushi:1,f_cake:1},ach:'a_chef'},
+  '21qfwl742mu':{cons:{w_shampoo:2,w_soap:3},ach:'a_clean'}, '3l9fvh9ue1':{cons:{s_music:1,s_lamp:1},ach:'a_dream'}, '230uhjim84m':{c:200,cons:{t_kite:1,t_blocks:1},ach:'a_player'},
+  '1tav0ytjgld':{acc:['bow','glasses','scarf'],ach:'a_stylist'}, 'ssd7hh0x2u':{dec:['art_land','art_polaroid','win_classic'],ach:'a_collect'}, '1n5j8ahv28':{c:333,g:3,ach:'a_lucky'},
+  '16qwp0vjj40':{c:300,g:1,ach:'a_gift'}, '2aozdmm0fc4':{g:2,dec:['ceil_mobile']}, '1cq9krhiwd4':{dec:['art_moon'],cons:{s_lamp:1}},
+  '1hl6mw4j7d2':{sc:['snow'],acc:['scarf']}, '1zcnkcvzzkf':{sc:['beach'],acc:['sunglasses']}, 'w0c7s5q50t':{c:100,sc:['garden'],acc:['flower']},
+  '29ri9mz4zpr':{sc:['space'],dec:['w_galaxy']}, '23kdjhmkihx':{c:500,g:2,ach:'a_gift'}, '1wo2y69z7mf':{c:400,g:1,egg:['egg_spot']},
+  '2dtyxmf0t8w':{c:250,cons:{f_cookie:2,f_milk:2}},
   'weygigv7ow':{c:10000,g:1000,admin:true}
 };
 function petFindDecor(id){
@@ -10374,6 +10644,8 @@ function petApplyPromo(state, code, p){
   if (p.g){ state.gems += p.g; rewards.push({ ico:'gem', t:'+'+p.g.toLocaleString('ru-RU')+' кристаллов', s:'на счёт' }); }
   (p.acc || []).forEach(function(id){ var a = petFindIn(PET_ACCS, id); if (!a) return; var had = state.owned[id]; state.owned[id] = 1; rewards.push({ ico:'hanger', t:a.name, s: had ? 'уже было — в гардеробе' : 'новый аксессуар' }); });
   (p.dec || []).forEach(function(id){ var d = petFindDecor(id); if (!d) return; var had = state.owned[id]; state.owned[id] = 1; rewards.push({ ico:'house', t:d.name, s: had ? 'уже было' : 'для комнаты' }); });
+  (p.egg || []).forEach(function(t){ var eg = petFindIn(PET_EGGS, t); if (!eg) return; var at = petStoreEgg(state, eg.id); rewards.push({ ico:'gift', t:eg.name, s: at < 0 ? 'в запас' : 'греется в комнате '+(at+1) }); });
+  (p.sc || []).forEach(function(id){ var sc = petFindIn(PET_SCENES, id); if (!sc) return; var had = state.ownedScenes.indexOf(id) >= 0; if (!had) state.ownedScenes.push(id); rewards.push({ ico:'house', t:sc.name, s: had ? 'уже было' : 'новый фон' }); });
   Object.keys(p.cons || {}).forEach(function(id){ var it = PET_CONS_ALL[id]; if (!it) return; state.inventory[id] = (state.inventory[id]||0) + p.cons[id]; rewards.push({ ico:it.icon, t:it.name+' ×'+p.cons[id], s:'в запас' }); });
   if (p.ach){ var a2 = PET_ACH_BY[p.ach]; if (a2){ state.ach = state.ach || {}; var had2 = !!state.ach[p.ach]; if (!had2) state.ach[p.ach] = Date.now(); rewards.push({ medal:a2, t:'Достижение: '+a2.name, s: had2 ? 'уже открыто' : a2.desc }); } }
   return rewards;
@@ -10413,7 +10685,7 @@ function petPlayGiftAnim(rewards, admin, done){
     '<svg viewBox="0 0 120 120" width="150" height="150"><g class="pt_g_body"><rect x="18" y="52" width="84" height="56" rx="8" fill="#f472b6"/><rect x="53" y="52" width="14" height="56" fill="#fde68a"/><rect x="18" y="52" width="84" height="8" fill="#000" opacity=".1"/></g>'+
     '<g class="pt_g_lid"><rect x="12" y="34" width="96" height="22" rx="7" fill="#fb7fb8"/><rect x="53" y="34" width="14" height="22" fill="#fde68a"/><path d="M60 34c-14-18-34-12-24-2 6 4 24 2 24 2zM60 34c14-18 34-12 24-2-6 4-24 2-24 2z" fill="#fde68a" stroke="#f5c76a" stroke-width="2"/></g></svg></div>'+
     '<div class="pt_gconf">'+conf+'</div>'+
-    '<div class="pt_gov_t">'+(admin ? 'Служебный подарок' : 'Подарок!')+'</div>'+
+    '<div class="pt_gov_t">'+(typeof admin === 'string' ? escapeHtml(admin) : admin ? 'Служебный подарок' : 'Подарок!')+'</div>'+
     '<div class="pt_grew">'+rewards.map(function(r, k){ return '<div class="pt_grow" style="animation-delay:'+(1.5+k*0.28).toFixed(2)+'s">'+(r.medal ? petMedal(r.medal, 38) : '<div class="pt_grow_i">'+petIcon(r.ico, 32)+'</div>')+'<div class="pt_grow_b"><div class="pt_grow_t">'+escapeHtml(r.t)+'</div><div class="pt_grow_s">'+escapeHtml(r.s)+'</div></div></div>'; }).join('')+'</div>'+
     '<div class="pt_big pt_gov_ok" style="animation-delay:'+(1.7+rewards.length*0.28).toFixed(2)+'s" id="pt_gov_ok">Забрать</div></div>';
   host.appendChild(ov);
@@ -10427,12 +10699,16 @@ async function renderPetBody(scope){
   if (!state){ state = petDefaultState(); }
   petMigrate(state);
   petApplyDecay(state);
+  if (state.timeAuto) state.timeOfDay = petClockTime();
+  petDaily(state);
   await rpSet('rp_pet_state', state);
 
   var top = el('div','rp_pet_topbar');
-  top.innerHTML = '<div class="rp_pet_coins"><span>'+petIcon('coin',20)+state.coins.toLocaleString()+'</span><span>'+petIcon('gem',20)+state.gems+'</span></div>'+
-    '<div style="display:flex;gap:8px;"><div class="pt_gift" id="pt_promo" title="Промокод" style="opacity:1;">'+petIcon('ticket',22)+'</div><div class="pt_gift'+(petGiftReady(state)?' ready':'')+'" id="pt_gift" title="Подарок раз в 4 часа">'+petIcon('gift',22)+'</div></div>';
+  var qn = petQuestBadge(state);
+  top.innerHTML = '<div class="rp_pet_coins"><span class="pt_pill">'+petIcon('coin',20)+'<b id="pt_coins_n">'+state.coins.toLocaleString()+'</b></span><span class="pt_pill">'+petIcon('gem',20)+'<b id="pt_gems_n">'+state.gems+'</b></span></div>'+
+    '<div style="display:flex;gap:8px;"><div class="pt_gift'+(qn?' ready':'')+'" id="pt_quests" data-n="'+(qn||'')+'" title="Задания и награды" style="opacity:1;">'+petIcon('scroll',22)+'</div><div class="pt_gift" id="pt_promo" title="Промокод" style="opacity:1;">'+petIcon('ticket',22)+'</div><div class="pt_gift'+(petGiftReady(state)?' ready':'')+'" id="pt_gift" title="Подарок раз в 4 часа">'+petIcon('gift',22)+'</div></div>';
   scope.appendChild(top);
+  $('#pt_quests', top).addEventListener('click', function(){ petQuestsSheet(state, scope); });
   $('#pt_gift', top).addEventListener('click', function(){ petClaimGift(state, scope); });
   $('#pt_promo', top).addEventListener('click', function(){ petOpenPromo(state, scope); });
 
@@ -10446,8 +10722,7 @@ async function renderPetBody(scope){
   var navAdded = false;
   if (petActiveTab==='home'){
     if (state.reveal) petRenderReveal(body, state, scope);
-    else if (!state.activePetId) await petRenderEggStage(body, state, scope);
-    else await renderPetHome(body, state, scope);
+    else await petRenderRooms(body, state, scope);
   }
   else if (petActiveTab==='selector') await renderPetSelector(body, state, scope);
   else if (petActiveTab==='shop') await renderPetShop(body, state, scope);
@@ -10457,21 +10732,7 @@ async function renderPetBody(scope){
 }
 async function petRenderEggStage(container, state, scope){
   container.innerHTML = '';
-  if (!state.egg){
-    var intro = el('div','pt_intro');
-    intro.innerHTML = '<div class="pt_intro_egg">'+petEggSVG('egg_basic', 0)+'</div><div class="pt_intro_t">У тебя пока нет малыша</div><div class="pt_intro_s">Купи яйцо и согрей его. Кто вылупится — решит случай: бывают и обычные, и редкие, и даже легендарные.</div>';
-    container.appendChild(intro);
-    var list = el('div','pt_eggs');
-    list.innerHTML = PET_EGGS.map(function(e){
-      var cost = e.gems ? petIcon('gem',16)+e.gems : petIcon('coin',16)+e.price;
-      return '<div class="pt_egg_card"><div class="pt_egg_pic">'+petEggSVG(e.id, 0)+'</div><div class="pt_egg_info"><div class="pt_egg_n">'+e.name+'</div><div class="pt_egg_d">'+e.desc+' · греть '+e.mins+' мин</div></div><div class="pt_buy" data-egg="'+e.id+'">'+cost+'</div></div>';
-    }).join('');
-    container.appendChild(list);
-    list.querySelectorAll('[data-egg]').forEach(function(b){
-      b.addEventListener('click', async function(){ if (await petBuyEgg(state, b.getAttribute('data-egg'))) await renderPetBody(scope); });
-    });
-    return;
-  }
+  if (!state.egg) return petRenderEmptyRoom(container, state, scope);
   var egg = petFindIn(PET_EGGS, state.egg.type) || PET_EGGS[0], total = (egg.mins||12)*60000;
   var wrap = el('div','pt_eggscene');
   wrap.innerHTML = '<div class="pt_egg_t">'+egg.name+'</div><div class="pt_eggbig" id="pt_eggbig"></div><div class="pt_egg_timer" id="pt_egg_timer"></div>'+
@@ -10526,45 +10787,174 @@ function petRenderReveal(container, state, scope){
   container.appendChild(w);
   $('#pt_take', w).addEventListener('click', async function(){ state.reveal = null; await rpSet('rp_pet_state', state); await renderPetBody(scope); });
 }
-var petHomeCat = 'food';
-async function renderPetHome(container, state, scope){
+function petRoomTile(state, i){
+  var sl = state.slots[i], view = { room: sl.room, currentScene: sl.scene, timeOfDay: state.timeOfDay }, pd = sl.pet ? petEnsurePetData(state, sl.pet) : null, label, sub;
+  if (pd){ label = (pd.genome && pd.genome.name) || (PET_BY_ID[sl.pet] || {}).name || 'Малыш'; sub = pd.walk ? (pd.walk.until > Date.now() ? 'гуляет · ' + petFmtTime(pd.walk.until - Date.now()) : 'ждёт у двери') : pd.isSleeping ? 'спит' : petIsSick(pd) ? 'болеет' : (pd.hunger < 25 ? 'голоден' : 'ур. ' + pd.level); }
+  else if (sl.egg){ var left = sl.egg.hatchAt - Date.now(); label = 'Яйцо'; sub = left > 0 ? 'ещё ' + petFmtTime(left) : 'готово!'; }
+  else { label = 'Свободна'; sub = 'заселить'; }
+  var gst = pd && i === state.activeSlot && petGuestShow && petGuestShow.until > Date.now() && petGuestShow.id !== sl.pet ? petEnsurePetData(state, petGuestShow.id) : null;
+  var away = pd && i !== state.activeSlot && petGuestShow && petGuestShow.until > Date.now() && petGuestShow.id === sl.pet;
+  if (away) sub = 'в гостях';
+  return { svg: petRoomSVG(view, pd && !pd.walk && !away ? pd.genome : null, pd ? pd.isSleeping : false, pd ? { dirty: pd.cleanliness < 35, sick: petIsSick(pd), scale: petStage(pd.level).s, guest: gst ? gst.genome : null, guestScale: gst ? petStage(gst.level).s : 1 } : { egg: sl.egg }), label: label, sub: sub, pet: !!pd && !pd.walk };
+}
+async function petSwitchSlot(state, i, root, scope, dir){
+  if (i < 0 || i > 1 || i === state.activeSlot) return;
+  state.activeSlot = i; petSpeechText = null;
+  await rpSet('rp_pet_state', state);
+  await petRenderRooms(root, state, scope);
+  var c = $('.pt_roomcontent', root); if (dir && c) c.classList.add(dir > 0 ? 'pt_in_r' : 'pt_in_l');
+}
+function petWireSwipe(target, state, root, scope){
+  var x0 = null, y0 = 0;
+  target.addEventListener('touchstart', function(e){ var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive:true });
+  target.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if (Math.abs(dx) > 60 && Math.abs(dy) < 50 && !petBusy) petSwitchSlot(state, state.activeSlot + (dx < 0 ? 1 : -1), root, scope, dx < 0 ? 1 : -1);
+  }, { passive:true });
+}
+async function petRenderRooms(container, state, scope){
+  petClearTimer();
   container.innerHTML = '';
+  var duo = state.view !== 'swipe';
+  var bar = el('div','pt_roombar');
+  bar.innerHTML = '<div class="pt_viewseg"><div data-v="duo" class="'+(duo?'on':'')+'">Рядом</div><div data-v="swipe" class="'+(duo?'':'on')+'">Свайп</div></div>'+
+    (state.eggInv.length ? '<div class="pt_egginv" id="pt_egginv"><i>'+petEggSVG(state.eggInv[0].type, 0)+'</i><span>Яйца в запасе: '+state.eggInv.length+'</span></div>' : '');
+  container.appendChild(bar);
+  bar.querySelectorAll('[data-v]').forEach(function(b){ b.addEventListener('click', async function(){ var v = b.getAttribute('data-v'); if (state.view === v) return; state.view = v; await rpSet('rp_pet_state', state); petRenderRooms(container, state, scope); }); });
+  var ei = $('#pt_egginv', bar); if (ei) ei.addEventListener('click', function(){ petEggInvSheet(state, scope); });
+  var content = el('div','pt_roomcontent');
+  content._roomsRoot = container;
+  if (duo){
+    var row = el('div','pt_duo');
+    row.innerHTML = [0,1].map(function(i){ var t = petRoomTile(state, i), on = i === state.activeSlot; return '<div class="pt_mroom'+(on?' on':'')+'" data-slot="'+i+'"><div class="pt_mroom_pic'+(on && t.pet ? ' pt_stage' : '')+'">'+t.svg+'</div><div class="pt_mroom_cap"><b>'+escapeHtml(t.label)+'</b><span>'+escapeHtml(t.sub)+'</span></div><div class="pt_mroom_n">'+(i+1)+'</div></div>'; }).join('');
+    container.appendChild(row);
+    row.querySelectorAll('[data-slot]').forEach(function(r){
+      r.addEventListener('click', function(e){
+        var i = +r.getAttribute('data-slot');
+        if (i !== state.activeSlot){ petSwitchSlot(state, i, container, scope); return; }
+        var pic = $('.pt_stage', r); if (pic) petTouchPet(e, pic, content, state, scope);
+      });
+    });
+  } else {
+    var nav = el('div','pt_swnav');
+    nav.innerHTML = '<div class="pt_swarr'+(state.activeSlot === 0 ? ' off' : '')+'" data-d="-1">‹</div><div class="pt_swmid">'+[0,1].map(function(i){ var t = petRoomTile(state, i); return '<span class="'+(i===state.activeSlot?'on':'')+'" data-slot="'+i+'">'+(i+1)+' · '+escapeHtml(t.label)+'</span>'; }).join('')+'</div><div class="pt_swarr'+(state.activeSlot === 1 ? ' off' : '')+'" data-d="1">›</div>';
+    container.appendChild(nav);
+    nav.querySelectorAll('[data-d]').forEach(function(a){ a.addEventListener('click', function(){ var d = +a.getAttribute('data-d'); petSwitchSlot(state, state.activeSlot + d, container, scope, d); }); });
+    nav.querySelectorAll('[data-slot]').forEach(function(a){ a.addEventListener('click', function(){ var i = +a.getAttribute('data-slot'); petSwitchSlot(state, i, container, scope, i > state.activeSlot ? 1 : -1); }); });
+    petWireSwipe(content, state, container, scope);
+  }
+  container.appendChild(content);
+  var sl = state.slots[state.activeSlot];
+  if (sl.pet) await renderPetHome(content, state, scope, true);
+  else await petRenderEggStage(content, state, scope);
+}
+async function petRenderEmptyRoom(container, state, scope){
+  container.innerHTML = '';
+  var i = state.activeSlot, homeless = state.pets.filter(function(id){ return petRoomOf(state, id) < 0; });
+  var w = el('div','pt_empty');
+  var h = '<div class="pt_empty_t">Комната '+(i+1)+' свободна</div><div class="pt_empty_s">Поселите сюда малыша или положите яйцо — оно сразу начнёт греться.</div>';
+  if (homeless.length) h += '<div class="pt_empty_h">Малыши без комнаты</div><div class="pt_pick">'+homeless.map(function(id){ var pd = petEnsurePetData(state, id); return '<div class="pt_pick_it" data-pet="'+id+'"><div class="pt_pick_pic">'+petRenderSVG(pd.genome, false, { noAnim:true })+'</div><span>'+escapeHtml((pd.genome && pd.genome.name) || (PET_BY_ID[id] || {}).name || '')+'</span></div>'; }).join('')+'</div>';
+  if (state.eggInv.length) h += '<div class="pt_empty_h">Яйца в запасе</div><div class="pt_pick">'+state.eggInv.map(function(e, k){ var eg = petFindIn(PET_EGGS, e.type) || PET_EGGS[0]; return '<div class="pt_pick_it" data-inv="'+k+'"><div class="pt_pick_pic egg">'+petEggSVG(eg.id, 0)+'</div><span>'+escapeHtml(eg.name)+'</span></div>'; }).join('')+'</div>';
+  h += '<div class="pt_empty_h">Купить яйцо</div>';
+  w.innerHTML = h;
+  container.appendChild(w);
+  var list = el('div','pt_eggs');
+  list.innerHTML = PET_EGGS.map(function(e){
+    var cost = e.gems ? petIcon('gem',16)+e.gems : petIcon('coin',16)+e.price;
+    return '<div class="pt_egg_card"><div class="pt_egg_pic">'+petEggSVG(e.id, 0)+'</div><div class="pt_egg_info"><div class="pt_egg_n">'+e.name+'</div><div class="pt_egg_d">'+e.desc+' · греть '+e.mins+' мин</div></div><div class="pt_buy" data-egg="'+e.id+'">'+cost+'</div></div>';
+  }).join('');
+  container.appendChild(list);
+  w.querySelectorAll('[data-pet]').forEach(function(b){ b.addEventListener('click', async function(){ if (await petPlace(state, b.getAttribute('data-pet'), i)) await renderPetBody(scope); }); });
+  w.querySelectorAll('[data-inv]').forEach(function(b){ b.addEventListener('click', async function(){
+    var k = +b.getAttribute('data-inv'), e = state.eggInv[k]; if (!e) return;
+    state.eggInv.splice(k, 1); state.slots[i].egg = petEggNew(e.type);
+    await rpSet('rp_pet_state', state); toast('Яйцо греется в комнате '+(i+1)); await renderPetBody(scope);
+  }); });
+  list.querySelectorAll('[data-egg]').forEach(function(b){ b.addEventListener('click', async function(){ if (await petBuyEgg(state, b.getAttribute('data-egg'))) await renderPetBody(scope); }); });
+}
+function petEggInvSheet(state, scope){
+  var free = petFreeSlot(state);
+  var sh = thSheet('<div style="font-weight:900;font-size:15px;color:var(--text);margin-bottom:4px;">Яйца в запасе</div>'+
+    '<div class="th_hint" style="margin-bottom:10px;">'+(free >= 0 ? 'Нажми на яйцо — оно ляжет в свободную комнату '+(free+1)+' и начнёт греться.' : 'Обе комнаты заняты. Чтобы согреть яйцо, отправь одного малыша отдыхать: «Питомцы» → малыш → «Отдыхать».')+'</div>'+
+    '<div class="pt_pick">'+state.eggInv.map(function(e, k){ var eg = petFindIn(PET_EGGS, e.type) || PET_EGGS[0]; return '<div class="pt_pick_it'+(free < 0 ? ' off' : '')+'" data-inv="'+k+'"><div class="pt_pick_pic egg">'+petEggSVG(eg.id, 0)+'</div><span>'+escapeHtml(eg.name)+'</span></div>'; }).join('')+'</div>'+
+    '<div class="th_btn ghost" id="pt_inv_x" style="margin-top:12px;">Закрыть</div>');
+  $('#pt_inv_x', sh).addEventListener('click', function(){ sh.remove(); });
+  if (free < 0) return;
+  sh.querySelectorAll('[data-inv]').forEach(function(b){ b.addEventListener('click', async function(){
+    var k = +b.getAttribute('data-inv'), e = state.eggInv[k]; if (!e) return;
+    state.eggInv.splice(k, 1); state.slots[free].egg = petEggNew(e.type); state.activeSlot = free;
+    await rpSet('rp_pet_state', state); sh.remove(); toast('Яйцо греется в комнате '+(free+1)); petActiveTab = 'home'; await renderPetBody(scope);
+  }); });
+}
+function petPlaceSheet(state, id, scope){
+  var pd = petEnsurePetData(state, id), nm = (pd.genome && pd.genome.name) || (PET_BY_ID[id] || {}).name || 'Малыш', at = petRoomOf(state, id);
+  var opt = [0,1].map(function(i){
+    var sl = state.slots[i], what = sl.pet ? (sl.pet === id ? 'живёт здесь' : 'там ' + ((petEnsurePetData(state, sl.pet).genome || {}).name || 'малыш') + (at >= 0 ? ' — поменяются местами' : ' — уйдёт отдыхать')) : sl.egg ? 'там греется яйцо' : 'свободна';
+    return '<div class="th_btn'+(sl.pet === id || sl.egg ? ' ghost' : '')+'" data-room="'+i+'" style="margin-top:8px;text-align:left;"><b>Комната '+(i+1)+'</b> · '+escapeHtml(what)+'</div>';
+  }).join('');
+  var sh = thSheet('<div style="font-weight:900;font-size:15px;color:var(--text);margin-bottom:4px;">Где будет жить '+escapeHtml(nm)+'?</div>'+
+    '<div class="th_hint">Малыши в комнатах проголодаются и устанут, если о них не заботиться. Кто отдыхает без комнаты, тот не меняется.</div>'+opt+
+    (at >= 0 ? '<div class="th_btn ghost" id="pt_rest" style="margin-top:8px;">Отдыхать без комнаты</div>' : '')+
+    '<div class="th_btn ghost" id="pt_pl_x" style="margin-top:12px;">Закрыть</div>');
+  $('#pt_pl_x', sh).addEventListener('click', function(){ sh.remove(); });
+  var rs = $('#pt_rest', sh); if (rs) rs.addEventListener('click', async function(){ await petRest(state, id); sh.remove(); toast(nm+' отдыхает'); await renderPetBody(scope); });
+  sh.querySelectorAll('[data-room]').forEach(function(b){ b.addEventListener('click', async function(){
+    var i = +b.getAttribute('data-room');
+    if (state.slots[i].pet === id){ state.activeSlot = i; await rpSet('rp_pet_state', state); sh.remove(); petActiveTab = 'home'; await renderPetBody(scope); return; }
+    if (await petPlace(state, id, i)){ sh.remove(); petActiveTab = 'home'; await renderPetBody(scope); }
+  }); });
+}
+var petHomeCat = 'food';
+async function renderPetHome(container, state, scope, inner){
+  if (!inner && container._roomsRoot && container._roomsRoot.isConnected) return petRenderRooms(container._roomsRoot, state, scope);
+  container.innerHTML = '';
+  var duoMode = !!container._roomsRoot && state.view !== 'swipe';
   var pet = PET_BY_ID[state.activePetId] || PET_DATABASE[0];
   var ps = petEnsurePetData(state, pet.id);
-  var g = ps.genome, r = PET_RARITY[pet.rarity];
+  var g = ps.genome, r = PET_RARITY[pet.rarity], trait = petTrait(ps), stage0 = petStage(ps.level);
   var need = petExpNeed(ps.level), pct = Math.min(100, Math.round(ps.exp/need*100));
 
   var head = el('div','pt_head');
-  head.innerHTML = '<div class="pt_lvl">'+petIcon('star',34)+'<b>'+ps.level+'</b></div>'+
-    '<div class="pt_head_mid"><div class="pt_head_name"><span id="pt_nm">'+escapeHtml(g.name || pet.name)+'</span><span class="pt_edit" id="pt_rename" title="Дать имя">'+petIcon('pencil',16)+'</span> <i style="background:'+r.col+'">'+r.n+'</i></div>'+
+  head.innerHTML = '<div class="pt_lvl">'+petIcon('star',38)+'<b>'+ps.level+'</b></div>'+
+    '<div class="pt_head_mid"><div class="pt_head_name"><span id="pt_nm">'+escapeHtml(g.name || pet.name)+'</span><span class="pt_edit" id="pt_rename" title="Дать имя">'+petIcon('pencil',16)+'</span></div>'+
+    '<div class="pt_chips"><i style="background:'+r.col+'">'+r.n+'</i><i class="st">'+stage0.n+'</i><i class="tr" id="pt_trait">'+trait.n+'</i></div>'+
     '<div class="pt_exp"><div class="pt_exp_fill" style="width:'+pct+'%"></div></div>'+
     '<div class="pt_exp_t">Опыт '+ps.exp+'/'+need+' · сегодня +'+(ps.expDay.d===petTodayKey()?ps.expDay.n:0)+'</div></div>'+
     '<div class="pt_hearts">'+petHearts(ps)+'</div>';
   container.appendChild(head);
   $('#pt_rename', head).addEventListener('click', function(){ petOpenRename(scope, container, state, ps, pet); });
+  $('#pt_trait', head).addEventListener('click', function(){ toast(trait.n+': '+trait.d.toLowerCase()); });
+  if (ps.walk){ await petRenderWalk(container, state, scope, ps, pet); return; }
   if (ps.nameTalk) await petRenderNameTalk(container, state, scope, ps);
 
-  var stage = el('div','pt_stage');
-  var speechText = petSpeechText || ((ps.accidentAt && Date.now()-ps.accidentAt < 600000) ? 'Ой... случилась неприятность' : ps.potty >= 80 ? 'Мне срочно нужно в туалет!' : petIsSick(ps) ? 'Мне плохо... нужно лекарство' : ps.isSleeping ? 'Zzz...' : ps.hunger<20 ? 'Я проголодался...' : ps.cleanliness<25 ? 'Хочу помыться' : ps.energy<20 ? 'Я так хочу спать' : 'Я так рад тебя видеть!');
-  stage.innerHTML = petRoomSVG(state, g, ps.isSleeping, { dirty: ps.cleanliness < 35, sick: petIsSick(ps) })+
+  var stage = el('div', duoMode ? 'pt_say' : 'pt_stage');
+  var speechText = petSpeechText || ((ps.accidentAt && Date.now()-ps.accidentAt < 600000) ? 'Ой... случилась неприятность' : ps.potty >= 80 ? 'Мне срочно нужно в туалет!' : petIsSick(ps) ? 'Мне плохо... нужно лекарство' : ps.isSleeping ? 'Zzz...' : ps.hunger<20 ? 'Я проголодался...' : ps.cleanliness<25 ? 'Хочу помыться' : ps.energy<20 ? 'Я так хочу спать' : (Math.random() < 0.5 ? trait.lines[Math.floor(Math.random()*trait.lines.length)] : 'Я так рад тебя видеть!'));
+  var guest = petGuestShow && petGuestShow.until > Date.now() && petRoomOf(state, petGuestShow.id) >= 0 ? petEnsurePetData(state, petGuestShow.id) : null;
+  stage.innerHTML = (duoMode ? '' : petRoomSVG(state, g, ps.isSleeping, { dirty: ps.cleanliness < 35, sick: petIsSick(ps), scale: stage0.s, guest: guest ? guest.genome : null, guestScale: guest ? petStage(guest.level).s : 1 }))+
     '<div class="pt_speech">'+escapeHtml(speechText)+'</div>'+
-    '<div class="pt_stage_btns"><div class="pt_round" id="pt_time" title="Время суток">'+petIcon({morning:'sunrise',day:'sun',sunset:'sunset',night:'moon'}[state.timeOfDay||'day'],22)+'</div>'+
-    '<div class="pt_round" id="pt_wear" title="Гардероб">'+petIcon('hanger',22)+'</div></div>';
+    '<div class="pt_stage_btns"><div class="pt_round" id="pt_time" title="Время суток">'+petIcon(state.timeAuto ? 'clock' : {morning:'sunrise',day:'sun',sunset:'sunset',night:'moon'}[state.timeOfDay||'day'],22)+'</div>'+
+    '<div class="pt_round" id="pt_wear" title="Гардероб">'+petIcon('hanger',22)+'</div>'+
+    '<div class="pt_round" id="pt_walkb" title="Прогулка">'+petIcon('leash',22)+'</div>'+
+    '<div class="pt_round" id="pt_snap" title="Фото в Галерею">'+petIcon('cam',22)+'</div></div>';
   container.appendChild(stage);
   $('#pt_time', stage).addEventListener('click', async function(e){
     e.stopPropagation();
-    var order = ['morning','day','sunset','night'];
-    state.timeOfDay = order[(order.indexOf(state.timeOfDay||'day')+1) % 4];
+    var order = ['auto','morning','day','sunset','night'], curT = state.timeAuto ? 'auto' : (state.timeOfDay || 'day'), nx = order[(order.indexOf(curT)+1) % order.length];
+    state.timeAuto = nx === 'auto'; state.timeOfDay = nx === 'auto' ? petClockTime() : nx;
+    toast({ auto:'Время как на часах', morning:'Утро', day:'День', sunset:'Закат', night:'Ночь' }[nx]);
     await rpSet('rp_pet_state', state); await renderPetHome(container, state, scope);
   });
+  $('#pt_walkb', stage).addEventListener('click', function(e){ e.stopPropagation(); petWalkSheet(state, ps, scope); });
+  $('#pt_snap', stage).addEventListener('click', function(e){ e.stopPropagation(); if (petBusy) return; petSnap(state, ps).then(function(ok){ if (ok) petRefreshTop(state); }); });
   $('#pt_wear', stage).addEventListener('click', function(e){ e.stopPropagation(); petActiveTab = 'shop'; petShopCat = 'wear'; renderPetBody(scope); });
-  stage.addEventListener('click', function(e){ petTouchPet(e, stage, container, state, scope); });
+  if (!duoMode) stage.addEventListener('click', function(e){ petTouchPet(e, stage, container, state, scope); });
 
-  var stats = el('div','pt_stats');
-  stats.innerHTML = petBar('apple','Сытость',ps.hunger,'linear-gradient(90deg,#f59e0b,#fbbf24)')+petBar('heart','Радость',ps.happiness,'linear-gradient(90deg,#fb7185,#f472b6)')+
-    petBar('drop','Чистота',ps.cleanliness,'linear-gradient(90deg,#38bdf8,#0ea5e9)')+petBar('bolt','Энергия',ps.energy,'linear-gradient(90deg,#a78bfa,#818cf8)')+
-    petBar('plus','Здоровье',ps.health,'linear-gradient(90deg,#ef4444,#22c55e)')+petBar('toilet','Туалет (чем больше, тем срочнее)',ps.potty,'linear-gradient(90deg,#a3e635,#f59e0b,#ef4444)');
+  var stats = el('div','pt_rings');
+  stats.innerHTML = petRing('apple','Сытость',ps.hunger,'#f59e0b')+petRing('heart','Радость',ps.happiness,'#f472b6')+petRing('drop','Чистота',ps.cleanliness,'#38bdf8')+
+    petRing('bolt','Энергия',ps.energy,'#a78bfa')+petRing('plus','Здоровье',ps.health,'#22c55e')+petRing('toilet','Туалет',ps.potty,'#a3e635',true);
   container.appendChild(stats);
+  petVisitCard(container, state, scope, ps);
 
   var tabs = el('div','pt_acttabs');
   tabs.innerHTML = Object.keys(PET_CAT_LABEL).map(function(k){ return '<div class="pt_acttab'+(petHomeCat===k?' on':'')+'" data-k="'+k+'">'+petIcon(PET_CAT_ICON[k],26)+'<span>'+PET_CAT_LABEL[k]+'</span></div>'; }).join('');
@@ -10597,9 +10987,10 @@ async function renderPetHome(container, state, scope){
   if (sl) sl.addEventListener('click', async function(){
     if (petBusy) return;
     ps.isSleeping = !ps.isSleeping;
+    if (ps.isSleeping) petTrack(state, 'sleep');
     petSpeechText = ps.isSleeping ? 'Сладко засыпает...' : 'С добрым утром!';
     await rpSet('rp_pet_state', state);
-    await petPlayFx($('.pt_stage', container), { cat:'sleep', icon: ps.isSleeping ? 'moon' : 'sun' }, [ps.isSleeping ? 'засыпает' : 'проснулся']);
+    await petPlayFx(petStageOf(container), { cat:'sleep', icon: ps.isSleeping ? 'moon' : 'sun' }, [ps.isSleeping ? 'засыпает' : 'проснулся']);
     await petKeepScroll(scope, function(){ return renderPetHome(container, state, scope); });
   });
   var pt = $('[data-potty]', grid);
@@ -10607,15 +10998,16 @@ async function renderPetHome(container, state, scope){
     if (petBusy) return;
     if (ps.isSleeping){ petSpeechText = 'Тсс, малыш спит'; await renderPetHome(container, state, scope); return; }
     if ((ps.potty||0) < 15){ petSpeechText = 'Мне пока не нужно'; await renderPetHome(container, state, scope); return; }
-    petApplyFx(state, ps, { potty:-70, clean:-5 }); petSpeechText = 'Фух, стало легче!';
+    petApplyFx(state, ps, { potty:-70, clean:-5 }); petSpeechText = 'Фух, стало легче!'; petTrack(state, 'potty');
     var lv = petGainExp(state, ps, 3);
     await rpSet('rp_pet_state', state); await petAddFeedLog('user', 'сводил(а) малыша в туалет');
-    await petPlayFx($('.pt_stage', container), { cat:'toilet', icon:'toilet' }, ['облегчение']);
+    await petPlayFx(petStageOf(container), { cat:'toilet', icon:'toilet' }, ['облегчение']);
     if (lv) toast(lv);
     await petKeepScroll(scope, function(){ return renderPetHome(container, state, scope); });
   });
 }
 var petBusy = false;
+function petStageOf(container){ var root = container && container._roomsRoot && container._roomsRoot.isConnected ? container._roomsRoot : container; return root ? $('.pt_stage', root) : null; }
 async function petKeepScroll(scope, fn){
   var sc = scope.closest('#rp_screens'), st = sc ? sc.scrollTop : 0;
   await fn(); if (sc) sc.scrollTop = st;
@@ -10651,7 +11043,7 @@ function petPlayFx(stage, it, chips){
 async function petBuyConsumable(id, state, done){
   var it = PET_CONS_ALL[id]; if (!it) return;
   if (state.coins < it.price){ toast('Не хватает монет. Сыграй в мини-игры'); return; }
-  state.coins -= it.price; state.inventory[id] = (state.inventory[id]||0)+1;
+  state.coins -= it.price; state.inventory[id] = (state.inventory[id]||0)+1; petTrack(state, 'buy');
   await rpSet('rp_pet_state', state);
   toast('Куплено: '+it.name.toLowerCase());
   if (done) done();
@@ -10666,7 +11058,13 @@ async function petUseItem(id, container, state, scope){
   if (it.cat==='toy' && (petIsSick(ps) || ps.energy < 12)){ petSpeechText = petIsSick(ps) ? 'Мне плохо, не до игр' : 'Я слишком устал'; await renderPetHome(container, state, scope); return; }
   if (it.fx.hunger > 0 && ps.hunger >= 100 && !it.fx.heal){ petSpeechText = 'Я уже сыт'; await renderPetHome(container, state, scope); return; }
   state.inventory[id]--;
-  petApplyFx(state, ps, it.fx);
+  var tr = petTrait(ps), fxT = Object.assign({}, it.fx);
+  if (tr.id === 'glutton' && it.cat === 'food' && fxT.hunger > 0) fxT.hunger = Math.round(fxT.hunger * 1.25);
+  if (tr.id === 'hyper' && it.cat === 'toy' && fxT.joy > 0) fxT.joy = Math.round(fxT.joy * 1.3);
+  if (tr.id === 'neat' && it.cat === 'wash' && fxT.joy > 0) fxT.joy = Math.round(fxT.joy * 1.3);
+  if (tr.id === 'sleepy' && it.cat === 'sleep' && fxT.energy > 0) fxT.energy = Math.round(fxT.energy * 1.3);
+  petApplyFx(state, ps, fxT);
+  petTrack(state, { food:'feed', wash:'wash', sleep:'sleep', toy:'toy', toilet:'potty' }[it.cat] || 'feed');
   if (it.cat === 'food' && it.fx.hunger > 0) ps.potty = Math.min(100, (ps.potty||0) + it.fx.hunger*0.25);
   var lines = { food:['Ням-ням, вкусно!','Спасибо, как вкусно!'], wash:['Свежий и чистый!','Ух, как приятно!'], sleep:['Так уютно...','Хорошо, можно и поспать'], toy:['Это так весело!','Ещё, ещё!'], toilet:['Фух, стало легче!','Спасибо, как удобно!'] };
   petSpeechText = it.fx.heal ? 'Горько, но стало лучше' : lines[it.cat][Math.floor(Math.random()*2)];
@@ -10675,20 +11073,20 @@ async function petUseItem(id, container, state, scope){
   var verb = { food:'покормил', wash:'искупал', sleep:'уложил поудобнее', toy:'поиграл с' }[it.cat];
   await petAddFeedLog('user', (it.cat==='food' ? 'покормил(а) малыша: ' : it.cat==='wash' ? 'искупал(а) малыша: ' : it.cat==='sleep' ? 'помог(ла) малышу уснуть: ' : it.cat==='toilet' ? 'помог(ла) малышу в туалете: ' : 'поиграл(а) с малышом: ')+it.name.toLowerCase());
   var chips = petFxText(it.fx).split(', ').filter(Boolean);
-  await petPlayFx($('.pt_stage', container), it, chips);
+  await petPlayFx(petStageOf(container), it, chips);
   if (lvl) toast(lvl);
   await petKeepScroll(scope, function(){ return renderPetHome(container, state, scope); });
 }
 async function petTouchPet(e, stage, container, state, scope){
   if (petBusy) return;
   var ps = petEnsurePetData(state, state.activePetId);
-  if (!ps.isSleeping){ ps.happiness = Math.min(100, ps.happiness + 3); petGainExp(state, ps, 1); }
+  if (!ps.isSleeping){ ps.happiness = Math.min(100, ps.happiness + (petTrait(ps).id === 'tender' ? 6 : 3)); petGainExp(state, ps, 1); petTrack(state, 'pet'); }
   await rpSet('rp_pet_state', state);
   var msgs = ['Мурр! Обожаю поглаживания!','Ты лучший!','Ещё погладь!'];
   petSpeechText = ps.isSleeping ? 'Zzz...' : msgs[Math.floor(Math.random()*msgs.length)];
   var rect = stage.getBoundingClientRect(), x = e.clientX - rect.left, y = e.clientY - rect.top;
   await renderPetHome(container, state, scope);
-  var fresh = $('.pt_stage', container);
+  var fresh = petStageOf(container);
   if (fresh && !ps.isSleeping){
     var fx = el('div','pt_float'); fx.innerHTML = petIcon('heart',26);
     fx.style.left = Math.max(10, x-13)+'px'; fx.style.top = Math.max(10, y-13)+'px';
@@ -10697,22 +11095,19 @@ async function petTouchPet(e, stage, container, state, scope){
 }
 async function renderPetSelector(container, state, scope){
   container.innerHTML = '';
-  var h1 = el('div','rp_h','Мои малыши'); h1.style.marginBottom = '8px'; container.appendChild(h1);
+  var h1 = el('div','pt_coll','<div class="pt_coll_t"><b>Моя коллекция</b><span>собрано '+state.pets.length+' из '+PET_DATABASE.length+'</span></div><div class="pt_coll_bar"><i style="width:'+Math.round(state.pets.length/PET_DATABASE.length*100)+'%"></i></div>'); container.appendChild(h1);
   if (!state.pets.length){
     var e = el('div','rp_muted'); e.textContent = 'Пока никого нет. Первого малыша даёт яйцо — загляни в «Дом» или «Магазин».'; e.style.marginBottom = '12px'; container.appendChild(e);
   } else {
     var grid = el('div','pt_roster');
     grid.innerHTML = state.pets.map(function(id){
-      var sp = PET_BY_ID[id], pd = petEnsurePetData(state, id), r = PET_RARITY[sp.rarity], on = id === state.activePetId;
+      var sp = PET_BY_ID[id], pd = petEnsurePetData(state, id), r = PET_RARITY[sp.rarity], at = petRoomOf(state, id), on = at >= 0;
       return '<div class="pt_rcard'+(on?' on':'')+'" data-pick="'+id+'"><div class="pt_rpic">'+petRenderSVG(pd.genome, false, { noAnim:true })+'</div><div class="pt_rname">'+escapeHtml((pd.genome && pd.genome.name) || sp.name)+'</div><div class="pt_rrar" style="color:'+r.col+'">'+r.n+'</div>'+
-        '<div class="pt_rlvl">Ур. '+pd.level+'</div><div class="pt_hearts sm">'+petHearts(pd)+'</div><div class="pt_rbtn'+(on?' on':'')+'">'+(on?'Выбран':'Выбрать')+'</div></div>';
+        '<div class="pt_rlvl">Ур. '+pd.level+' · '+(on ? 'комната '+(at+1) : 'отдыхает')+'</div><div class="pt_hearts sm">'+petHearts(pd)+'</div><div class="pt_rbtn'+(on?' on':'')+'">Где жить</div></div>';
     }).join('');
     container.appendChild(grid);
     grid.querySelectorAll('[data-pick]').forEach(function(c){
-      c.addEventListener('click', async function(){
-        state.activePetId = c.getAttribute('data-pick'); state.lastTickAt = Date.now();
-        await rpSet('rp_pet_state', state); petActiveTab = 'home'; await renderPetBody(scope);
-      });
+      c.addEventListener('click', function(){ petPlaceSheet(state, c.getAttribute('data-pick'), scope); });
     });
   }
   var h2 = el('div','rp_h','Приютить любого малыша'); h2.style.cssText = 'margin:16px 0 4px;'; container.appendChild(h2);
@@ -10726,7 +11121,7 @@ async function renderPetSelector(container, state, scope){
   container.appendChild(shop);
   var ah = el('div','rp_h','Достижения'); ah.style.cssText = 'margin:18px 0 8px;'; container.appendChild(ah);
   var ag = el('div','pt_achgrid');
-  ag.innerHTML = PET_ACH.map(function(a){ var got = state.ach && state.ach[a.id]; return '<div class="pt_ach'+(got?'':' off')+'">'+petMedal(a, 52, !got)+'<div class="pt_ach_n">'+escapeHtml(a.name)+'</div><div class="pt_ach_d">'+(got ? escapeHtml(a.desc) : 'Закрыто')+'</div></div>'; }).join('');
+  ag.innerHTML = PET_ACH2.concat(PET_ACH.filter(function(a){ return !a.stat; })).map(function(a){ var got = state.ach && state.ach[a.id]; var prog = !got && a.stat ? Math.min(a.need, petStatOf(state, a.stat)) : 0; return '<div class="pt_ach'+(got?'':' off')+'">'+petMedal(a, 52, !got)+'<div class="pt_ach_n">'+escapeHtml(a.name)+'</div><div class="pt_ach_d">'+(got ? escapeHtml(a.desc) : a.stat ? escapeHtml(a.desc)+'<em>'+prog+' / '+a.need+'</em>' : 'Секрет: ищи промокоды')+'</div></div>'; }).join('');
   container.appendChild(ag);
   shop.querySelectorAll('[data-adopt]').forEach(function(b){
     b.addEventListener('click', async function(){
@@ -10749,6 +11144,10 @@ async function renderPetShop(container, state, scope){
   container.appendChild(catRow);
   catRow.querySelectorAll('[data-cat]').forEach(function(c){ c.addEventListener('click', function(){ petShopCat = c.getAttribute('data-cat'); renderPetShop(container, state, scope); }); });
   var rerender = function(){ rpSet('rp_pet_state', state); renderPetBody(scope); };
+  if (petShopCat === 'egg' || PET_ROOM_LIST[petShopCat] || petShopCat === 'decor' || petShopCat === 'scene'){
+    var note = el('div','pt_shopnote', petShopCat === 'egg' ? 'Яйцо ляжет в свободную комнату и начнёт греться. Если обе заняты — в запас.' : 'Обставляешь комнату '+(state.activeSlot+1)+'. Сменить комнату можно на вкладке «Дом».');
+    container.appendChild(note);
+  }
   var grid = el('div','pt_shopgrid'); container.appendChild(grid);
   var cat = petShopCat, cards = '', handlers = [];
   var cost = function(p){ return petIcon('coin',14)+p; };
@@ -10787,9 +11186,9 @@ async function renderPetShop(container, state, scope){
   grid.innerHTML = cards;
   var spend = async function(price, id, msg){
     if (state.coins < price){ toast('Не хватает монет: нужно '+price); return false; }
-    state.coins -= price; if (id) state.owned[id] = 1; toast(msg); return true;
+    state.coins -= price; if (id) state.owned[id] = 1; petTrack(state, 'buy'); toast(msg); return true;
   };
-  grid.querySelectorAll('[data-egg]').forEach(function(b){ b.addEventListener('click', async function(){ if (await petBuyEgg(state, b.getAttribute('data-egg'))){ petActiveTab = 'home'; await renderPetBody(scope); } }); });
+  grid.querySelectorAll('[data-egg]').forEach(function(b){ b.addEventListener('click', async function(){ if (await petBuyEgg(state, b.getAttribute('data-egg'))){ if (!state.eggInv.length || state.egg) petActiveTab = 'home'; await renderPetBody(scope); } }); });
   grid.querySelectorAll('[data-cons]').forEach(function(b){ b.addEventListener('click', function(){ petBuyConsumable(b.getAttribute('data-cons'), state, function(){ renderPetBody(scope); }); }); });
   grid.querySelectorAll('[data-scene]').forEach(function(b){ b.addEventListener('click', function(){ state.currentScene = b.getAttribute('data-scene'); rerender(); }); });
   grid.querySelectorAll('[data-scenebuy]').forEach(function(b){ b.addEventListener('click', async function(){
@@ -10880,8 +11279,42 @@ async function petAddFeedLog(who, action){
 var PET_GAMES_LIST = [
   { id:'catcher', name:'Ловец вкусняшек', desc:'Лови падающие фруктики', icon:petIcon('g_catch',30), cost:30 },
   { id:'flappy', name:'Флэппи питомец', desc:'Лети и огибай препятствия', icon:petIcon('g_fly',30), cost:30 },
-  { id:'memory', name:'Найди пару', desc:'Тренируй память', icon:petIcon('g_cards',30), cost:20 }
+  { id:'memory', name:'Найди пару', desc:'Тренируй память', icon:petIcon('g_cards',30), cost:20 },
+  { id:'stack', name:'Башня из печенек', desc:'Роняй печеньки точно друг на друга', icon:petIcon('g_stack',30), cost:25 },
+  { id:'snake', name:'Голодный хвостик', desc:'Собирай вкусняшки и не кусай себя', icon:petIcon('g_snake',30), cost:30 },
+  { id:'mole', name:'Поймай шалуна', desc:'Лови мышат, обходи бомбы, 30 секунд', icon:petIcon('g_mole',30), cost:20 },
+  { id:'merge', name:'Эволюция', desc:'Сдвигай и соединяй: из яйца — в дракона', icon:petIcon('g_merge',30), cost:30 },
+  { id:'simon', name:'Повтори за малышом', desc:'Запомни мелодию и сыграй её', icon:petIcon('g_simon',30), cost:20 }
 ];
+function petGameEnd(area, score){
+  if (!area.isConnected || $('.pt_gover', area)) return;
+  area.appendChild(el('div','pt_gover','<b>Игра окончена</b><span>'+score+' очков. Нажми «Выход», чтобы забрать награду</span>'));
+}
+function petPad(area, fn){
+  var pad = el('div','pt_gpad','<div></div><div data-k="u">▲</div><div></div><div data-k="l">◀</div><div data-k="d">▼</div><div data-k="r">▶</div>');
+  area.appendChild(pad);
+  pad.querySelectorAll('[data-k]').forEach(function(b){ b.addEventListener('pointerdown', function(e){ e.preventDefault(); fn(b.getAttribute('data-k')); }); });
+  return pad;
+}
+function petSwipeOn(target, fn){
+  var x0 = null, y0 = 0;
+  target.addEventListener('touchstart', function(e){ var t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; e.preventDefault(); }, { passive:false });
+  target.addEventListener('touchend', function(e){
+    if (x0 === null) return;
+    var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+    fn(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'r' : 'l') : (dy > 0 ? 'd' : 'u'));
+  });
+}
+var PET_SIMON_AC = null;
+function petBeep(f, ms){
+  try{
+    if (!PET_SIMON_AC) PET_SIMON_AC = new (window.AudioContext || window.webkitAudioContext)();
+    var o = PET_SIMON_AC.createOscillator(), g = PET_SIMON_AC.createGain(), t = PET_SIMON_AC.currentTime;
+    o.type = 'triangle'; o.frequency.setValueAtTime(f, t); g.gain.setValueAtTime(0.09, t); g.gain.exponentialRampToValueAtTime(0.001, t + ms/1000);
+    o.connect(g); g.connect(PET_SIMON_AC.destination); o.start(t); o.stop(t + ms/1000);
+  }catch(e){}
+}
 async function renderPetGames(container, state, scope){
   var hard = !!state.hardMode;
   var title = el('div','rp_title_row'); title.style.marginBottom='8px';
@@ -10910,6 +11343,7 @@ function petLaunchGame(gameId, container, state, scope){
   var fee = hard ? Math.round((gameDef.cost||10)*1.8) : (gameDef.cost||10);
   if (!state.activePetId){ toast('Сначала вылупи малыша из яйца'); return; }
   var psG = petEnsurePetData(state, state.activePetId);
+  if (psG.walk){ toast('Малыш на прогулке'); return; }
   if (psG.isSleeping){ toast('Малыш спит — разбуди его 🌙'); return; }
   if (petIsSick(psG) && state.coins >= 75){ toast('Малыш болеет 🤒 — сначала лекарство (75 🪙 в магазине)'); return; }
   if (psG.energy < 30){ toast('Малыш слишком устал для игр ⚡'); return; }
@@ -10930,9 +11364,10 @@ function petLaunchGame(gameId, container, state, scope){
     ps.energy = Math.max(0, ps.energy - (hard ? 32 : 25));
     ps.hunger = Math.max(0, ps.hunger - (hard ? 20 : 14));
     ps.cleanliness = Math.max(0, ps.cleanliness - 8);
-    ps.happiness = Math.min(100, ps.happiness + Math.min(15, Math.floor(score/8)));
+    ps.happiness = Math.min(100, ps.happiness + Math.round(Math.min(15, Math.floor(score/8)) * (petTrait(ps).id === 'hyper' ? 1.3 : 1)));
     if (coinsReward > 0){ state.coins += coinsReward; }
     var lvMsg = petGainExp(state, ps, Math.min(25, 4 + Math.floor(score/5)));
+    if (score > 0) petTrack(state, 'game', 1, { score: score });
     rpSet('rp_pet_state', state);
     toast(lvMsg || (coinsReward > 0 ? ('Награда: +'+coinsReward+' монет') : 'Монеты за вход не окупились в этот раз'));
     container.innerHTML = ''; renderPetGames(container, state, scope);
@@ -11043,6 +11478,167 @@ function petLaunchGame(gameId, container, state, scope){
       });
     }
     renderDeck();
+  } else if (gameId === 'stack'){
+    area.innerHTML = '<canvas id="rp_pet_canvas"></canvas>';
+    var cvS = $('#rp_pet_canvas', area), cxS = cvS.getContext('2d');
+    cvS.width = cvS.clientWidth || 300; cvS.height = cvS.clientHeight || 220;
+    var WS = cvS.width, HS = cvS.height, BH = 18, colS = ['#f9a8d4','#fcd34d','#86efac','#93c5fd','#c4b5fd','#fda4af'];
+    var tower = [{ x: WS/2 - 60, w: 120 }], curS = { x: 0, w: 120, dir: 1 }, spdS = hard ? 3.4 : 2.4, overS = false, flash = 0;
+    var petE = (PET_DATABASE.find(function(p){ return p.id===state.activePetId; })||{}).emoji || '🐾';
+    var dropS = function(){
+      if (overS) return;
+      var top = tower[tower.length-1], l = Math.max(curS.x, top.x), r = Math.min(curS.x + curS.w, top.x + top.w);
+      if (r - l <= 3){ overS = true; petGameEnd(area, score); return; }
+      var perfect = Math.abs(curS.x - top.x) < (hard ? 3 : 5);
+      if (perfect){ l = top.x; r = top.x + top.w; flash = 8; }
+      tower.push({ x: l, w: r - l });
+      score += perfect ? 15 : 10; $('#rp_pet_game_score', head).textContent = score;
+      var dir = tower.length % 2 ? 1 : -1;
+      curS = { x: dir > 0 ? 0 : WS - (r - l), w: r - l, dir: dir };
+      spdS = Math.min(spdS + (hard ? 0.24 : 0.16), 9);
+    };
+    cvS.addEventListener('pointerdown', function(e){ e.preventDefault(); dropS(); });
+    var gidS = petGameTimer = setInterval(function(){
+      if (!cvS.isConnected){ clearInterval(gidS); if (petGameTimer === gidS) petGameTimer = null; return; }
+      if (!panelOpen || overS) return;
+      curS.x += spdS * curS.dir;
+      if (curS.x + curS.w >= WS){ curS.x = WS - curS.w; curS.dir = -1; }
+      if (curS.x <= 0){ curS.x = 0; curS.dir = 1; }
+      cxS.clearRect(0, 0, WS, HS);
+      var n = tower.length, rows = Math.floor((HS - 46) / BH), base = Math.max(0, n - rows);
+      for (var i = base; i < n; i++){ var b = tower[i], y = HS - (i - base + 1) * BH; cxS.fillStyle = colS[i % colS.length]; cxS.fillRect(b.x, y, b.w, BH - 2); cxS.fillStyle = 'rgba(0,0,0,.12)'; cxS.fillRect(b.x, y + BH - 5, b.w, 3); }
+      var yc = HS - (n - base + 1) * BH;
+      cxS.fillStyle = colS[n % colS.length]; cxS.fillRect(curS.x, yc, curS.w, BH - 2);
+      cxS.font = '20px sans-serif'; cxS.textAlign = 'center'; cxS.fillText(petE, curS.x + curS.w/2, yc - 4); cxS.textAlign = 'left';
+      if (flash > 0){ flash--; cxS.fillStyle = 'rgba(255,255,255,'+(flash/20)+')'; cxS.fillRect(0, 0, WS, HS); }
+    }, 1000/40);
+  } else if (gameId === 'snake'){
+    area.innerHTML = '<canvas id="rp_pet_canvas" style="touch-action:none;"></canvas>';
+    var cvN = $('#rp_pet_canvas', area), cxN = cvN.getContext('2d'), N = 14;
+    cvN.style.height = Math.min(cvN.clientWidth || 280, 300) + 'px';
+    cvN.width = cvN.clientWidth || 280; cvN.height = cvN.clientHeight || 280;
+    var cell = Math.floor(Math.min(cvN.width, cvN.height) / N), ox = Math.floor((cvN.width - cell*N)/2), oy = Math.floor((cvN.height - cell*N)/2);
+    var snake = [{ x:6, y:7 }, { x:5, y:7 }, { x:4, y:7 }], dirN = { x:1, y:0 }, nextDir = dirN, overN = false, food = null;
+    var place = function(){ var f; do { f = { x: Math.floor(Math.random()*N), y: Math.floor(Math.random()*N), gold: Math.random() < 0.12 }; } while (snake.some(function(p){ return p.x === f.x && p.y === f.y; })); food = f; };
+    place();
+    var turn = function(k){ var d = { u:{x:0,y:-1}, d:{x:0,y:1}, l:{x:-1,y:0}, r:{x:1,y:0} }[k]; if (d && !(d.x === -dirN.x && d.y === -dirN.y)) nextDir = d; };
+    petSwipeOn(cvN, turn); petPad(area, turn);
+    var stepN = function(){
+      dirN = nextDir;
+      var h = { x: snake[0].x + dirN.x, y: snake[0].y + dirN.y };
+      if (hard && (h.x < 0 || h.y < 0 || h.x >= N || h.y >= N)){ overN = true; return; }
+      h.x = (h.x + N) % N; h.y = (h.y + N) % N;
+      if (snake.some(function(p, i){ return i < snake.length - 1 && p.x === h.x && p.y === h.y; })){ overN = true; return; }
+      snake.unshift(h);
+      if (h.x === food.x && h.y === food.y){ score += food.gold ? 25 : 10; $('#rp_pet_game_score', head).textContent = score; place(); }
+      else snake.pop();
+    };
+    var drawN = function(){
+      cxN.clearRect(0, 0, cvN.width, cvN.height);
+      cxN.fillStyle = 'rgba(255,255,255,.05)'; cxN.fillRect(ox, oy, cell*N, cell*N);
+      if (hard){ cxN.strokeStyle = 'rgba(239,68,68,.6)'; cxN.lineWidth = 2; cxN.strokeRect(ox+1, oy+1, cell*N-2, cell*N-2); }
+      cxN.font = (cell - 2) + 'px sans-serif'; cxN.textAlign = 'center'; cxN.textBaseline = 'middle'; cxN.fillStyle = '#fff';
+      cxN.fillText(food.gold ? '🍰' : '🍓', ox + food.x*cell + cell/2, oy + food.y*cell + cell/2 + 1);
+      snake.forEach(function(p, i){ cxN.fillStyle = i ? 'hsl('+(330 - i*6)+',75%,'+(70 - Math.min(i, 20))+'%)' : '#f472b6'; var r = i ? 3 : 5; if (cxN.roundRect){ cxN.beginPath(); cxN.roundRect(ox + p.x*cell + 1, oy + p.y*cell + 1, cell - 2, cell - 2, r); cxN.fill(); } else cxN.fillRect(ox + p.x*cell + 1, oy + p.y*cell + 1, cell - 2, cell - 2); });
+      cxN.fillStyle = '#fff'; cxN.fillText('•', ox + snake[0].x*cell + cell/2, oy + snake[0].y*cell + cell/2);
+      cxN.textAlign = 'left'; cxN.textBaseline = 'alphabetic';
+    };
+    drawN();
+    var gidN = petGameTimer = setInterval(function(){
+      if (!cvN.isConnected){ clearInterval(gidN); if (petGameTimer === gidN) petGameTimer = null; return; }
+      if (!panelOpen || overN) return;
+      stepN(); drawN();
+      if (overN){ clearInterval(gidN); if (petGameTimer === gidN) petGameTimer = null; petGameEnd(area, score); }
+    }, hard ? 115 : 165);
+  } else if (gameId === 'mole'){
+    var tLeft = 30, live = {}, overM = false;
+    area.innerHTML = '<div class="pt_mtime"><i id="pt_mbar"></i></div><div class="pt_mgrid" id="pt_mgrid">'+[0,1,2,3,4,5,6,7,8].map(function(i){ return '<div class="pt_mhole" data-h="'+i+'"><span></span></div>'; }).join('')+'</div>';
+    var holes = area.querySelectorAll('.pt_mhole');
+    var hide = function(i){ var h = holes[i]; if (!h) return; h.classList.remove('up','hit','bad'); delete live[i]; };
+    holes.forEach(function(h, i){ h.addEventListener('pointerdown', function(e){
+      e.preventDefault(); if (overM || !live[i]) return;
+      var k = live[i]; delete live[i];
+      if (k === 'bomb'){ score = Math.max(0, score - 20); h.classList.add('bad'); }
+      else { score += k === 'star' ? 25 : 8; h.classList.add('hit'); }
+      $('#rp_pet_game_score', head).textContent = score;
+      setTimeout(function(){ hide(i); }, 160);
+    }); });
+    var popM = function(){
+      if (!area.isConnected || overM) return;
+      if (panelOpen){
+        var free = []; for (var i = 0; i < 9; i++) if (!live[i]) free.push(i);
+        if (free.length){
+          var i2 = free[Math.floor(Math.random()*free.length)], r = Math.random(), kind = r < (hard ? 0.3 : 0.2) ? 'bomb' : r > 0.92 ? 'star' : 'mouse';
+          live[i2] = kind; holes[i2].querySelector('span').textContent = kind === 'bomb' ? '💣' : kind === 'star' ? '⭐' : '🐭'; holes[i2].classList.add('up');
+          setTimeout(function(){ if (live[i2] === kind) hide(i2); }, hard ? 640 : 900);
+        }
+      }
+      setTimeout(popM, (hard ? 430 : 600) * (0.75 + Math.random()*0.5));
+    };
+    popM();
+    var gidM = petGameTimer = setInterval(function(){
+      if (!area.isConnected){ clearInterval(gidM); if (petGameTimer === gidM) petGameTimer = null; return; }
+      if (!panelOpen) return;
+      tLeft -= 0.1; var bar = $('#pt_mbar', area); if (bar) bar.style.width = Math.max(0, tLeft/30*100) + '%';
+      if (tLeft <= 0){ overM = true; clearInterval(gidM); if (petGameTimer === gidM) petGameTimer = null; petGameEnd(area, score); }
+    }, 100);
+  } else if (gameId === 'merge'){
+    var EVO = ['','🥚','🐣','🐥','🐤','🐔','🦚','🦢','🦄','🐉','🌟','👑'];
+    var bd = [], overG = false;
+    for (var q = 0; q < 16; q++) bd.push(0);
+    var addT = function(){ var f = []; bd.forEach(function(v, i){ if (!v) f.push(i); }); if (!f.length) return; bd[f[Math.floor(Math.random()*f.length)]] = Math.random() < (hard ? 0.25 : 0.1) ? 2 : 1; };
+    addT(); addT();
+    area.innerHTML = '<div class="pt_mboard" id="pt_mboard" style="touch-action:none;"></div>';
+    var boardEl = $('#pt_mboard', area);
+    var drawG = function(){ boardEl.innerHTML = bd.map(function(v){ return '<div class="pt_mcell'+(v ? ' v'+Math.min(v, 11) : '')+'">'+(v ? '<span>'+EVO[Math.min(v, 11)]+'</span><i>'+Math.pow(2, v)+'</i>' : '')+'</div>'; }).join(''); };
+    var canMove = function(){ for (var i = 0; i < 16; i++){ if (!bd[i]) return true; var x = i % 4, y = Math.floor(i/4); if (x < 3 && bd[i] === bd[i+1]) return true; if (y < 3 && bd[i] === bd[i+4]) return true; } return false; };
+    var moveG = function(k){
+      if (overG) return;
+      var moved = false;
+      for (var a = 0; a < 4; a++){
+        var idx = [];
+        for (var b = 0; b < 4; b++){
+          if (k === 'l') idx.push(a*4 + b); else if (k === 'r') idx.push(a*4 + 3 - b); else if (k === 'u') idx.push(b*4 + a); else idx.push((3 - b)*4 + a);
+        }
+        var vals = idx.map(function(i){ return bd[i]; }).filter(Boolean), out = [];
+        for (var c = 0; c < vals.length; c++){
+          if (c + 1 < vals.length && vals[c] === vals[c+1]){ var nv = vals[c] + 1; out.push(nv); score += Math.max(1, nv - 2); c++; }
+          else out.push(vals[c]);
+        }
+        while (out.length < 4) out.push(0);
+        idx.forEach(function(i, j){ if (bd[i] !== out[j]) moved = true; bd[i] = out[j]; });
+      }
+      if (!moved) return;
+      addT(); drawG(); $('#rp_pet_game_score', head).textContent = score;
+      if (!canMove()){ overG = true; petGameEnd(area, score); }
+    };
+    petSwipeOn(boardEl, moveG); petPad(area, moveG);
+    drawG();
+  } else if (gameId === 'simon'){
+    var PADS = [{ e:'🍎', c:'#ef4444', f:330 }, { e:'🎵', c:'#a78bfa', f:415 }, { e:'⭐', c:'#fbbf24', f:494 }, { e:'💧', c:'#38bdf8', f:587 }];
+    var seq = [], pos = 0, busyS = true, overSi = false, round = 0;
+    area.innerHTML = '<div class="pt_shint" id="pt_shint">Слушай и смотри…</div><div class="pt_sgrid">'+PADS.map(function(p, i){ return '<div class="pt_spad" data-p="'+i+'" style="--pc:'+p.c+'"><span>'+p.e+'</span></div>'; }).join('')+'</div>';
+    var pads = area.querySelectorAll('.pt_spad'), hintEl = $('#pt_shint', area);
+    var lit = function(i, ms){ var el2 = pads[i]; if (!el2) return; el2.classList.add('on'); petBeep(PADS[i].f, ms); setTimeout(function(){ if (el2.isConnected) el2.classList.remove('on'); }, ms); };
+    var playSeq = function(){
+      busyS = true; hintEl.textContent = 'Раунд '+(round+1)+': слушай…';
+      var gap = Math.max(hard ? 220 : 300, (hard ? 520 : 680) - round * 28), k = 0;
+      var next = function(){
+        if (!area.isConnected || overSi) return;
+        if (k >= seq.length){ busyS = false; pos = 0; hintEl.textContent = 'Твоя очередь: повтори'; return; }
+        lit(seq[k], gap * 0.7); k++; setTimeout(next, gap);
+      };
+      setTimeout(next, 500);
+    };
+    var nextRound = function(){ seq.push(Math.floor(Math.random()*4)); if (hard && round > 2 && Math.random() < 0.5) seq.push(Math.floor(Math.random()*4)); playSeq(); };
+    pads.forEach(function(pEl, i){ pEl.addEventListener('pointerdown', function(e){
+      e.preventDefault(); if (busyS || overSi) return;
+      lit(i, 220);
+      if (seq[pos] !== i){ overSi = true; hintEl.textContent = 'Ой, не та нота'; petGameEnd(area, score); return; }
+      pos++;
+      if (pos >= seq.length){ round++; score += 5 * round; $('#rp_pet_game_score', head).textContent = score; busyS = true; hintEl.textContent = 'Отлично!'; setTimeout(function(){ if (area.isConnected && !overSi) nextRound(); }, 650); }
+    }); });
+    nextRound();
   }
 }
 function petAvHtml(name, url){
@@ -11226,7 +11822,7 @@ async function maybeAutonomousPet(){
     var partner = await rpGet('rp_pet_partner', null);
     if (!partner || partner.status !== 'accepted') return;
     var st0 = await rpGet('rp_pet_state', null);
-    if (!st0 || !st0.activePetId) return;
+    if (!st0 || !petMigrate(st0).slots.some(function(sl){ return sl.pet; })) return;
     var conf = await rpGet('rp_autonomy_pet', null);
     if (!conf || !conf.enabled) return;
     var intervalMs = Math.max(15, Number(conf.intervalMin)||40) * 60000;
@@ -11246,7 +11842,7 @@ async function maybeAutonomousPet(){
     var res = await generatePetAutonomousAction();
     if (!res) return;
     var state = petMigrate(await rpGet('rp_pet_state', petDefaultState()));
-    if (!state.activePetId) return;
+    if (!state.activePetId){ var occ = state.slots.filter(function(sl){ return sl.pet; })[0]; if (!occ) return; state.activeSlot = state.slots.indexOf(occ); }
     var ps = petEnsurePetData(state, state.activePetId);
     petGainExp(state, ps, 6);
     if (res.action === 'feed'){ ps.hunger = Math.min(100, ps.hunger+22); ps.happiness = Math.min(100, ps.happiness+6); }
@@ -11269,11 +11865,14 @@ async function gatherOocPet(){
   var parts = [];
   var partner = await rpGet('rp_pet_partner', null);
   var state = await rpGet('rp_pet_state', null);
-  if (state && !state.activePetId){
-    parts.push('Мой малыш: питомца пока нет'+(state.egg ? ', яйцо ещё греется' : ', нужно купить яйцо'));
+  if (state) petMigrate(state);
+  var roomPets = state ? state.slots.map(function(sl){ return sl.pet; }).filter(Boolean) : [];
+  if (state && !roomPets.length){
+    parts.push('Мой малыш: питомца пока нет'+(state.slots.some(function(sl){ return sl.egg; }) ? ', яйцо ещё греется' : ', нужно купить яйцо'));
   } else if (state){
-    var pet = PET_DATABASE.find(function(p){ return p.id===state.activePetId; }) || PET_DATABASE[0];
-    var ps = petEnsurePetData(state, state.activePetId);
+    var pid = state.activePetId || roomPets[0];
+    var pet = PET_DATABASE.find(function(p){ return p.id===pid; }) || PET_DATABASE[0];
+    var ps = petEnsurePetData(state, pid);
     var line = 'Мой малыш: питомец '+((ps.genome && ps.genome.name) || pet.name)+' ('+pet.title+', ур. '+(ps.level||1)+') — сытость '+Math.round(ps.hunger)+'%, счастье '+Math.round(ps.happiness)+'%, чистота '+Math.round(ps.cleanliness)+'%, энергия '+Math.round(ps.energy)+'%'+(ps.isSleeping?' (спит)':'');
     if (partner && partner.status === 'accepted') line += '. Растят вместе с персонажем.';
     else if (partner && partner.status === 'declined') line += '. Персонаж отказался присоединиться.';
@@ -11659,6 +12258,7 @@ async function renderPromisesList(wrap){
         await renderPromisesList(wrap);
       });
     });
+    rpWireEdit(wrap, '.rp_promise_row', 'rp_promises', [{k:'text',label:'Обещание',rows:4}], function(){ return renderPromisesList(wrap); }, 'Обещание');
     rpWireLongPressDelete(wrap, '.rp_promise_row', async function(id){
       var list = await rpGet('rp_promises', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -11695,6 +12295,7 @@ async function renderBoundariesList(wrap){
     wrap.innerHTML = bounds.slice().reverse().map(function(b){
       return '<div class="rp_boundary_row'+(b.hidden?' hidden':'')+'" data-id="'+b.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg style="width:14px;height:14px;flex-shrink:0;color:var(--accent);"><use href="#rpi-knot"/></svg><div style="flex:1;min-width:0;"><div class="rp_boundary_text">'+escapeHtml(b.text)+'</div>'+(b.rpLabel?('<div class="rp_item_rplabel">'+escapeHtml(b.rpLabel)+'</div>'):'')+'</div></div>';
     }).join('');
+    rpWireEdit(wrap, '.rp_boundary_row', 'rp_boundaries', [{k:'text',label:'Граница',rows:4}], function(){ return renderBoundariesList(wrap); }, 'Граница');
     rpWireLongPressDelete(wrap, '.rp_boundary_row', async function(id){
       var list = await rpGet('rp_boundaries', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -12292,698 +12893,7 @@ async function renderMoodCalendar(wrap){
   });
 }
 
-SCREENS.npcchats = {
-  title: 'Чаты персонажа',
-  async render(container){
-    stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown();
-    container.style.flexDirection=''; container.style.height=''; container.style.minHeight='';
-    container.style.padding = '10px 14px 16px';
-    await renderNpcChatsList(container);
-  }
-};
-async function renderNpcChatsList(container){
-  await rpRefreshPhotoMap();
-  container.innerHTML = '';
-  var unreadSet = {}; try{ (await npcUnreadIds()).forEach(function(i){ unreadSet[i] = 1; }); }catch(e){}
-  var hint = el('div','rp_muted');
-  hint.style.cssText = 'margin-bottom:10px;font-size:11.5px;line-height:1.4;';
-  hint.textContent = 'Переписки персонажа с другими людьми — пойманные из тега [CHAT_N] в основной сцене. Это не твой мессенджер: читать можно, писать от своего имени сюда нельзя.';
-  container.appendChild(hint);
 
-  var contacts = [];
-  try{ contacts = await rpGet('rp_npc_contacts', []); }catch(e){}
-  var tp0 = null; try{ tp0 = await rpTidyPlan(); }catch(e){}
-  var tidyN = tp0 ? tp0.plan.length : 0;
-  var tidyBtn = el('div','rp_btn rp_sm'); tidyBtn.style.marginBottom = '10px';
-  tidyBtn.innerHTML = '<span>Навести порядок · лишних чатов: ' + tidyN + '</span>';
-  tidyBtn.addEventListener('click', async function(){
-    var tp = await rpTidyPlan();
-    if (!tp.plan.length){ toast('Дублей и чатов-уведомлений не нашла'); return; }
-    var sel = await rpTidyPick(tp.plan);
-    if (!sel) return;
-    var no = tp.plan.filter(function(it){ return sel.indexOf(it) < 0; }).map(rpTidyKey);
-    if (no.length) await rpSet('rp_tidy_skip', (await rpGet('rp_tidy_skip', [])).concat(no).slice(-200));
-    if (!sel.length){ await renderNpcChatsList(container); return; }
-    tp.plan = sel;
-    var mv = await rpTidyApply(tp);
-    toast('Готово: убрано чатов ' + tp.plan.length + ', перенесено сообщений ' + mv);
-    await renderNpcChatsList(container);
-  });
-  if (tidyN) container.appendChild(tidyBtn);
-  if (!contacts.length){
-    container.appendChild(el('div','rp_empty','Пока ничего не поймано. Как только персонаж где-то в сцене напишет кому-то ещё по тегу чата, переписка появится здесь.'));
-    return;
-  }
-  contacts.forEach(function(c){
-    var row = buildContactRow(c, false, 'rp_npc_contacts');
-    row.setAttribute('data-id', c.id);
-    if (unreadSet[c.id]){ var nmEl = row.querySelector('.rp_contact_name'); if (nmEl) nmEl.insertAdjacentHTML('beforeend', ' <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);vertical-align:middle;"></span>'); }
-    row.insertAdjacentHTML('afterbegin', '<div class="rp_del_btn">'+RP_DEL_ICON+'</div>');
-    row.insertAdjacentHTML('beforeend', '<div class="rp_merge_btn" data-act="merge">Слить в основной</div>');
-    row.addEventListener('click', function(ev){
-      if (ev.target.closest && (ev.target.closest('.rp_merge_btn') || ev.target.closest('.rp_del_btn'))) return;
-      if (row.classList.contains('rp_del_armed')) return;
-      openThread(c.id, c);
-    });
-    container.appendChild(row);
-  });
-  rpWireLongPressDelete(container, '.rp_contact_row[data-id]', async function(id){
-    var list = await rpGet('rp_npc_contacts', []);
-    await rpSet('rp_npc_contacts', list.filter(function(x){ return x.id !== id; }));
-    await renderNpcChatsList(container);
-    toast('Чат удалён');
-  });
-  container.querySelectorAll('.rp_merge_btn').forEach(function(btn){
-    btn.addEventListener('click', async function(ev){
-      ev.preventDefault(); ev.stopPropagation();
-      var row = btn.closest('.rp_contact_row');
-      var id = row && row.getAttribute('data-id');
-      var c = contacts.find(function(x){ return x.id === id; });
-      if (!c) return;
-      var n = await mergeNpcChatIntoMain(c);
-      toast('Чат «'+c.name+'» слит в основной ('+n+' сообщ.) — дальше такие теги идут туда же');
-      await renderNpcChatsList(container);
-    });
-  });
-}
-function rpTidyKey(it){ return it.type === 'svc' ? 'svc:' + it.c.id : it.c.id + '>' + it.into.id; }
-async function rpTidyPlan(){
-  var contacts = await rpGet('rp_npc_contacts', []), keep = [], plan = [], skip = await rpGet('rp_tidy_skip', []);
-  var order = contacts.filter(function(c){ return c.group; }).concat(contacts.filter(function(c){ return !c.group; }));
-  order.forEach(function(c){
-    if (!c.group && rpIsServiceName(c.name) && skip.indexOf('svc:' + c.id) < 0){ plan.push({ type:'svc', c:c }); return; }
-    var t = keep.filter(function(k){ return skip.indexOf(c.id + '>' + k.id) < 0 && [c.name].concat(c.aliases || []).some(function(a){ return rpSameContact(k, a) || (!k.group && !c.group && rpSameContact(c, k.name)); }); })[0];
-    if (t){ plan.push({ type:'merge', c:c, into:t }); return; }
-    keep.push(c);
-  });
-  return { contacts: contacts, keep: keep, plan: plan };
-}
-function rpTidyPick(plan){
-  return new Promise(function(resolve){
-    var root = $('#rp_screen') || $('#rp_frame'); if (!root){ resolve(null); return; }
-    var modal = el('div','rp_confirm_overlay');
-    modal.innerHTML = '<div class="rp_confirm_card"><div class="rp_confirm_title">Навести порядок?</div><div class="rp_confirm_msg" style="white-space:normal;">'+
-      plan.map(function(it, i){ return '<label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:7px;color:var(--text);"><input type="checkbox" data-i="'+i+'" checked style="margin-top:2px;flex:none;"><span>'+escapeHtml(it.type === 'svc' ? '«'+it.c.name+'» → в уведомления' : '«'+it.c.name+'» → в «'+it.into.name+'»')+'</span></label>'; }).join('')+
-      '<div style="margin-top:8px;">Сними галочку, если это разные люди. Переписки дублей склеятся в один чат.</div></div>'+
-      '<div class="rp_confirm_actions"><div class="rp_btn rp_sm" data-a="ok"><span>Сделать</span></div><div class="rp_btn rp_ghost rp_sm" data-a="no"><span>Отмена</span></div></div></div>';
-    root.appendChild(modal);
-    modal.querySelector('[data-a="ok"]').addEventListener('click', function(){ var sel = []; modal.querySelectorAll('input[data-i]').forEach(function(x){ if (x.checked) sel.push(plan[+x.getAttribute('data-i')]); }); modal.remove(); resolve(sel); });
-    modal.querySelector('[data-a="no"]').addEventListener('click', function(){ modal.remove(); resolve(null); });
-  });
-}
-async function rpTidyApply(tp){
-  var moved = 0, gone = tp.plan.map(function(it){ return it.c.id; });
-  var keep = tp.contacts.filter(function(c){ return gone.indexOf(c.id) < 0; });
-  for (var i = 0; i < tp.plan.length; i++){
-    var it = tp.plan[i], src = await rpGet(msgKey(it.c.id), []);
-    if (it.type === 'svc'){
-      for (var k = Math.max(0, src.length - 5); k < src.length; k++) await pushHomeNotification(String(it.c.name).slice(0, 40), src[k].text || (src[k].kind ? '📷 Фото' : ''));
-    } else {
-      await mutateMessages(it.into.id, function(list){ src.forEach(function(m){ if (!rpMsgIsDup(list, m.mediaDesc || m.text)) list.push(m); }); list.sort(function(a, b){ return (a.ts || 0) - (b.ts || 0); }); });
-      it.into.aliases = (it.into.aliases || []).concat([it.c.name], it.c.aliases || []).filter(function(x, j, a){ return x && a.indexOf(x) === j; }).slice(-12);
-      if (!it.into.avatarPath && it.c.avatarPath) it.into.avatarPath = it.c.avatarPath;
-      if (it.c.group){ it.into.group = true; it.into.members = (it.into.members || []).concat(it.c.members || []).filter(function(x, j, a){ return x && a.indexOf(x) === j; }); it.into.desc = 'группа · ' + it.into.members.length + ' уч.'; }
-      moved += src.length;
-    }
-    await rpSet(msgKey(it.c.id), []);
-  }
-  await rpSet('rp_npc_contacts', keep);
-  return moved;
-}
-async function mergeNpcChatIntoMain(contact){
-  var moved = await rpGet(msgKey(contact.id), []);
-  await mutateMessages('main', function(list){
-    moved.forEach(function(m){ list.push(m); });
-    list.sort(function(a,b){ return (a.ts||0) - (b.ts||0); });
-  });
-  await rpSet(msgKey(contact.id), []);
-  var map = await rpGet('rp_chat_merge_names', []);
-  var nm = String(contact.name||'').trim().toLowerCase();
-  if (nm && map.indexOf(nm) === -1) map.push(nm);
-  await rpSet('rp_chat_merge_names', map);
-  var list = await rpGet('rp_npc_contacts', []);
-  await rpSet('rp_npc_contacts', list.filter(function(x){ return x.id !== contact.id; }));
-  return moved.length;
-}
-async function isMergedChatName(name){
-  var nm = String(name||'').trim().toLowerCase();
-  if (!nm) return false;
-  var map = await rpGet('rp_chat_merge_names', []);
-  return map.indexOf(nm) !== -1;
-}
-SCREENS.messenger = {
-  title: 'Мессенджер',
-  async render(container){
-    stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown();
-    backTarget = openHome;
-    container.style.flexDirection=''; container.style.height=''; container.style.minHeight='';
-    container.style.padding = '10px 14px 16px';
-    await renderMessengerAppbarActions();
-    await renderContactsList(container);
-  }
-};
-async function npcReadMap(){
-  var m = await rpGet('rp_npc_read', null);
-  if (m) return m;
-  m = {}; var now = Date.now();
-  try{ (await rpGet('rp_npc_contacts', [])).forEach(function(c){ m[c.id] = now; }); }catch(e){}
-  await rpSet('rp_npc_read', m); return m;
-}
-async function npcMarkRead(id){ try{ var m = await npcReadMap(); m[id] = Date.now(); await rpSet('rp_npc_read', m); }catch(e){} }
-async function npcUnreadIds(){
-  var out = [];
-  try{
-    var read = await npcReadMap();
-    var cs = await rpGet('rp_npc_contacts', []);
-    for (var i=0;i<cs.length;i++){
-      var msgs = await rpGet(msgKey(cs[i].id), []), last = 0;
-      msgs.forEach(function(x){ if (!x.hidden && x.ts > last) last = x.ts; });
-      if (last && last > (read[cs[i].id] || 0)) out.push(cs[i].id);
-    }
-  }catch(e){}
-  return out;
-}
-async function renderMessengerAppbarActions(){
-  var wrap = $('#rp_appbar_actions');
-  var npcContacts = [];
-  try{ npcContacts = await npcUnreadIds(); }catch(e){}
-  wrap.innerHTML =
-    '<div class="rp_iconbtn" id="rp_appbar_npcchats_btn">'+
-      '<svg><use href="#rpi-eye-watch"/></svg>'+
-      (npcContacts.length ? '<div class="rp_iconbtn_badge">'+npcContacts.length+'</div>' : '')+
-    '</div>'+
-    '<div class="rp_iconbtn" id="rp_appbar_scan_btn" title="Найти сообщения в сюжете"><svg><use href="#rpi-search"/></svg></div>'+
-    '<div class="rp_iconbtn" id="rp_appbar_addcontact_btn"><svg><use href="#rpi-plus"/></svg></div>';
-  wrap.style.display = 'flex';
-  $('#rp_appbar_scan_btn', wrap).addEventListener('click', function(){ msgScanSheet($('#rp_screens'), function(){ if (currentScreen === 'messenger') openScreen('messenger'); }); });
-  $('#rp_appbar_npcchats_btn', wrap).addEventListener('click', function(){
-    openScreen('npcchats').then(function(){ backTarget = function(){ openScreen('messenger'); }; });
-  });
-  $('#rp_appbar_addcontact_btn', wrap).addEventListener('click', function(){
-    openNewContactForm($('#rp_screens'));
-  });
-}
-async function openNewGroupSheet(done){
-  var people = []; try{ people = (await pbCollect()).filter(function(x){ return x.src !== 'me'; }); }catch(e){}
-  var seen = {}; var names = people.map(function(x){ return x.name; }).filter(function(n){ var k = String(n).toLowerCase(); if (!n || seen[k]) return false; seen[k] = 1; return true; });
-  var picked = {};
-  var sh = thSheet('<div style="font-weight:900;font-size:15px;margin-bottom:6px;">Новый групповой чат</div>'+
-    '<input class="rp_input" id="grp_name" maxlength="40" placeholder="Название чата (например: Вечеринка)">'+
-    '<div class="th_hint" style="margin-top:8px;">Участники (кроме тебя) — нажми, чтобы добавить</div><div id="grp_chips">'+
-    (names.length ? names.map(function(n){ return '<span class="rp_grp_chip" data-n="'+escapeHtml(n)+'">'+escapeHtml(n)+'</span>'; }).join('') : '<div class="th_hint">В телефонной книге пока никого. Впиши имена ниже.</div>')+'</div>'+
-    '<div style="display:flex;gap:6px;margin-top:6px;"><input class="rp_input" id="grp_extra" placeholder="Другое имя" style="flex:1;margin:0;"><div class="th_btn" id="grp_add" style="flex:0 0 auto;padding:9px 12px;">+</div></div>'+
-    '<div class="th_btn ghost" id="grp_photo" style="margin-top:10px;">Фото группы (необязательно)</div>'+
-    '<div class="th_row2" style="margin-top:12px;"><div class="th_btn ghost" id="grp_x">Отмена</div><div class="th_btn" id="grp_ok">Создать</div></div>');
-  var wire = function(chip){ chip.addEventListener('click', function(){ var n = chip.getAttribute('data-n'); if (picked[n]){ delete picked[n]; chip.classList.remove('on'); } else { picked[n] = 1; chip.classList.add('on'); } }); };
-  sh.querySelectorAll('.rp_grp_chip').forEach(wire);
-  $('#grp_add', sh).addEventListener('click', function(){ var v = $('#grp_extra', sh).value.trim(); if (!v) return; var c = el('span','rp_grp_chip on'); c.textContent = v; c.setAttribute('data-n', v); picked[v] = 1; wire(c); $('#grp_chips', sh).appendChild(c); $('#grp_extra', sh).value = ''; });
-  var grpAv = '';
-  $('#grp_photo', sh).addEventListener('click', async function(){ var pk = await pickContactAvatar(); if (!pk) return; grpAv = pk.path; $('#grp_photo', sh).textContent = 'Фото выбрано ✓'; });
-  $('#grp_x', sh).addEventListener('click', function(){ sh.remove(); });
-  $('#grp_ok', sh).addEventListener('click', async function(){
-    var nm = $('#grp_name', sh).value.trim(), mem = Object.keys(picked);
-    if (!nm){ toast('Введи название'); return; }
-    if (mem.length < 2){ toast('Выбери хотя бы двоих участников'); return; }
-    var list = await rpGet('rp_contacts', []);
-    var g0 = { id:'grp-'+uid(), name:nm, desc:'группа · '+(mem.length+1)+' уч.', color:grpColor(nm), ts:Date.now(), group:true, members:mem };
-    if (grpAv) g0.avatarPath = grpAv;
-    list.push(g0);
-    await rpSet('rp_contacts', list); sh.remove(); toast('Групповой чат создан'); if (done) done();
-  });
-}
-async function renderContactsList(container){
-  await rpRefreshPhotoMap();
-  container.innerHTML = '';
-  var mainRow = buildContactRow({ name: 'Персонаж', desc: 'Основной персонаж истории', color:'#8b5cf6' }, true);
-  mainRow.addEventListener('click', function(){ openThread('main', null); });
-  container.appendChild(mainRow);
-
-  var grpBtn = el('div','rp_grp_btn'); grpBtn.innerHTML = '<svg style="width:16px;height:16px;"><use href="#rpi-plus"/></svg><span>Создать групповой чат</span>';
-  grpBtn.addEventListener('click', function(){ openNewGroupSheet(function(){ renderContactsList(container); }); });
-  container.appendChild(grpBtn);
-  var contacts = [];
-  try{ contacts = await rpGet('rp_contacts', []); }catch(e){}
-  contacts.forEach(function(c){
-    var row = buildContactRow(c, false, 'rp_contacts');
-    row.addEventListener('click', function(){ openThread(c.id, c); });
-    container.appendChild(row);
-  });
-
-  getNames().then(function(names){
-    var nameEl = mainRow.querySelector('.rp_contact_name');
-    if (nameEl) nameEl.textContent = names.charName;
-    var avEl = mainRow.querySelector('.rp_contact_avatar');
-    if (avEl) avEl.innerHTML = avatarInner((names.charName||'?').slice(0,2).toUpperCase(), names.charAvatar);
-  }).catch(function(){});
-}
-var RP_PHOTO_MAP = [];
-async function rpRefreshPhotoMap(){ try{ RP_PHOTO_MAP = (await pbCollect()).filter(function(c){ return c.img; }).map(function(c){ return { name: c.name, img: c.img }; }); }catch(e){ RP_PHOTO_MAP = []; } }
-function rpPhotoFor(name, aliases){
-  if (!name) return '';
-  var hit = RP_PHOTO_MAP.filter(function(p){ return String(p.name).toLowerCase() === String(name).toLowerCase(); })[0] || RP_PHOTO_MAP.filter(function(p){ return rpSameContact({ name: p.name }, name) || (aliases || []).some(function(a){ return rpSameContact({ name: p.name }, a); }); })[0];
-  return hit ? hit.img : '';
-}
-function buildContactRow(c, pinned, storeKey){
-  var row = el('div','rp_contact_row');
-  var initials = (c.name||'?').slice(0,2).toUpperCase();
-  var avatarUrl = c.avatarPath || (c.group || pinned ? '' : rpPhotoFor(c.name, c.aliases));
-  row.innerHTML = '<div class="rp_contact_avatar" style="background:'+(c.color||'#8b5cf6')+'">'+avatarInner(initials, avatarUrl)+
-      (storeKey ? '<div class="rp_avatar_camera_badge"><svg><use href="#rpi-camera"/></svg></div>' : '')+
-    '</div>'+
-    '<div class="rp_contact_info"><div class="rp_contact_name">'+escapeHtml(c.name)+'</div>'+
-    '<div class="rp_contact_desc">'+escapeHtml(c.desc||'')+'</div>'+
-    (pinned ? '<div class="rp_contact_pin">персонаж истории</div>' : '')+
-    '</div>';
-  if (storeKey){
-    var avEl = row.querySelector('.rp_contact_avatar');
-    avEl.style.cursor = 'pointer';
-    avEl.addEventListener('click', async function(ev){
-      ev.stopPropagation();
-      var picked = await pickContactAvatar();
-      if (!picked) return;
-      var ok = await setContactAvatar(storeKey, c.id, picked.path);
-      if (!ok) return;
-      c.avatarPath = picked.path;
-      avEl.innerHTML = avatarInner(initials, picked.url)+'<div class="rp_avatar_camera_badge"><svg><use href="#rpi-camera"/></svg></div>';
-      toast('Аватарка обновлена');
-    });
-  }
-  return row;
-}
-async function openNewContactForm(container){
-  container.innerHTML = '';
-  var chosen = CONTACT_COLORS[0];
-  var pickedAvatar = null;
-  var form = el('div','rp_card');
-  form.innerHTML =
-    '<div class="rp_h" style="margin-bottom:8px;">Новый контакт</div>'+
-    '<div class="rp_muted" style="margin-bottom:3px;">Имя</div><input class="rp_input" id="rp_nc_name" placeholder="Например, Соня">'+
-    '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">Кто это (пара слов)</div>'+
-    '<textarea class="rp_input" id="rp_nc_desc" style="min-height:54px;" placeholder="Лучшая подруга, знает все секреты, всегда на связи. Для группового чата — опиши всех участников."></textarea>'+
-    '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:6px;">Цвет аватарки</div><div class="rp_color_grid" id="rp_nc_colors"></div>'+
-    '<div style="height:10px;"></div><div class="rp_btn rp_ghost rp_xs" id="rp_nc_avatar"><svg><use href="#rpi-camera"/></svg><span>Фото аватарки (необязательно)</span></div>'+
-    '<div style="height:10px;"></div><div class="rp_row2"><div class="rp_btn rp_ghost" id="rp_nc_cancel"><span>Отмена</span></div><div class="rp_btn" id="rp_nc_save"><span>Создать</span></div></div>';
-  container.appendChild(form);
-  var colorsWrap = $('#rp_nc_colors', form);
-  CONTACT_COLORS.forEach(function(c){
-    var dot = el('div','rp_color_dot'+(c===chosen?' on':'')); dot.style.background = c;
-    dot.addEventListener('click', function(){
-      chosen = c;
-      colorsWrap.querySelectorAll('.rp_color_dot').forEach(function(d){ d.classList.remove('on'); });
-      dot.classList.add('on');
-    });
-    colorsWrap.appendChild(dot);
-  });
-  $('#rp_nc_avatar', form).addEventListener('click', async function(){
-    var picked = await pickContactAvatar();
-    if (!picked) return;
-    pickedAvatar = picked.path;
-    $('#rp_nc_avatar', form).querySelector('span').textContent = 'Фото выбрано ✓';
-  });
-  $('#rp_nc_cancel', form).addEventListener('click', function(){ renderContactsList(container); });
-  $('#rp_nc_save', form).addEventListener('click', async function(){
-    var name = $('#rp_nc_name', form).value.trim();
-    var desc = $('#rp_nc_desc', form).value.trim();
-    if (!name){ toast('Введите имя'); return; }
-    var contacts = await rpGet('rp_contacts', []);
-    var entry = { id: uid(), name:name, desc:desc, color:chosen, ts:Date.now() };
-    if (pickedAvatar) entry.avatarPath = pickedAvatar;
-    contacts.push(entry);
-    await rpSet('rp_contacts', contacts);
-    toast('Контакт создан');
-    renderContactsList(container);
-  });
-}
-
-async function openThread(threadId, contact){
-  stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown();
-  backTarget = function(){ openScreen('messenger'); };
-  currentScreen = 'thread:'+threadId;
-  $('#rp_home').style.display = 'none';
-  var scr = $('#rp_screens');
-  scr.style.display = 'block'; scr.style.visibility = '';
-  $('#rp_appbar').style.display = 'flex';
-  $('#rp_appbar_title').textContent = contact ? contact.name : 'Чат';
-  var subtitle = contact ? (contact.group && contact.members && contact.members.length ? 'группа · '+contact.members.slice(0,4).join(', ')+(contact.members.length>4?'…':'') : (contact.npc ? 'чат персонажа · не твой' : (contact.desc || 'в сети'))) : 'в сети';
-  var contactAvatarUrl = (contact && contact.avatarPath) || '';
-  setAppbarIdentity(contact ? contact.name : null, contact ? contact.color : '#8b5cf6', subtitle, contactAvatarUrl);
-  clearAppbarActions();
-  if (threadId === 'main'){ unreadCount = 0; updateBadge(); }
-  scr.innerHTML = '<div class="rp_empty"><svg class="rp_spin" style="width:20px;height:20px;"><use href="#rpi-spinner"/></svg></div>';
-  try{ if (rpThreadDedupe(await rpGet(msgKey(threadId), []))) await mutateMessages(threadId, function(list){ var d = rpThreadDedupe(list); if (d){ list.length = 0; Array.prototype.push.apply(list, d); } }); }catch(eD){}
-  try{ await renderThreadScreen(scr, threadId, contact); }
-  catch(e){ console.error('RP thread render failed', e); scr.innerHTML = '<div class="rp_empty">Не удалось отобразить экран.</div>'; return; }
-  if (!contact){
-    getNames().then(function(names){
-      $('#rp_appbar_title').textContent = names.charName;
-      setAppbarIdentity(names.charName, '#8b5cf6', 'в сети', names.charAvatar);
-    }).catch(function(){});
-  }
-}
-async function renderThreadScreen(container, threadId, contact){
-  container.innerHTML = '';
-  container.style.display = 'flex';
-  container.style.flexDirection = 'column';
-  container.style.height = '100%';
-  container.style.minHeight = '0';
-  container.style.padding = '10px 14px 16px';
-
-  var isNpcThread = !!(contact && contact.npc);
-  var gatherFn = isNpcThread
-    ? function(){ return gatherOocNpcChat(threadId, contact); }
-    : function(){ return gatherOocMessenger(threadId, contact); };
-
-  var menu = buildAppbarMenu();
-  menu.innerHTML = '<div class="rp_btn rp_ghost rp_xs" id="rp_msg_summarize"><svg><use href="#rpi-journal"/></svg><span>Саммари</span></div>'+
-                    '<div class="rp_btn rp_ghost rp_xs" id="rp_msg_hide"><svg><use href="#rpi-eyeoff"/></svg><span>Хайд</span></div>'+
-                    '<div class="rp_btn rp_ghost rp_xs" id="rp_msg_unhide"><svg><use href="#rpi-eye"/></svg><span>Анхайд</span></div>'+
-                    '<div class="rp_btn rp_ghost rp_xs" id="rp_msg_scan"><svg><use href="#rpi-search"/></svg><span>Найти в сюжете</span></div>'+
-                    (contact && contact.id ? '<div class="rp_btn rp_ghost rp_xs" id="rp_msg_photo"><svg><use href="#rpi-camera"/></svg><span>' + (contact.group ? 'Фото группы' : 'Фото чата') + '</span></div>' : '');
-  menu.appendChild(buildOocButton('ooc-msg-'+threadId, gatherFn));
-  if (contact && contact.id) $('#rp_msg_photo', menu).addEventListener('click', async function(){
-    closeAppbarMenu();
-    var picked = await pickContactAvatar(); if (!picked) return;
-    if (!(await setContactAvatar(contact.npc ? 'rp_npc_contacts' : 'rp_contacts', contact.id, picked.path))) return;
-    contact.avatarPath = picked.path;
-    setAppbarIdentity(contact.name, contact.color || '#8b5cf6', $('#rp_appbar_subtitle') ? $('#rp_appbar_subtitle').textContent : '', picked.path);
-    toast('Фото обновлено');
-  });
-  $('#rp_msg_scan', menu).addEventListener('click', function(){ closeAppbarMenu(); msgScanSheet($('#rp_screens'), function(){ var lw = $('#rp_msg_list'); if (lw) renderThreadList(threadId, lw, null); }); });
-  var hint = el('div'); hint.id = 'rp_appbar_menu_hint';
-  hint.textContent = 'Переписка не появляется в чате ролевой. «Саммари» пересказывает видимые сообщения в новую запись лорбука; «Хайд» скрывает их (кроме последнего — для связности), чтобы следующий саммари брал только новое.';
-  hint.style.display = 'none';
-  var hintToggle = el('div','rp_btn rp_ghost rp_xs'); hintToggle.innerHTML = '<svg><use href="#rpi-more"/></svg><span>Что это?</span>';
-  hintToggle.addEventListener('click', function(){ hint.style.display = hint.style.display==='none' ? 'block' : 'none'; });
-  menu.appendChild(hintToggle);
-  menu.appendChild(hint);
-  var actions = menu;
-
-  if (threadId === 'main'){
-    var autoWrap = el('div'); autoWrap.className = 'rp_autonomy_app_row'; autoWrap.style.cssText = 'border:none;padding:8px 6px 2px;';
-    var mConf0 = (await rpGet('rp_autonomy_messenger', null)) || { enabled:false, intervalMin:20 };
-    autoWrap.innerHTML =
-      '<div class="rp_title_row" style="margin-bottom:4px;"><span class="rp_h" style="font-size:11.5px;">Сам(а) пишет при простое</span>'+
-      '<div class="rp_conseq_check'+(mConf0.enabled?' on':'')+'" id="rp_menu_auto_switch">'+(mConf0.enabled?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>'+
-      '<div class="rp_muted" style="margin-bottom:4px;font-size:10px;">Если РП долго не трогали, минут:</div>'+
-      '<input class="rp_input" type="number" id="rp_menu_auto_interval" min="3" max="240" value="'+(mConf0.intervalMin||20)+'" style="font-size:12px;padding:6px 8px;">'+
-      '<div style="height:6px;"></div><div class="rp_btn rp_xs" id="rp_menu_auto_save"><span>Сохранить</span></div>';
-    menu.appendChild(autoWrap);
-    var autoOn0 = mConf0.enabled === true;
-    var autoSw0 = $('#rp_menu_auto_switch', autoWrap);
-    autoSw0.addEventListener('click', function(){ autoOn0 = !autoOn0; autoSw0.classList.toggle('on', autoOn0); autoSw0.innerHTML = autoOn0 ? '<svg><use href="#rpi-check"/></svg>' : ''; });
-    $('#rp_menu_auto_save', autoWrap).addEventListener('click', async function(){
-      var min = Math.max(3, Math.min(240, Number($('#rp_menu_auto_interval', autoWrap).value)||20));
-      await rpSet('rp_autonomy_messenger', { enabled: autoOn0, intervalMin: min });
-      await rpSet('rp_autonomy_watch_messenger', null);
-      toast('Сохранено');
-      closeAppbarMenu();
-    });
-  }
-
-  var listWrap = el('div'); listWrap.id = 'rp_msg_list';
-  listWrap.style.flex = '1'; listWrap.style.minHeight = '0'; listWrap.style.overflowY = 'auto';
-  listWrap.innerHTML = '<div class="rp_empty"><svg class="rp_spin" style="width:16px;height:16px;"><use href="#rpi-spinner"/></svg></div>';
-  container.appendChild(listWrap);
-  attachLongPress(listWrap, threadId, contact);
-
-  if (isNpcThread){
-    var roBanner = el('div','rp_muted');
-    roBanner.style.cssText = 'text-align:center;font-size:10px;padding:6px 10px;flex-shrink:0;';
-    roBanner.textContent = 'Только чтение — это переписка персонажа, не твоя';
-    container.appendChild(roBanner);
-  } else {
-    var compose = el('div'); compose.id = 'rp_compose'; compose.style.flexShrink = '0';
-    compose.innerHTML = '<textarea class="rp_input" id="rp_msg_input" placeholder="Написать сообщение..."></textarea><button class="rp_sendbtn" id="rp_msg_send"><svg><use href="#rpi-send"/></svg></button>';
-    container.appendChild(compose);
-
-    var sendBtn = $('#rp_msg_send', compose);
-    sendBtn.addEventListener('click', async function(){
-      var ta = $('#rp_msg_input', compose);
-      var text = ta.value.trim();
-      if (!text) return;
-      var st = await getMsgStatus(threadId);
-      if (st && st.state === 'pending') return;
-      ta.value = '';
-      sendBtn.style.opacity = '.5'; sendBtn.style.pointerEvents = 'none';
-      try{
-        await mutateMessages(threadId, function(l){ l.push({ id: uid(), role:'user', text: text, ts: Date.now(), hidden:false }); });
-        if (threadId === 'main') await rpSet('rp_msg_last_activity', Date.now());
-        await attemptReply(threadId, listWrap, contact);
-      }catch(e){ console.error(e); toast('Ошибка: '+(e.message||e)); await renderThreadList(threadId, listWrap, contact); }
-      finally{ sendBtn.style.opacity = ''; sendBtn.style.pointerEvents = ''; }
-    });
-  }
-
-  wireBusyButton($('#rp_msg_summarize', actions), 'msg-sum-'+threadId, async function(){
-    var list = await rpGet(msgKey(threadId), []);
-    var visible = list.filter(function(m){ return !m.hidden; });
-    if (!visible.length){ toast('Нет новых сообщений для саммари'); return; }
-    var names = await getNames();
-    var otherName = contact ? contact.name : names.charName;
-    var text = isNpcThread
-      ? visible.map(function(m){ return (m.role==='char'?names.charName:otherName)+': '+m.text; }).join('\n')
-      : visible.map(function(m){ return (m.role==='user'?names.userName:otherName)+': '+m.text; }).join('\n');
-    var summary = String(await callModel(summaryPrompt(text)) || '').trim();
-    if (!summary){ toast('Не удалось получить сводку'); return; }
-    if (/^\(ничего существенного\)\.?$/i.test(summary)){ toast('В переписке нет существенных фактов — запись не создана'); return; }
-    var n = await nextSummaryIndex(threadId);
-    await upsertLorebookEntry(summaryEntryId(threadId, n), otherName+' · сводка '+n, summary);
-    toast('Сводка №'+n+' записана в лорбук');
-    closeAppbarMenu();
-  });
-
-  var hideBtn = $('#rp_msg_hide', actions);
-  hideBtn.addEventListener('click', async function(){
-    var changed = false;
-    await mutateMessages(threadId, function(l){
-      for (var i=0;i<l.length-hk();i++){ if (!l[i].hidden){ l[i].hidden = true; changed = true; } }
-    });
-    closeAppbarMenu();
-    if (!changed){ toast('Нечего скрывать'); return; }
-    toast('Скрыто — последнее сообщение оставлено для контекста');
-    await renderThreadList(threadId, listWrap, contact);
-  });
-  $('#rp_msg_unhide', actions).addEventListener('click', async function(){
-    var changed = await unhideThread(threadId);
-    closeAppbarMenu();
-    if (!changed){ toast('Нечего показывать'); return; }
-    toast('Показано всё скрытое');
-    await renderThreadList(threadId, listWrap, contact);
-  });
-
-  await renderThreadList(threadId, listWrap, contact);
-  msgPollTimer = setInterval(async function(){
-    var status = await getMsgStatus(threadId);
-    if (status && status.state === 'pending'){ await renderThreadList(threadId, listWrap, contact); }
-    else { stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown(); await renderThreadList(threadId, listWrap, contact); }
-  }, 2000);
-}
-var msgPollTimer = null;
-function stopMsgPoll(){ if (msgPollTimer){ clearInterval(msgPollTimer); msgPollTimer = null; } }
-function grpColor(name){ var n = String(name||'').trim().toLowerCase(), h = 0; for (var i=0;i<n.length;i++) h = (h*31 + n.charCodeAt(i)) >>> 0; var pal = ['#ff6fae','#4cc9f0','#5ad0a0','#ffb37a','#c084fc','#f5c451','#ff7a7a','#7aa7ff']; return pal[h % pal.length]; }
-function voiceParse(text){
-  var m = /^🎤 Голосовое\s*(?:\(([^)]*)\))?\s*(?:—\s*([\s\S]*?))?\s*(?::\s*«([\s\S]*)»)?\s*$/.exec(String(text||'').trim());
-  if (!m) return null;
-  var dur = (m[1]||'').trim(), sec = 0, t;
-  if ((t = /^(\d{1,2}):(\d{2})$/.exec(dur))) sec = (+t[1])*60 + (+t[2]);
-  else if ((t = /(\d+)/.exec(dur))) sec = +t[1];
-  if (!sec || sec > 600) sec = 8;
-  var label = dur && /^\d{1,2}:\d{2}$/.test(dur) ? dur : (Math.floor(sec/60)+':'+('0'+(sec%60)).slice(-2));
-  return { sec:sec, label:label, desc:(m[2]||'').trim(), tr:(m[3]||'').trim() };
-}
-function voiceHtml(v, seed){
-  var bars = '', h = 0, str = String(seed||'')+v.label;
-  for (var i=0;i<str.length;i++) h = (h*33 + str.charCodeAt(i)) >>> 0;
-  for (var k=0;k<30;k++){ h = (h*1103515245 + 12345) >>> 0; var ht = 18 + (h >> 8) % 82; bars += '<i style="height:'+ht+'%"></i>'; }
-  var body = [v.desc ? '<i>'+escapeHtml(v.desc)+'</i>' : '', v.tr ? escapeHtml(v.tr) : ''].filter(Boolean).join('<br>');
-  return '<div class="rp_voice" data-sec="'+v.sec+'"><button class="rp_voice_btn" data-act="voice-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>'+
-    '<div class="rp_voice_body"><div class="rp_wave">'+bars+'</div><div class="rp_voice_meta"><span class="rp_voice_t">'+escapeHtml(v.label)+'</span>'+(body ? '<span class="rp_voice_cc" data-act="voice-cc">Aa</span>' : '')+'</div></div></div>'+
-    (body ? '<div class="rp_voice_tr">'+body+'</div>' : '');
-}
-var voiceTimer = null;
-function voiceToggle(btn){
-  var box = btn.closest('.rp_voice'); if (!box) return;
-  var bars = box.querySelectorAll('.rp_wave i'), sec = +box.getAttribute('data-sec') || 8, t = box.querySelector('.rp_voice_t');
-  var playing = btn.getAttribute('data-playing') === '1';
-  if (voiceTimer){ clearInterval(voiceTimer); voiceTimer = null; }
-  document.querySelectorAll('.rp_voice_btn[data-playing="1"]').forEach(function(b){ b.setAttribute('data-playing','0'); b.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; b.closest('.rp_voice').querySelectorAll('.rp_wave i').forEach(function(x){ x.classList.remove('on'); }); });
-  if (playing) return;
-  btn.setAttribute('data-playing','1'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
-  var t0 = Date.now(), total = sec*1000, orig = t ? t.textContent : '';
-  voiceTimer = setInterval(function(){
-    var f = Math.min(1, (Date.now()-t0)/total);
-    bars.forEach(function(b, i){ b.classList.toggle('on', i < Math.round(f*bars.length)); });
-    if (t){ var left = Math.max(0, Math.ceil(sec*(1-f))); t.textContent = Math.floor(left/60)+':'+('0'+(left%60)).slice(-2); }
-    if (f >= 1){ clearInterval(voiceTimer); voiceTimer = null; btn.setAttribute('data-playing','0'); btn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>'; bars.forEach(function(b){ b.classList.remove('on'); }); if (t) t.textContent = orig; }
-  }, 120);
-}
-async function renderThreadList(threadId, wrap, contact){
-  try{
-    if (contact && contact.npc) npcMarkRead(contact.id);
-    var list = await rpGet(msgKey(threadId), []);
-    var status = await getMsgStatus(threadId);
-    if (!list.length && !status){ wrap.innerHTML = '<div class="rp_empty">Переписки пока нет. Напишите первым.</div>'; return; }
-    var msgs = list.slice(-60);
-    var lastHiddenIdx = -1;
-    msgs.forEach(function(m,i){ if (m.hidden) lastHiddenIdx = i; });
-
-    var otherName = contact ? contact.name : null;
-    var otherColor = (contact && contact.color) || '#8b5cf6';
-    var otherAvatarUrl = (contact && contact.avatarPath) || '';
-    if (!otherName){
-      try{ var names = await getNames(); otherName = names.charName; otherAvatarUrl = names.charAvatar; }catch(e){ otherName = 'Персонаж'; }
-    }
-    var otherInitials = String(otherName||'?').slice(0,2).toUpperCase();
-    var avatarTag = '<div class="rp_bubble_avatar" style="background:'+otherColor+'">'+avatarInner(otherInitials, otherAvatarUrl)+'</div>';
-    var spacerTag = '<div class="rp_bubble_avatar_spacer"></div>';
-
-    var isGrp = !!(contact && contact.group) || msgs.some(function(m){ return m.from || m.senderLabel; });
-    var gNames = null, userLc = '', gImgs = {};
-    try{ gNames = await getNames(); userLc = String(gNames.userName||'').trim().toLowerCase(); }catch(e){}
-    var isNpcView = !!(contact && contact.npc);
-    var charLc = gNames ? String(gNames.charName||'').trim().toLowerCase() : '';
-    var PFX = /^([^\s:]{1,24}(?:\s[^\s:]{1,24})?):\s+([\s\S]+)$/;
-    var prefNames = {};
-    if (isNpcView){
-      msgs.forEach(function(m){ if (m.kind || m.from || m.role === 'char') return; var pm = PFX.exec(String(m.text||'')); if (pm){ var pk = pm[1].trim().toLowerCase(); prefNames[pk] = (prefNames[pk]||0) + 1; } });
-      var pkeys = Object.keys(prefNames);
-      if (pkeys.length >= 2 && pkeys.some(function(k){ return prefNames[k] >= 2; })) isGrp = true; else prefNames = {};
-    }
-    if (isGrp){ try{ (await pbCollect()).forEach(function(pp){ if (pp.img) gImgs[String(pp.name).trim().toLowerCase()] = pp.img; }); }catch(e){} }
-    function sOf(m){
-      if (isNpcView){
-        if (m.role === 'char') return (!m.from || String(m.from).trim().toLowerCase() === charLc) ? '' : m.from;
-        var pm2 = PFX.exec(String(m.text||''));
-        if (pm2 && prefNames[pm2[1].trim().toLowerCase()]) return pm2[1].trim();
-        if (m.senderLabel && String(m.senderLabel).trim().toLowerCase() !== userLc) return m.senderLabel;
-        return isGrp ? (contact.name) : null;
-      }
-      if (m.role === 'user'){ if (m.senderLabel && String(m.senderLabel).trim().toLowerCase() !== userLc) return m.senderLabel; return ''; }
-      if (!isGrp) return null;
-      return m.from || (gNames ? gNames.charName : 'Персонаж');
-    }
-    var html = '';
-    msgs.forEach(function(m, i){
-      var snd = sOf(m);
-      var me = snd === '';
-      var prev = msgs[i-1], next = msgs[i+1];
-      var kOf = function(x){ var sx = sOf(x); return sx === '' ? '#me' : (sx === null ? '#o' : String(sx).toLowerCase()); };
-      var groupStart = !prev || kOf(prev) !== kOf(m);
-      var groupEnd = !next || kOf(next) !== kOf(m);
-      var rowCls = 'rp_bubble_row '+(me?'me':'them')+(m.hidden?' rp_msg_hidden':'')+(groupStart?' rp_group_start':'');
-      var sideAv = avatarTag;
-      if (isGrp && snd){
-        var slc = String(snd).trim().toLowerCase();
-        var simg = gImgs[slc] || (gNames && slc === String(gNames.charName||'').trim().toLowerCase() ? gNames.charAvatar : '') || '';
-        sideAv = '<div class="rp_bubble_avatar" style="background:'+grpColor(snd)+'">'+avatarInner(String(snd).slice(0,2).toUpperCase(), simg)+'</div>';
-      }
-      var side = me ? '' : (groupEnd ? sideAv : spacerTag);
-      var senderLabelHtml = (isGrp && snd && groupStart) ? '<div class="rp_msg_sender_label" style="color:'+grpColor(snd)+'">'+escapeHtml(snd)+'</div>' : '';
-      var mText = String(m.text||'');
-      if (isGrp && snd){ var pre = String(snd)+': '; if (mText.indexOf(pre) === 0) mText = mText.slice(pre.length); }
-      var bubbleInner;
-      if (m.kind === 'circle'){
-        var ccBtn = m.text ? '<div class="rp_circle_cc_btn" data-act="cc-toggle">CC</div>' : '';
-        var ccText = m.text ? '<div class="rp_msg_caption rp_circle_transcript">'+escapeHtml(m.text)+'</div>' : '';
-        bubbleInner = '<div class="rp_circle_wrap"><img class="rp_msg_media rp_msg_media_circle" src="'+escapeHtml(m.imgUrl||'')+'" alt="">'+ccBtn+'</div>'+ccText;
-      } else if (m.kind === 'photo'){
-        bubbleInner = '<img class="rp_msg_media" src="'+escapeHtml(m.imgUrl||'')+'" alt="">'+(m.text?'<div class="rp_msg_caption">'+escapeHtml(m.text)+'</div>':'');
-      } else {
-        var vp = voiceParse(mText);
-        bubbleInner = vp ? voiceHtml(vp, m.id) : escapeHtml(mText);
-      }
-      var bubbleHtml = '<div class="rp_bubble '+(me?'me':'them')+(groupEnd?' tail':'')+(m.kind?' rp_bubble_media_wrap':'')+'">'+bubbleInner+'</div>';
-      html += '<div class="'+rowCls+'" data-id="'+m.id+'">'+side+(senderLabelHtml ? ('<div>'+senderLabelHtml+bubbleHtml+'</div>') : bubbleHtml)+'</div>';
-      if (i === lastHiddenIdx) html += '<div class="rp_msg_divider">учтено в сводке</div>';
-    });
-    if (status && status.state === 'pending'){
-      html += '<div class="rp_bubble_row them rp_group_start">'+avatarTag+'<div class="rp_bubble them tail"><span class="rp_typing"><i></i><i></i><i></i></span></div></div>';
-    }
-    if (status && status.state === 'error'){
-      html += '<div class="rp_bubble_row them rp_group_start">'+avatarTag+'<div class="rp_bubble error tail" id="rp_msg_retry">Не удалось получить ответ · нажмите, чтобы повторить</div></div>';
-    }
-    wrap.innerHTML = html;
-    wrap.scrollTop = wrap.scrollHeight;
-    if (!wrap._vcBound){
-      wrap.addEventListener('click', function(e){
-        var vb = e.target.closest('[data-act="voice-play"]'); if (vb){ voiceToggle(vb); return; }
-        var vc = e.target.closest('[data-act="voice-cc"]'); if (vc){ var tr = vc.closest('.rp_bubble').querySelector('.rp_voice_tr'); if (tr) tr.classList.toggle('rp_revealed'); }
-      });
-      wrap._vcBound = true;
-    }
-    if (!wrap._ccBound){
-      wrap.addEventListener('click', function(e){
-        var btn = e.target.closest('[data-act="cc-toggle"]');
-        if (!btn) return;
-        var row = btn.closest('.rp_bubble');
-        var cap = row && row.querySelector('.rp_circle_transcript');
-        if (cap) cap.classList.toggle('rp_revealed');
-      });
-      wrap._ccBound = true;
-    }
-    if (status && status.state === 'error'){
-      var retryEl = $('#rp_msg_retry', wrap);
-      if (retryEl) retryEl.addEventListener('click', function(){
-        var c = threadId==='main' ? null : (contact || { id:threadId });
-        attemptReply(threadId, wrap, c);
-      });
-    }
-  }catch(e){ console.error(e); wrap.innerHTML = '<div class="rp_empty">Не удалось загрузить переписку.</div>'; }
-}
-var pressTimer = null;
-var longPressedId = null;
-function attachLongPress(wrap, threadId, contact){
-  var startX = 0, startY = 0;
-  function onDown(e){
-    var row = e.target.closest('.rp_bubble_row[data-id]');
-    if (!row) return;
-    var pt = e.touches ? e.touches[0] : e;
-    startX = pt.clientX; startY = pt.clientY;
-    clearTimeout(pressTimer);
-    pressTimer = setTimeout(function(){
-      longPressedId = row.getAttribute('data-id');
-      showMsgActionBar(threadId, wrap, contact);
-    }, 500);
-  }
-  function onMove(e){
-    var pt = e.touches ? e.touches[0] : e;
-    if (Math.abs(pt.clientX-startX) > 10 || Math.abs(pt.clientY-startY) > 10) clearTimeout(pressTimer);
-  }
-  function onUp(){ clearTimeout(pressTimer); }
-  wrap.addEventListener('touchstart', onDown, { passive:true });
-  wrap.addEventListener('touchmove', onMove, { passive:true });
-  wrap.addEventListener('touchend', onUp);
-  wrap.addEventListener('mousedown', onDown);
-  wrap.addEventListener('mousemove', onMove);
-  wrap.addEventListener('mouseup', onUp);
-  wrap.addEventListener('mouseleave', onUp);
-}
-function showMsgActionBar(threadId, wrap, contact){
-  var old = document.getElementById('rp_msg_actionbar');
-  if (old) old.remove();
-  var bar = el('div'); bar.id = 'rp_msg_actionbar';
-  bar.style.cssText = 'display:flex;gap:8px;padding:8px 0;flex-shrink:0;';
-  bar.innerHTML =
-    '<div class="rp_btn rp_ghost rp_sm" id="rp_ma_hide"><span>Скрыть из контекста</span></div>'+
-    '<div class="rp_btn rp_ghost rp_sm" id="rp_ma_delete" style="background:rgba(255,90,90,.18);"><span>Удалить</span></div>'+
-    '<div class="rp_iconbtn" id="rp_ma_cancel"><svg><use href="#rpi-x"/></svg></div>';
-  wrap.parentElement.insertBefore(bar, wrap.nextSibling);
-  $('#rp_ma_cancel', bar).addEventListener('click', function(){ bar.remove(); longPressedId = null; });
-  $('#rp_ma_hide', bar).addEventListener('click', async function(){
-    var id = longPressedId; bar.remove(); longPressedId = null;
-    if (!id) return;
-    await mutateMessages(threadId, function(l){ var m = l.find(function(x){ return x.id===id; }); if (m) m.hidden = true; });
-    await renderThreadList(threadId, wrap, contact);
-  });
-  $('#rp_ma_delete', bar).addEventListener('click', async function(){
-    var id = longPressedId; bar.remove(); longPressedId = null;
-    if (!id) return;
-    var delMsg = null;
-    await mutateMessages(threadId, function(l){ var idx = l.findIndex(function(x){ return x.id===id; }); if (idx!==-1){ delMsg = l[idx]; l.splice(idx,1); } });
-    await rpTombAdd(delMsg);
-    await renderThreadList(threadId, wrap, contact);
-  });
-}
 
 SCREENS.settings = {
   title: 'Настройки',
@@ -12997,7 +12907,7 @@ SCREENS.settings = {
       '<div class="rp_about_av"><img alt="" src="data:image/webp;base64,UklGRmgfAABXRUJQVlA4IFwfAAAQbwCdASqwALAAPm0skUYkIqGhLpdLwIANiUAX5gVqC5O/JfgDv1wglo+cK/F6Xv77u4edt9PW9O71P/gLTR41YoOd/5Vn14v+zz/e9Bv53+T/6n+M9rP9j4A/L7UOeH2iPgjwV9X3ID/XX/l+vviGUEf1h/2fZ//2PKd9d/+/3DP19/7PZE9IRokf0uerAfqABu6s7150BV/7QKU/5Hv2ha0QJZEToozqci1HeXd86pVBTPRxNNlh+Ol8J4vxIybPIXJO8NZ4EJ3dg5LU3Hl8FTI7Rz+4QeJL+vyQ/xMyvYzkn3OzidQs6JjJcn1xGPuHm0/r1epMcUqDkrB5laIdjeOek6OhPnH3Qv1USLDevD5O8fz10zGBBwJzZ/sl7nNAggAwg3pKgFgWgT58F+PhuKDx4PL4GXrMcn2y2Q8ydtm6WsObH1ywroZO0Ipc7RRPmkI19iXfQJjYATRHyzrjcHusxg/YB7KrxjtStp7iiY4ptBKXTkXx7zrDY+LkhqH+qG8Z52CFA6ukLjGLHVeLkKznVfWDHcaCDUikvOqcPPXPZcaHcGdtCZaMOrI5ae8kdkNzKQyvvNd0QkI0+0EFcFnhr7CvMtI9RR83m1zZVK+lN+R841Oy1Llg8wzEHPHFcbNmc+5WsDlj5/fbDheskRVn5Wvsz3HUNC4AgDa7ic26ctCybTdrF+zl2tNQFe5V/hES0+3+S5Srw9KwT9tdLDARrzc+2c1iAZ4fvGenGNU772Mcpr1z1ssv59D5unrsJWpKvTlQWoFUontvOgjjBsIVTfTCkWbyGz41lRfJlw3sBINr5v3JSj0fkzw4/XYqCfZyeDH1/6/gi0WJG9twuSmp3AyPNSqUAF1Mqm/eoG3FTWfccGxmDqHEFiyPU5pCkxCQc1C2f00ndaPEN+Hec0VFQ/Wx6JIl1rLC0Uj2lpP8db69KZCAlNT6Bm/3rMajquDu//Qhv28xgTjmqDMLO2EbPkDb+KvGtuZ7oqZSaHcOik79Gih1A+pwMgO7krJWYEPVYcRuboai+2wLXC/KxdfPtxfi+l2naHIoGlteO44wkwoZGvTyeH3xbjHzCW3jh0mbZtsdnlKsvPYzZQzXPlWQpl5o6AISVYE63LN9HkEO+3nW12HC9u4qu2S7MgLjJHOj41Pnv5+VTgR2hA0ZmMezTFt68BnyV++EpTUu1gAA/v87qUHwQ0qnanaD0G7D39RScYZ6k7nHaIczZf+/w2fbAm8s0iWVXb4o4Jkl8XjU9G8ESrx4Bg/CvYYgj6mGUeT9E7EnL8LtbWHkRCcsQFeXDlXg804CmdfXLqzTvZqUmHBb+4NGFGZXt+aB4yWKR/HemfGzozBA0GZPiI/YHLOkTOzob3Xu6YWFEdteh47Syrwe8Nk0MoKLBLofFC1krlbccOLgEuW7Bfg9y7TBPtu8vl5EfdMA6OHxSVlScJeaOxvXl/O2SW15AmN3mdRXD7LtzyhBSTHkVZ3bP2aa58e75vISgjNbNLDSPXHNoqPvudWAUjRyrh2mbKNHzE51jJhqm5Q4ReZm233JpIwvA8J7jN+iQDr9ZaAc1v6rJpdvJesK/ARrcTofAdhdOG+rZ3AKwRvQVY1diPhp4rZvDIneaSVyNoZFRqWrE4VatlI2D1EVh+BnQQzOSEJCMX8zeHnRPI5AGS5+QI07heNaAD/ZhsEKyhSSmsWJZo5IKGgClZdJslD4TuPEGVaN9p3DMDlf3oVWQqRZefpk4ahXX9/fNu0FxofkdYTPJPBVSfDc/pDJvV6ujPz+zMqGOusobTD8XsWA9Hgp9qdPMCseQPjIT1juuoJgdO4qomVSnkEs2k9h7EOx7aKZgv+xihYoRbHTTOxBtcoQPQvYE69R6mPpLQYhEBpOMt421rTMkkW1qiIAWITnfFRFqLr4xcTI2u3ShQmi7N/riLRVaFzmgpAWAAdDBFbncv3GECaqsE4cOlEybH25KKNUvETMYZgBxrVnltFrVqiQ0/9q8SsaqUeDC3rSHnH2Rb5E6a6/p6p6OVZJbt6qZZOljE8bPRnBDqpyDSGrfHNCihUPptGxzNeaisJdxvR+EXTb8pWM9WiLyTuOsQ3AHLLPi1UONq2MdEt+uwLuAPIxsGzxwZ9ewPdB2jFO7w0nPZvmxFTpgd+wOld+6GkOf9qKNH1OOwO45LNJ0Q8UWTtR8QgoVQhSBglm+GEmrQ41w5/uMnF6MWRjOGckMOAi3IjHT1J83gzDVCd2i0f5fG+PCwYhfMNmUt9U3FFYaw0E0/+VjGdpFTFMTw7UxC9j4QDUtgWnSbJ2TYMC7MSqKr1pm4uR8y/0c/nAoqSMNJOuUb0J6koZTY/iyEMWpNn2IuU1WXzFpbcs/Azh8vnhZs7qaVSLYiGUFF0IvwtmbCqgSjKAeA3zVp6Rp0V9wrZsesNFmlwXRIVu0ZLPCws20gc5qM2AdMlSMe7kRI+N8kALzm6ssbew4iR4TwLaTp5/ssNJzcGHw2LFvDFkPkeL7SGf+Nk161OWR2O6psiTLpvjEEkxVQyrxslgh0eNBiKuFB+mc8Hu6S2Vfo/cxp2kROBYCcbDaQMEQKOG26/JsKXld3Wr3P0+8A6NI7g/7JXNpOw6z+yzvslYEvy4WspV+NP/pTg+xuzRalVWeODDSQTcvmRa2LAiRJn2+gkpKRdeB7WBVMHpDUSPd54bnYTCmdvM90t5oHFpk9Iaj5UyYOJiH0CJ1hjpPLlIXvN4SXDpwCdaLg8WnO9yBv7To0lXpCMM07A6TLkI9o+lmGfYZ4m90OqoSuIrGzBaiCLoj1o3EMZuqqoP58xZ3wzL5qNciYS/uJOtZLHrIrbZl3qRZUjaelnVRveHRZZiqOdBJD96oLVXtqXyMwcVKlKawwfXZWOj75cfrNUW1Shu4Mp5/fmPt5ga+ICUTKOviBqtU4IKlIFgIBuCN/+q35ST77ZJubFi0SjPG8t3k9WsO3gwOcEP1FRWt2RkgJhMSRNb7F3yhGMZeo8uuM2sCQA+y1WtUqAP3HLwT3tL8TdyLiPiYPGXv+hTG4qqNa4Teb4S3DCQuY/B9PTn4wZJNhVto7xO5OUAnj34CYGU3kKacy6EC9YrSgDlc/TQClILrzTWJ5r4Ye5RG0+oBEYWTePrrDR7ZfPYrH3znwyS0naSfzMReYxPe3/xuwukwC6CuIlNeY8P8fjwKvErrQsN8E70DbwaneARsc8hm1mWICwA0GCFT271rcusGz6koT1v9a64cwkhovRax56q2Rc+78Yj9q4qTbS26NQl5/d+eu4nfSZO7QywvddlEhA+6k7aH00xPr7seWwAkpmhqU2EUbuKIsTshZF7rCWgnK69363MBsWXmEZ991ieDtMJOGTFe4DB6PRTUbMmxfE5xT2rhEnW9kUrBKohizw9LbSD9qyjn0h5o97VzLvq9LpF37sP2acTwv31WTg8ZacCKdT3PvB0+beJLR33+iBOl81+whqdr+8WaLycM6wrrs/M//LJnvwIQaN0bOCbQqwWs9kSwm9unI7gEAtTQ7wpYdyun+TFR7lj+9SFT3CuI4kWPGEZEWbcemk+fRHZemgdEgd71rSFgDC35MecArCLaJnL3tXDy69UtTlAUMFucpV3H978pN9UPf5fIO4Gx1VqILpfznDQFiPLFT6cGtabaLIocncI2oReWMOgg3/kQLkWRMQdmvaqMBvSfICtEUAacTm6J0P2R9PsS5Ld758ftlItcSTtkbltlFa1sHBoU+iQqOAYm0KwllfQ/VqJsRQdWO5h1oey6f8bhYdbT4GvucCEP6/VKJLLwHRqWVuqH6r9lDDsoPn1GCR0P7Ix8Sdl7VszxNA+EUaPZgyOCu0CSJdbwKJEpvyJ+ijTmzJv8T21DIOUO17/Xfw5FrvdgF3VvZP/+PBHMgxrhWNaUdm6G5wEeUVQ4I7iwhI3YYnXg0LfzUrXEEn5kI6eu7kN+2NXgQEfEkg9KFOGbmoUMjcT7I3LOdY1EwBm0ddZeuinDN6mLP10A1Up51vCwNE++Lx3R1xUzc4oO4Cgd8JT6gwI7m9ecZcqdt5Hln8CNVxpHpcjOzI5S3uJlUXIx/IOMHSTTWVERM0QeaOpBZLwOPUKov+Kq/2ONq9G8UVJPGnh/IFoVwuoCJuO/FuoRwkfSpta2kfks+3DwIwtvUR1XnxkgiDkLCdYB3GE+ifMZF/gJAMRPCnMR7yyjmQUzV24CnRgJugAyIobyYBcK0uTLyZF4z+eh+1eKE7ydNgjQ/htVuVU5611njR+qddRBxu1f16ATxcUjCzZDfqk+t/Y+9SdScpUcOMMwBZg7uQrBsORHnUTE+f0i2648W6HRGw4Mwu6TKqHS7WBiUFQNKbgc7VHgtAWtV36c1n+tM1xORmVQpaVAkvJJVcAYnCE+46M0h0QloWCBkAkW/qouhwdiDHHpDyp87wB9WkDbHd8ipn8sUxCAa1ndc8WQPFCCoHxfA15sK6i21+aCof8bx0ZwtH3YNnBZNNQFCTM3xtDrbyQER3tK7badwrtPyQtREzwdaYKuxYAmx0Zpu7aaxZjBgkZOSgCqlzz5G/OCUpaKCOfDhAQScsRVMNtJcvdamjQm7EYsRoHIatPHl+YaC1DXCdr44jMQy86nvTbSizJNG6zQMhdVrQZ5iuQ+C7xlJ9uf9v2aQKYRK/Xaa6EUBoWFbOKHg9S7WprCBB5u+/dHtS8H4gysysKY2wtWcZ6R/xP6/vcdHvT34cz1Dn7SK2moaHy01Q2Mtsm0eQFUZiWnijxL6IBIc1FsNLYmxRCZYsf+PJmJ2FTm2ROV7MeTTxur3ArS1xdt/05IgEVGh3T3207txugWxMELDuRZ815spbMMLwVUDTox+7xlZlQVRjxd94wHSEyokd2O1xfjL5gPv6MhM4VxsnZap8+YtztVgjk/koMKNTdTHTSfIQ/n4mOdacNTNynaXfBW93xOruW2mvwZc3MXdrVwkfunnT92WhsjU+a9OZcUTCmYWaqp6vF1KZ8tK4DikBmnKnI8MLZChElUa235l0wgwf1B9kypLqQKpPXaTG49YlI5K8YsJPNxOoayKSctvm67GgvUBmL/AEIkRC7FX6LBJC7CP6p1Uu2Tcpp3swB1Ek40YQ/VXnMxylcCVl59wJegopqKOmKaSG0XogjLvI4VMdyzq3twNuzZr3fr4PA9pd7aMTCOgqXAbG6CblIAzBV4hQJt9D7ssohU0UaLkY4KeNIRPEhbIYxiTQDQ6UgiM4/c4pXWOXjR+AdkCa1wDI7mN8uzaR0EDHyntUq5TiUe0+pfP0+TO3skaiG5ZfpVdseaI0FSSmLFMcW+vYYLxYPfUK5JSbXt5Ga+wz0bG7od0+j/S8qLfzPuywIvsGrwPnA7nroZdS7CrPUPMX9VGoZxb+/z9lvnE9cwYM6e0s9acK64deyclTQpwMoWsBTg3GZFqGtaki3Clt+eBN5LiKFqz4R9D6eMNN0HeLOXkftYPutSv6RMuY6GUXY/90fWa3brzaMpPu+szazeS4WDJU+jpreXETvFZxU2f953xt65WpNCNalJ/QPqoLA/ig+YlTlJcdzml5s00UXq6J2ZBO/foj26kPHdoDJwjOSDF/mmknkXPJ5k1+pJu6+kXqhpb4F9p+aCq+1dWuFVWInU832DRZV7u6dDUp73dNvRGB0KeZ98ywzAfJ7/Se14K+tgNwIaxT6Jgs2hsaEnD9CR0nch6I+NezmQKqo9Zd0FTDZzZAYtDFWvzXDl7MWhahPaJCnw8JF7ncgn01w0+kGAN1kxvGYYkJSTH3slU0GCk5KazGSPt1n8BPL4QqKV5t8SCLYh4JbWP8L1fD1fjx37ds1Jk2jZqWUS/yKOFMBrsRlYvQR3X9cSl31S8kspJ65O8bhya2sl7ppQMu9WUlDS+WLpdx8n5GMNpzRPMGvK0f+LOH96ffMTd/jqs8pOCNgDPdTQMAPnA0GOYAf9Z6Y3HbrfGf4st6PA4+gIwuhgJfxN2oiTj4gjrzy8KhcOP9e0qtypVy5FgEhSBFS+u5mxNw8cmk3yAfEIQs8uDfuBKwGXwO4trME32GsLrTbzE+MHeI6uMf8DYBLm7OZPcBotaPnO9/i12qheqKHtToF1V54DAxhJrV/V5R2JawGJ+RqUMOCF4/XA9Dg6q+cNJRt7pQURDBf8AalUfxccfMNmkgs2dDed2Km9LX+MIyk1jeV4IdpUad58pkGX+G5t5/NhfabJh9jDEjGLtX+aVO8s8v26vmB16R7WUGqjz2gwu5TOMn1kuuZjmLpDFJKKvqWgdoHwFgzBGgKpzRE487sfthpsCB00SJl0nam+ttIHS0i9KPT0XpOPXNjyIRvO+rJVE8NOM4g9yM2J7oTWC2sSIn8aWBQR5TJFGpM/M8vWnqeEyAjd4RoKaD1c4ruIQu82q9smL5wpKtzIlNKHMgJvTtIed8kGbiaCfC24FA5l+HHil15fF83/nxuEty4znawTJcRUDspmmgSzHAcKp44qjKrLflk7D+RtzqbfOsLgZCxI9JbvHkybhclipRJjbN7W7g5DkRHTBP0sIYZIzC4sgsy+my/JbUmpZ/WYXzEhPd4sxDDwUGZGlOciwee2ZQoiihjL8iqbMiORCQTyyHgo85T+Z3vQZcx2RKraljyRJCuxbhuiSTaIS7Nk1yuAvlFrDT2EHaRJDK81X/3+3scNmQEUYMXmkfK2TGvMCEP03EoV6eeMgFoqfpi+UR1IyZaTVfgWFeh8eTP/JjbnV12APR8UrI9KTdyvnsV4E1otmpR1YRZgfTMVbpxCoOMOZweBAeImtXCV9euw4nuBst9xg138PEVkIi5CSLheaTg5j04+LbHe5hggEtq4r0EtUrUpTVIeDij0kQRrwgJudFVIbvOs42HkHxKQd2KJDc4RKF5hqT+R7mtz0rnnAgAqBh6J9N42EhtZ7UuRG8sa2+loCvRwGqtEcfmjdKP6FH7enFiZRX9MH8GThLaMq1x55dtOrQmh6VT0EB76AmD1GIU9xtoJs4PR3LCoOquItcmV1uy9yUP3WQCQQriNZseIqsEe1qJqPzu0xhxIC+mqjKhFKUVw5nc6OeweZgVAUmOM+drkCs+qhnq98nToo2CEBT8FpMlgRvgCuRhPWUKk7x6s2z4hVAtfHUX0H0RodqorTjzYeeg762wDbVniFBEr0q3sPPh128wHnhK1vOyKcrh4I8dQDrcPeEtK6cEvtT8l1wsqOjWz5FIZqHJXNNWwl24fxBoyy7xFfXnSKDZSnVFvJc7nKwNCCJZpJ0uGIflqeTMVdwO/kSqH8uEI0z6fViW/5dL5KakCZExdQ2oz4l5KR7Ry7ytnbJmCL1A0elCd7ByND/8AnqjestNTCkWkVIizUeC8H/7fPCmdJu4fUeBpWDPoFvI0WSLADDOHSiYiun8sGj+b/+TJ4Q9WGNkPukvdm1MKi7cTeOY3FN72ZD2hkBdMHAuQjrW/jwB0UyvaPGaH7vvH3W4TXm2QztorTMLnYfpx1u7bsXdwoOstI8IRq7A0D9tJ28LyF7+bubhuK6HH/5urKzNf90Rw29UHnt2LR2S6vNZnHU3vcyFO1+f7THQGYIeeLZdvjwf0CK/9T/K5e+E5V32mnFixuqTBe9sTthpUXoU0+NGAohShgqiFDeR5EMpGKKSuq3D4bo7f6pRw2gq/tO9c62nWclkf3awKNQcdldFlKH28KI0STRC2mZcR7onmXIuMxlJ+VWzdh8ZpqEYXRRx7rqJuEVNpMpIVkX25EoBJGryuiylQ2zkY+J1eb8a5K2xwZoBDFykvU/Og5dJ0ECY4W4fxlqM0uibi9xZr+PLeu69Rjh338p8QSV7YeWtqxPimLIV+q9bV7D6sShkh4ANpb7AVFCdByDoN9gcqASZTQW6+Ipl7mChNg8a/hulx+NrXeDeHhv+mHPf7/gyr99KhlhLe8+HuKnB/WYq1ewnoGDiIqSIwrv8y/rnFjSlKg4UvDohoBE7vkC/GkElNeg8Ivz63HtUwpsZf7SHtvlv9+hFG8yeN00W+3WzH5/6vKGEFpffsp23htlaBRUFXjLkcr3pg9v4iICsVxe6E1Se36uRJ9LZJ77CTJ87I85GSE2ai01vHfekH2RQBTzG1f8p9tD8Jko/vprH9VrJWv1FwuuUq0T1dS78i9YNulOvxCpRddvcFKxJL6f2U4fKENGBjE2MHUcQjxbeXLL3uFZssZn1HVER7BtLm9UnOvpAvGAzjZOtbRc+5ksvPSvLKbovamsw5Q5wr4BIpAushX0SMVsXnogS2c4j1aiwjoGFxR9+s1ln3cUgvui/9hlcin/ftMSmfD3HeTrb1MP07m587L37OSt2mExYKxMo01ugjMVwIvnn5TAbmXMV9UP/SIjsT4vXl4JqJpcqq7JlZg6+7RIxcbp5zI8TkoTlm1mUhbXXcnlL6S6qdlEWfA8JTK5iBvxM7vA0HoKjoomZzAf9iPdylj4VmjW+48AGHHHJpJ9rCQRQnIZu9Tgw4Rwiz9fZo6bQc7CPErrpKGJ0dexMJV1HbAxhbU5oHuo4vEvFM5Bbzd56NDCiXlG0xOKIZks5nPgtM80hg2jizffgjI0aNSOPhIwvOxi0ZUXYkC+M3N4HUt5clc/dHl0KLG6TiRrPJPzlgD+T8+zkVRhFOVrYN2hw/1oG8NJsHmLqVjbilLtl0dFGr/m1MpNbm/UlVJz4ryUHdyQl05CDMijp0Ikv0SnbtiVaj6L58YDTrs8eTr7PQVEDpJ5IfjqhfwHvm/hw5pUK79goa14N2lacfManNjtlQI5Y4USyTFAgc1zgGDO7NcoCY2Zj47QCcyR3sR/ptCY/LkxYWGtHkIUVGYBkDl6xsKGaM8QQWgjnGB1jKzXwpw5D4VY/BFSQiMeQa1/VEMIdk+8KGr8tcUhLt/noK8HXfZZWAv9m7rw2H75/W+2lzjbbo4Er36aGtjZIuFb3zEp6N3UQhocjhpi897AHy2Vy0uPBVdFKsXeXKoII7H391tIXhafNb0k1cjdEr7xSwGEkCy+f7xHDQsgvcEB90/C1QOz/nq+LRhlrX9Uf0/7Gb93H18K/T8dVk3scsw5CF2gRU7J9pgO56pvDx8wotaLylRGhTX311RYR+Wo8Zvxi+9cbgNpSZeWv4x6i/HzRc4an/O/mYP8sPB7dV/Yw/loplVv8iOV2E0Axtt1d90qiEq/vKXzSeC0kcamHfm7HcXqrUN/mEyQ1f6pAi5M6O38HwsF11hrnvBnvdi1lYTrW11fllBwe4HpfDxXfsx3ZV6b2jnV4xztjLT9hxLjc10OJntGgVm+19aUQfqWbT9hAr0g16rvzwrYKvS8nTBtxFzWPCNapOn1p+tC5/P8/1lHlU617uWE/eq/VCvI4Fj+0lvwqHJ9Vy6XngUmqCmIdK/UIn0nywQGx5dJD4Vrh6tql+oqpfnDUl1TTPMNKlHXOs8a0RFJqsoj/x13bG6boWHCz46/Ad65udp2j9Hs9ryR/tMuXoxqC8hpmAS78kJ8v3c+peDcJ8/O/4epObyeMxa3VCRUD/rAPbTxPGr889FG2ocRyd12Iei9b1cdIs58Qq6ZdbKuYhMvN6aolH4BHB+sSkfA3aHrDfnGhrYkKLdR/uj/txdbfufzN+WFcDCJK5FRUdcC34T5lPgT/n6oLza+9yhsKZOtP/gfrRkNcCQ3lHy9rlZtDRSkfmsRtOUR1vSdG73PBtWCvk0T1yMJy3gSAY3Y0ZRAb6ayA7tiQ5Amkw64FBtBSABuDSDmgSM5G28caj5AgSeNT5YX4Fl8KQooptMMYD5/L9N/z4CvArdpZLp0nZu5EyshgiWJsN11C2bbx4brYkGs5Ul2hqYtOO0wJYaD8ghsSO6F7XwFrzblYs5MxqcJqOuhNZuI3E/FkzZF6nnuTbjVN2VwamVCRFIAwECwmDVyrBOcmSrSG9gOG3PZziVABdC5GTJbR0hUlvUsWsccY0yj/FJ1EhCzE154brM5TzhsmsyXFYM3RwfN7hvXddXmkg+x7nXbD3L9+z2ROr4wz31ncUjinhwCxZNaI+OSGvBqHH7//eWvubNtBoCXVcKGWiHj+vAsicvmyS+ENEH/o7Yc2eQb6HOhgTa7/+9hwaSXv745YdLPoceajaOW2rt2NzgGDR1/9SnE0QLcI5P3XmaaMLFV6OWv6pQB4duZfCVP/ya0b6VmgHXF0w1pb6rKDMCrcrrrkw/PkaJTFu9GDS24G3VmzuQr7ZzW2hMN/6rmhoqKDmoF/a5Vg6oWT8kR/v8g9wH+fFpMZ83iasXQPlfUb1b0j7KphsjrVhRVqs6GwAhUd3Yh6iW6cz48UDb0PAORMlwny2TvN/vcDwGxx8AwqU7cr6jPt4oNPVJN9brirjxzluB476MxPwL13bXzy4gk5IWaZm/jIY6MVigVGeqSycDMBWM3WswQTikiF/QMyowzM2hXGOcGbu3CUH0nqWOIJw0ffyhPbvN50Lrz7pC38Arj2y+AhPzckq3SFypjsGzneTtf2THM2FVsiL8yPssr+iNEN01qh4JNs0d7OH/6/vPWIX+tRoV9Cr6vmCX81cuEZbedQVKlkoBBcgfvy5iMsGGmsAcF4zbL+cAzVkdKypLk/ATKkL/qMFuP9NQf/Z5V314ezXQS0JeLkQ/iAWk5nH64NSl5MrMdbWmWKo9Ch3T+DMF5tX/EpcAA="></div>'+
       '<div class="rp_about_body">'+
         '<div class="rp_about_name">PHONE MOUSE</div>'+
-        '<div class="rp_about_ver">v0.0.1 · первая публикация</div>'+
+        '<div class="rp_about_ver">v0.0.1</div>'+
         '<div class="rp_about_txt">Твой телефон внутри ролевой игры, с возможностью подглядеть к персонажу. В историю попадает только то, что ты отправишь в лорбук или OOC. Баг или идея — пиши автору.</div>'+
         '<a class="rp_about_tg" href="https://t.me/saturic" target="_blank" rel="noopener">SATURIC · @saturic</a>'+
       '</div>';
@@ -13071,6 +12981,51 @@ SCREENS.settings = {
         var id = tabBtn.getAttribute('data-tab');
         Object.keys(settingsTabPanes).forEach(function(k){ settingsTabPanes[k].style.display = (k===id) ? 'block' : 'none'; });
         tabsWrap.querySelectorAll('.rp_settings_tab').forEach(function(b){ b.classList.toggle('on', b===tabBtn); });
+      });
+    });
+
+    var hintBody = el('div'), hc = await rpHintConf(), hlast = await rpGet('rp_hint_last', null), lalast = await rpGet('rp_lore_auto_last', null);
+    var hAgo = function(t){ var m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'только что' : (m < 60 ? m + ' мин назад' : Math.round(m / 60) + ' ч назад'); };
+    var hChk = function(on){ return '<div class="rp_conseq_check' + (on ? ' on' : '') + '" id="rp_hint_on">' + (on ? '<svg><use href="#rpi-check"/></svg>' : '') + '</div>'; };
+    var hSt = function(){ return hlast && hlast.at ? 'Последняя подсказка ушла ' + hAgo(hlast.at) + ' · ' + hlast.chars + ' знаков' + (hlast.fresh ? ', нового: ' + hlast.fresh : '') : (hc.on ? 'Ещё не уходила — сделай ход в ролевой, и здесь появится отметка. Если отметки нет, подсказка не дошла до запроса — тогда выручит автосохранение в лорбук.' : 'Выключено'); };
+    hintBody.innerHTML =
+      '<div class="rp_title_row"><div><div class="rp_h" style="font-size:12px;">Невидимая подсказка боту</div><div class="rp_muted" style="font-size:10px;margin-top:2px;">Каждый твой ход к сообщению незаметно добавляется блок: что нового в телефоне и что в нём сейчас. В чате его не видно, в историю он не сохраняется.</div></div>' + hChk(hc.on) + '</div>' +
+      '<div class="rp_muted rp_hint_st" id="rp_hint_st">' + escapeHtml(hSt()) + '</div>' +
+      '<div class="rp_muted" style="margin:10px 0 5px;">Что видит бот</div><div class="rp_hint_apps">' + RP_HINT_SRC.map(function(sr){ return '<div class="rp_hint_app' + (hc.apps[sr[0]] ? ' on' : '') + '" data-ha="' + sr[0] + '">' + escapeHtml(sr[1]) + '</div>'; }).join('') + '</div>' +
+      '<div class="rp_muted" style="margin:10px 0 5px;">Объём блока</div><div class="rp_hint_apps">' + [['s','Коротко'],['m','Обычно'],['l','Подробно']].map(function(o){ return '<div class="rp_hint_app' + (hc.size === o[0] ? ' on' : '') + '" data-hs="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div>' +
+      '<div style="height:10px;"></div><div class="rp_btn rp_sm rp_ghost" id="rp_hint_prev_btn"><span>Что увидит бот</span></div><div class="rp_hint_prev" id="rp_hint_prev" style="display:none;"></div>' +
+      '<div class="rp_hint_sep"></div>' +
+      '<div class="rp_h" style="font-size:12px;">Автосохранение в лорбук</div><div class="rp_muted" style="font-size:10px;margin:2px 0 8px;">Всё из телефона сохраняется в запись «Телефон · архив». Если сохранение прошло — делается хайд, и в подсказку дальше идёт только новое. Не прошло — ничего не скрывается. Когда архив разрастается, старое сжимается.</div>' +
+      '<div class="rp_hint_apps">' + [[0,'Выкл'],[10,'Каждые 10'],[20,'Каждые 20'],[30,'Каждые 30'],[50,'Каждые 50']].map(function(o){ return '<div class="rp_hint_app' + ((hc.lb || 0) === o[0] ? ' on' : '') + '" data-hl="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div><div class="rp_muted" style="font-size:10px;margin-top:5px;">сообщений ролевой</div>' +
+      '<div class="rp_muted rp_hint_st" id="rp_lore_st">' + (lalast && lalast.at ? 'Последнее сохранение: ' + hAgo(lalast.at) : 'Ещё не сохранялось') + '</div>' +
+      '<div style="height:8px;"></div><div class="rp_btn rp_sm" id="rp_lore_now"><span>Сохранить и скрыть сейчас</span></div>' +
+      '<div class="rp_hint_sep"></div><div class="rp_muted" style="font-size:10px;">OOC остаётся как был: кнопка «В OOC» в каждом приложении и на главном экране вставляет сводку в поле ввода.</div>';
+    buildAccordion(paneGeneral, 'Связь с ролевой', hintBody, false, function(){
+      var saveHint = async function(){ await rpHintConfSave(hc); if (hc.on) rpHintBuild(null); };
+      $('#rp_hint_on', hintBody).addEventListener('click', async function(){
+        hc.on = !hc.on;
+        this.classList.toggle('on', hc.on); this.innerHTML = hc.on ? '<svg><use href="#rpi-check"/></svg>' : '';
+        if (hc.on) await rpSet('rp_hint_seen', null);
+        await saveHint();
+        $('#rp_hint_st', hintBody).textContent = hSt();
+        toast(hc.on ? 'Подсказка включена — уйдёт со следующим ходом' : 'Подсказка выключена');
+      });
+      hintBody.querySelectorAll('[data-ha]').forEach(function(b){ b.addEventListener('click', async function(){ var k = b.getAttribute('data-ha'); hc.apps[k] = !hc.apps[k]; b.classList.toggle('on', hc.apps[k]); await saveHint(); }); });
+      hintBody.querySelectorAll('[data-hs]').forEach(function(b){ b.addEventListener('click', async function(){ hc.size = b.getAttribute('data-hs'); hintBody.querySelectorAll('[data-hs]').forEach(function(x){ x.classList.toggle('on', x === b); }); await saveHint(); }); });
+      hintBody.querySelectorAll('[data-hl]').forEach(function(b){ b.addEventListener('click', async function(){ hc.lb = +b.getAttribute('data-hl'); hintBody.querySelectorAll('[data-hl]').forEach(function(x){ x.classList.toggle('on', x === b); }); await rpHintConfSave(hc); if (hc.lb){ var cnt = 0; try{ cnt = await PM.chat.count(); }catch(e){} await rpSet('rp_lore_auto_mark', cnt); if (!(await ensureLorebook())){ toast('Лорбук не создан — автосохранению некуда писать'); return; } } toast(hc.lb ? 'Автосохранение: каждые ' + hc.lb + ' сообщений' : 'Автосохранение выключено'); }); });
+      wireBusyButton($('#rp_hint_prev_btn', hintBody), 'hint-prev', async function(){
+        var box = $('#rp_hint_prev', hintBody);
+        if (box.style.display !== 'none'){ box.style.display = 'none'; return; }
+        var txt = await rpHintPreview();
+        hlast = await rpGet('rp_hint_last', null); $('#rp_hint_st', hintBody).textContent = hSt();
+        box.textContent = txt || 'Пусто: в выбранных приложениях ничего нет или всё скрыто хайдом.';
+        box.style.display = 'block';
+      });
+      wireBusyButton($('#rp_lore_now', hintBody), 'lore-now', async function(){
+        var r = await rpLoreAuto(true);
+        if (r === true){ toast('Сохранено в лорбук, старое скрыто'); $('#rp_lore_st', hintBody).textContent = 'Последнее сохранение: только что'; }
+        else if (r === 0) toast('Нечего сохранять — всё уже скрыто или телефон пуст');
+        else toast('Не удалось сохранить в лорбук — ничего не скрыто');
       });
     });
 
@@ -13368,16 +13323,10 @@ SCREENS.settings = {
     });
 
     var autoBody = el('div');
-    var mConf = (await rpGet('rp_autonomy_messenger', null)) || { enabled:false, intervalMin:20 };
     var lConf = (await rpGet('rp_autonomy_love', null)) || { enabled:false, intervalMin:20 };
     var twConf = (await rpGet('rp_autonomy_twitter', null)) || { enabled:false, intervalMin:20 };
     autoBody.innerHTML =
       '<div class="rp_muted" style="margin-bottom:6px;">Если основной чат ролевой долго не трогали, приложение может само что-то прислать без повода — у каждого приложения свой переключатель и интервал.</div>'+
-      '<div class="rp_autonomy_app_row"><div class="rp_title_row"><span class="rp_h">Мессенджер</span>'+
-        '<div class="rp_conseq_check'+(mConf.enabled?' on':'')+'" id="rp_auto_m_switch">'+(mConf.enabled?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>'+
-        '<div class="rp_muted" style="margin-bottom:3px;">Персонаж может сам написать в чат. Простаивать без сообщений в РП, минут</div>'+
-        '<input class="rp_input" type="number" id="rp_auto_m_interval" min="3" max="240" value="'+(mConf.intervalMin||20)+'">'+
-      '</div>'+
       '<div class="rp_autonomy_app_row"><div class="rp_title_row"><span class="rp_h">Love</span>'+
         '<div class="rp_conseq_check'+(lConf.enabled?' on':'')+'" id="rp_auto_l_switch">'+(lConf.enabled?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>'+
         '<div class="rp_muted" style="margin-bottom:3px;">Персонаж может сам прислать напоминание в баночку. Простаивать без сообщений в РП, минут</div>'+
@@ -13389,25 +13338,20 @@ SCREENS.settings = {
         '<input class="rp_input" type="number" id="rp_auto_tw_interval" min="3" max="240" value="'+(twConf.intervalMin||20)+'">'+
       '</div>'+
       '<div style="height:10px;"></div><div class="rp_btn" id="rp_auto_save"><span>Сохранить</span></div>';
-    var autoMOn = mConf.enabled === true, autoLOn = lConf.enabled === true, autoTwOn = twConf.enabled === true;
-    var autoMSw, autoLSw, autoTwSw;
+    var autoLOn = lConf.enabled === true, autoTwOn = twConf.enabled === true;
+    var autoLSw, autoTwSw;
     buildAccordion(paneGeneral, 'Автономность приложений', autoBody, false, function(){
-      autoMSw = $('#rp_auto_m_switch', autoBody);
       autoLSw = $('#rp_auto_l_switch', autoBody);
       autoTwSw = $('#rp_auto_tw_switch', autoBody);
-      autoMSw.addEventListener('click', function(){ autoMOn = !autoMOn; autoMSw.classList.toggle('on', autoMOn); autoMSw.innerHTML = autoMOn ? '<svg><use href="#rpi-check"/></svg>' : ''; });
       autoLSw.addEventListener('click', function(){ autoLOn = !autoLOn; autoLSw.classList.toggle('on', autoLOn); autoLSw.innerHTML = autoLOn ? '<svg><use href="#rpi-check"/></svg>' : ''; });
       autoTwSw.addEventListener('click', function(){ autoTwOn = !autoTwOn; autoTwSw.classList.toggle('on', autoTwOn); autoTwSw.innerHTML = autoTwOn ? '<svg><use href="#rpi-check"/></svg>' : ''; });
       $('#rp_auto_save', autoBody).addEventListener('click', async function(){
-        var mMin = Math.max(3, Math.min(240, Number($('#rp_auto_m_interval', autoBody).value)||20));
         var lMin = Math.max(3, Math.min(240, Number($('#rp_auto_l_interval', autoBody).value)||20));
         var twMin = Math.max(3, Math.min(240, Number($('#rp_auto_tw_interval', autoBody).value)||20));
         var saveBtn = this; saveBtn.style.opacity = '.6'; saveBtn.style.pointerEvents = 'none';
         await Promise.all([
-          rpSet('rp_autonomy_messenger', { enabled: autoMOn, intervalMin: mMin }),
           rpSet('rp_autonomy_love', { enabled: autoLOn, intervalMin: lMin }),
           rpSet('rp_autonomy_twitter', { enabled: autoTwOn, intervalMin: twMin }),
-          rpSet('rp_autonomy_watch_messenger', null),
           rpSet('rp_autonomy_watch_love', null),
           rpSet('rp_autonomy_watch_twitter', null)
         ]);
@@ -13640,7 +13584,7 @@ SCREENS.settings = {
       }
       [apiNote, form, paneGeneral, paneApps, paneDesignTab].forEach(function(n){ stash.appendChild(n); });
       var accNodes = {};
-      ['Картинки','Страна действия','Дата в истории','Язык лорбука','Лорбук','Автономность приложений','Манера речи персонажа','Цвета иконок приложений','Приложения на главном экране','Виджеты главного экрана','Дизайн'].forEach(function(t){
+      ['Картинки','Связь с ролевой','Страна действия','Дата в истории','Язык лорбука','Лорбук','Автономность приложений','Манера речи персонажа','Цвета иконок приложений','Приложения на главном экране','Виджеты главного экрана','Дизайн'].forEach(function(t){
         accNodes[t] = accByTitle(t);
         if (accNodes[t]) stash.appendChild(accNodes[t]);
       });
@@ -13655,6 +13599,7 @@ SCREENS.settings = {
           { id:'auto', title:'Что делает персонаж сам', hint:'Когда он пишет, звонит и играет без твоего запроса', icon:'rpi-pulse', color:'#34d399', nodes:['Автономность приложений'] }
         ]},
         { group:'История', items:[
+          { id:'link', title:'Связь с ролевой', hint:'Невидимая подсказка боту о том, что в телефоне, и автосохранение в лорбук', icon:'rpi-sparkle', color:'#e879f9', wide:true, nodes:['Связь с ролевой'], status:function(){ return hc.on ? 'Подсказка вкл' : (hc.lb ? 'Лорбук · ' + hc.lb : 'Выключено'); }, on:function(){ return !!(hc.on || hc.lb); } },
           { id:'voice', title:'Манера речи', hint:'Как персонаж говорит в приложениях', icon:'rpi-chat', color:'#fb923c', nodes:['Манера речи персонажа'] },
           { id:'date', title:'Дата в истории', hint:'Какое сейчас число в сюжете', icon:'rpi-calendar', color:'#a78bfa', nodes:['Дата в истории'] },
           { id:'lore', title:'Лорбук', hint:'Куда сохраняются записи и на каком языке', icon:'rpi-journal', color:'#f59e0b', nodes:['Лорбук','Язык лорбука'] }
@@ -13717,7 +13662,7 @@ SCREENS.settings = {
     })();
   }
 };
-var BK_KEYS = 'scene_places scene_cache mb_conf mb_lb mb_state api_conf api_profiles app_icon_colors app_names app_removed autonomy_last_love autonomy_last_market autonomy_last_messenger autonomy_last_pet autonomy_last_twitter autonomy_love autonomy_market autonomy_messenger autonomy_pet autonomy_twitter autonomy_watch_love autonomy_watch_market autonomy_watch_messenger autonomy_watch_pet autonomy_watch_twitter bank_balance bank_bills bank_config bank_deposits bank_notifications bank_scene_payer bank_tag_watermark bank_tx bb_stats bg_preset bot_balance bot_conf bot_tx boundaries calendar_events calendar_meta calendar_tag_watermark casino_stats ch_interest channels_tag_watermark chat_merge_names constellations contacts custom_themes date_anchor delivery_addr delivery_cart delivery_favs delivery_orders delivery_places delivery_points delivery_promo delivery_saved delivery_stories_seen delivery_tag_watermark diary flo_cal flo_config flo_marks gal_cfg health_labs health_oms health_oms_log health_scans health_status health_tag_watermark hide_wm home_layout home_notifications home_order home_wgts home_widget_photo home_widgets icon_preset img_conf img_profiles img_refs img_styles lb_id locale_v1 lore_lang love_hdr_start map_pins map_tag_watermark map_tracker_meta map_trackers market_cart market_orders memories messages mood_cal mood_log mood_log_bak msg_last_activity msg_summary_count msg_tag_watermark my_profile mynotes_v1 notes npc_contacts npc_read npcs2 partner_mood_log partner_mood_log_bak pb_contacts pb_over pet_feed pet_partner pet_state promises rave_chat rave_movies rave_scenes rave_settings rave_state rave_tag_watermark relstatus reminders reminders_jar rpclock scan_last secrets smarthome_energy smarthome_rooms smarthome_scene smarthome_security smarthome_tag_watermark smartphone_tag_watermark status_log stk_cfg stk_chat stk_feed stk_following stk_hist stk_me stk_mine stk_notif_seen stk_notifs story_date stream_archive stream_chat stream_feed stream_session style_note tg_channels tg_posts theme theme_edit tinder_deck tinder_karma tinder_matches tinder_me tinder_mute tinder_radar tinder_seen toggle_pos tw_archive tw_img_conf tweets twitch_balance twitch_regulars twitch_settings twitch_stream_count twitch_tag_watermark wall wallpapers'.split(' ').map(function(k){ return 'rp_' + k; });
+var BK_KEYS = 'scene_places scene_cache mb_conf mb_lb mb_state api_conf api_profiles app_icon_colors app_names app_removed autonomy_last_love autonomy_last_market autonomy_last_pet autonomy_last_twitter autonomy_love autonomy_market autonomy_pet autonomy_twitter autonomy_watch_love autonomy_watch_market autonomy_watch_pet autonomy_watch_twitter bank_balance bank_bills bank_config bank_deposits bank_notifications bank_scene_payer bank_tag_watermark bank_tx bb_stats bg_preset bot_balance bot_conf bot_tx boundaries calendar_events calendar_meta calendar_tag_watermark casino_stats ch_interest channels_tag_watermark constellations contacts custom_themes date_anchor delivery_addr delivery_cart delivery_favs delivery_orders delivery_places delivery_points delivery_promo delivery_saved delivery_stories_seen delivery_tag_watermark diary flo_cal flo_config flo_marks gal_cfg health_labs health_oms health_oms_log health_scans health_status health_tag_watermark hide_wm home_layout home_notifications home_order home_wgts home_widget_photo home_widgets icon_preset img_conf img_profiles img_refs img_styles lb_id locale_v1 lore_lang love_hdr_start map_pins map_tag_watermark map_tracker_meta map_trackers market_cart market_orders memories mood_cal mood_log mood_log_bak msg_tag_watermark my_profile mynotes_v1 notes npc_contacts npcs2 partner_mood_log partner_mood_log_bak pb_contacts pb_over pet_feed pet_partner pet_state promises rave_chat rave_movies rave_scenes rave_settings rave_state rave_tag_watermark relstatus reminders reminders_jar rpclock scan_last secrets smarthome_energy smarthome_rooms smarthome_scene smarthome_security smarthome_tag_watermark smartphone_tag_watermark status_log stk_cfg stk_chat stk_feed stk_following stk_hist stk_me stk_mine stk_notif_seen stk_notifs story_date stream_archive stream_chat stream_feed stream_session style_note tg_channels tg_posts theme theme_edit tinder_deck tinder_karma tinder_matches tinder_me tinder_mute tinder_radar tinder_seen toggle_pos tw_archive tw_img_conf tweets twitch_balance twitch_regulars twitch_settings twitch_stream_count twitch_tag_watermark wall wallpapers'.split(' ').map(function(k){ return 'rp_' + k; });
 var BK_SECRET_KEYS = { rp_mb_conf:1, rp_api_conf:1, rp_img_conf:1, rp_tw_img_conf:1, rp_api_profiles:1, rp_img_profiles:1 };
 var BK_BANNER = 240;
 var BK_CRC_T = null;
@@ -13760,10 +13705,7 @@ async function bkCollectRaw(opt, onStep){
     }
   }
   await grabAll(BK_KEYS, ['chat','global']);
-  var ids = {};
-  ['rp_contacts','rp_npc_contacts'].forEach(function(k){ ['chat','global'].forEach(function(s){ var l = data[s][k]; if (Array.isArray(l)) l.forEach(function(c){ if (c && c.id) ids[c.id] = 1; }); }); });
   var dyn = [];
-  Object.keys(ids).forEach(function(id){ dyn.push('rp_messages_' + id, 'rp_msg_summary_count_' + id); });
   ['chat','global'].forEach(function(s){
     var m = data[s].rp_tinder_matches; if (Array.isArray(m)) m.forEach(function(x){ if (x && x.id) dyn.push('rp_tinder_msgs_' + x.id); });
     var p = data[s].rp_delivery_places; if (Array.isArray(p)) p.forEach(function(x){ if (x && x.id) dyn.push('rp_delivery_menu_' + x.id); });
@@ -13943,415 +13885,9 @@ function bkNode(){
   return box;
 }
 var MB_CONF_KEY = 'rp_mb_conf';
-var MB_DEF = { mode:'st', format:'gemini', baseUrl:'', apiKey:'', model:'', n:20, keep:1, autoHide:true, auto:false, strategy:'hybrid', recent:5, prev:true, lang:'ru', keyLang:'same', scan:8 };
-var MB_BUSY = false;
-var MB_TAB = 'main';
-async function mbConf(){ var v = null; try{ v = await PM.store.get(MB_CONF_KEY, 'global'); }catch(e){} var c = Object.assign({}, MB_DEF, v || {}); if (v && !v.strategyV2){ c.strategy = 'hybrid'; } return c; }
-async function mbConfSave(c){ c.strategyV2 = 1; try{ await PM.store.set(MB_CONF_KEY, c, 'global'); return true; }catch(e){ toast('Не удалось сохранить настройки книги'); return false; } }
-async function mbState(){ return Object.assign({ lastId:null, lastIdx:-1, entries:0, log:[] }, await rpGet('rp_mb_state', null) || {}); }
-async function mbStateSave(s){ s.log = (s.log || []).slice(0, 30); await rpSet('rp_mb_state', s); }
-async function mbAllMsgs(){
-  var count = 0; try{ count = await PM.chat.count(); }catch(e){ return []; }
-  if (!count) return [];
-  var out = [];
-  for (var a = 0; a < count; a += 300){
-    var part = []; try{ part = await PM.chat.slice([a, Math.min(count - 1, a + 299)]); }catch(e){ part = []; }
-    (Array.isArray(part) ? part : []).forEach(function(m, i){ out.push(Object.assign({}, m, { _idx: a + i })); });
-  }
-  return out;
-}
-function mbBoundary(msgs, st){
-  if (st.lastId != null){
-    for (var i = msgs.length - 1; i >= 0; i--){ if (String(msgs[i].id) === String(st.lastId)) return i; }
-  }
-  return Math.min(st.lastIdx == null ? -1 : st.lastIdx, msgs.length - 1);
-}
-async function mbQueue(conf, msgs){
-  msgs = msgs || await mbAllMsgs();
-  var st = await mbState(), b = mbBoundary(msgs, st);
-  var all = msgs.filter(function(m, i){ return i > b && m && !m.hidden && String(m.content || '').trim(); });
-  return { msgs: msgs, all: all, boundary: b };
-}
-function mbChunks(list, n, finish){
-  n = Math.max(2, n || 20);
-  var out = [];
-  for (var i = 0; i + n <= list.length; i += n) out.push(list.slice(i, i + n));
-  var rest = list.slice(out.length * n);
-  if (finish && rest.length){
-    if (rest.length < 2 && out.length) out[out.length - 1] = out[out.length - 1].concat(rest);
-    else if (rest.length >= 2 || !out.length) out.push(rest);
-  }
-  return out;
-}
-async function mbCall(conf, prompt){
-  if (conf.mode !== 'custom' || !conf.apiKey || !conf.model){
-    var t = await PM.ai.generate(prompt);
-    return { text: String(t || '') };
-  }
-  if (conf.format === 'gemini'){
-    var base = (conf.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
-    var url = base + '/models/' + encodeURIComponent(conf.model) + ':generateContent?key=' + encodeURIComponent(conf.apiKey);
-    var safety = ['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT','HARM_CATEGORY_CIVIC_INTEGRITY'].map(function(c){ return { category:c, threshold:'BLOCK_NONE' }; });
-    var res = await imgFetchT(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ contents:[{ role:'user', parts:[{ text: prompt }] }], safetySettings: safety, generationConfig:{ temperature:0.4 } }) }, 180000);
-    if (!res.ok){ var et = await res.text().catch(function(){ return ''; }); throw new Error('API ' + res.status + ': ' + et.replace(/(AIza|sk-)[A-Za-z0-9_\-]{8,}/g, '$1***').slice(0, 200)); }
-    var d = await res.json();
-    var pf = d.promptFeedback || {};
-    if (pf.blockReason) return { text:'', blocked:'запрос заблокирован цензурой (' + pf.blockReason + ')' };
-    var c0 = d.candidates && d.candidates[0];
-    var fr = c0 && c0.finishReason;
-    var txt = c0 && c0.content && c0.content.parts ? c0.content.parts.filter(function(p){ return !p.thought; }).map(function(p){ return p.text || ''; }).join('') : '';
-    if (/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/i.test(fr || '')) return { text: txt, blocked:'ответ обрезан цензурой (' + fr + ')' };
-    if (/MAX_TOKENS/i.test(fr || '')) return { text: txt, blocked:'ответ оборвался по лимиту длины' };
-    return { text: txt };
-  }
-  var res2 = await imgFetchT(String(conf.baseUrl || '').replace(/\/+$/, '') + '/chat/completions', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + conf.apiKey }, body: JSON.stringify({ model: conf.model, messages:[{ role:'user', content: prompt }], temperature:0.4 }) }, 180000);
-  if (!res2.ok){ var et2 = await res2.text().catch(function(){ return ''; }); throw new Error('API ' + res2.status + ': ' + et2.replace(/(AIza|sk-)[A-Za-z0-9_\-]{8,}/g, '$1***').slice(0, 200)); }
-  var d2 = await res2.json();
-  var ch = d2.choices && d2.choices[0];
-  if (ch && ch.finish_reason === 'content_filter') return { text: (ch.message && ch.message.content) || '', blocked:'ответ заблокирован фильтром провайдера' };
-  if (ch && ch.finish_reason === 'length') return { text: (ch.message && ch.message.content) || '', blocked:'ответ оборвался по лимиту длины' };
-  return { text: (ch && ch.message && ch.message.content) || '' };
-}
-var MB_REFUSAL = /(I can['’]?t (help|assist|continue|write|create|comply)|I(['’]m| am) (sorry|unable|not able)|as an AI|content polic|against (my|the) (guidelines|policy)|не могу (помочь|продолжить|выполнить|написать|создать|описать)|я не (могу|буду) (писать|описывать|продолжать|создавать)|противоречит (моим|политике|правилам)|нарушает (правила|политику)|извините, (но )?я не)/i;
-function mbParse(raw){
-  var t = String(raw || '').replace(/^```[a-z]*\n?/i, '').replace(/```\s*$/, '').trim();
-  var mT = /(?:ЗАГОЛОВОК|TITLE)\s*:\s*(.+)/i.exec(t), mD = /(?:ДАТА|DATE)\s*:\s*(.+)/i.exec(t), mK = /(?:КЛЮЧИ|KEYS|KEYWORDS)\s*:\s*(.+)/i.exec(t), mX = /(?:ТЕКСТ|TEXT)\s*:\s*([\s\S]+)/i.exec(t);
-  if (!mX) return null;
-  var keys = mK ? mK[1].split(/[,;]/).map(function(k){ return k.replace(/[«»"*_\[\]]/g, '').trim(); }).filter(function(k){ return k && k.length >= 3 && k.length <= 40; }) : [];
-  var seen = {}; keys = keys.filter(function(k){ var l = k.toLowerCase(); if (seen[l]) return false; seen[l] = 1; return true; }).slice(0, 20);
-  return { title: mT ? mT[1].replace(/[*_#]/g, '').trim().slice(0, 80) : '', date: mD ? mD[1].replace(/[*_#]/g, '').trim().slice(0, 80) : '', keys: keys, text: mX[1].trim() };
-}
-function mbCheck(res){
-  if (res.blocked) return { err: res.blocked };
-  var t = String(res.text || '').trim();
-  if (!t) return { err:'пустой ответ — похоже на цензуру или сбой' };
-  var p = mbParse(t);
-  if (!p) return { err: MB_REFUSAL.test(t) ? 'нейросеть отказалась писать (цензура)' : 'ответ пришёл не в том формате' };
-  if (p.text.length < 150) return { err: MB_REFUSAL.test(p.text) ? 'нейросеть отказалась писать (цензура)' : 'запись слишком короткая — похоже на обрыв' };
-  if (MB_REFUSAL.test(p.text.slice(0, 300))) return { err:'нейросеть отказалась писать (цензура)' };
-  return { ok: p };
-}
-async function mbLorebook(create){
-  var id = await rpGet('rp_mb_lb', null);
-  if (id != null){ try{ var lb = await PM.lore.get(id); if (lb) return lb; }catch(e){} }
-  if (!create) return null;
-  var names = await getNames();
-  try{
-    var nid = await PM.lore.create('Книга памяти · ' + names.charName + ' ↔ ' + names.userName);
-    await rpSet('rp_mb_lb', nid);
-    await mbAttach(nid);
-    return await PM.lore.get(nid);
-  }catch(e){ console.error('RP mb lorebook create failed', e); toast('Не удалось создать лорбук: ' + (e && e.message ? e.message : e)); return null; }
-}
-async function mbAttach(id){
-  try{ await PM.lore.bind(id); return true; }
-  catch(e){ console.error('RP mb attach failed', e); return false; }
-}
-function mbMsgText(m, names, n){
-  var pr = rpStoryProse(m.content);
-  var who = m.role === 'user' ? names.userName : (m.role === 'assistant' ? names.charName : 'Система');
-  var hd = [pr.hdr.date, pr.hdr.day, pr.hdr.location].filter(Boolean).join(' · ');
-  return '#' + n + ' ' + who + (hd ? ' [' + hd + ']' : '') + ':\n' + pr.text;
-}
-function mbBuildPrompt(conf, take, names, prev){
-  var en = conf.lang === 'en';
-  var keyRule = conf.keyLang === 'both' ? 'и на русском, и на английском' : ((conf.keyLang === 'en' || (conf.keyLang === 'same' && en)) ? 'на английском' : 'на русском');
-  var body = take.map(function(m){ return mbMsgText(m, names, m._idx + 1); }).join('\n\n');
-  if (body.length > 90000) body = body.slice(-90000);
-  return 'Ты ведёшь «Книгу памяти» ролевой истории между ' + names.userName + ' (игрок) и ' + names.charName + '. Ниже фрагмент истории. Сделай из него одну запись памяти: её будут всегда подставлять нейросети, чтобы она помнила, что было, даже когда сами сообщения скрыты.\n\n'+
-    'Правила записи:\n'+
-    '- Язык записи: ' + (en ? 'английский (English). Даже если история на русском, пиши запись на английском, имена — латиницей.' : 'русский.') + '\n'+
-    '- Хронология по датам и времени мира истории. Дату, время и место бери из пометок в квадратных скобках у сообщений и из самого текста. Каждый новый момент — отдельный пункт, начинающийся с даты и времени: «14 ноября 2025, ~23:45, у третьего подъезда — …». Если время неизвестно, пиши «позже», «утром» и т.п.\n'+
-    '- Внутри пунктов — конкретика: что произошло, кто что сказал по сути, решения, обещания, кто что узнал, как изменились отношения и настроение, имена второстепенных персонажей, предметы, деньги, раны, незакрытые конфликты.\n'+
-    '- Без оценок, морали и смягчений: что было в истории, то и пиши. Ничего не выдумывай.\n- Объём 150–400 слов.\n\n'+
-    'Ключевые слова (' + keyRule + '), 8–15 штук: имена и прозвища во всех формах, места, предметы, события и темы эпизода (ссора, поцелуй, долг, драка, обещание…). Для русских слов пиши основу без окончания, чтобы срабатывали все падежи: «Влад», «Алес», «подъезд», «нож-бабочк», «поцелу».\n\n'+
-    (prev ? 'Предыдущая запись (для связности, не повторяй её):\n' + prev + '\n\n' : '')+
-    'Ответь строго в формате (метки оставь как есть):\nЗАГОЛОВОК: короткое название эпизода\nДАТА: дата и время эпизода в мире истории (например «14 ноября 2025, 23:30–23:50»)\nКЛЮЧИ: ключевые слова через запятую\nТЕКСТ:\n- пункты по порядку\n\nФРАГМЕНТ ИСТОРИИ:\n' + body;
-}
-function mbApplyStrategy(entries, conf){
-  var mine = entries.filter(function(e){ return /^mb-/.test(e.identifier || ''); });
-  var k = Math.max(1, conf.recent || 5);
-  mine.forEach(function(e, i){
-    var st = conf.strategy === 'constant' ? 'constant' : (conf.strategy === 'keyword' ? 'keyword' : (i >= mine.length - k ? 'constant' : 'keyword'));
-    e.strategy = st;
-    e.scanDepth = Math.max(2, Math.min(1000, conf.scan || 8));
-  });
-}
-async function mbHideUpTo(msgs, boundary, keep, status){
-  var stop = Math.min(boundary, msgs.length - 1 - Math.max(1, keep || 1)), done = 0;
-  for (var i = 0; i <= stop; i++){
-    var m = msgs[i];
-    if (!m || m.hidden || m.id == null) continue;
-    var upd = { id: m.id, content: m.content, hidden: true };
-    if (m.reasoning) upd.reasoning = m.reasoning;
-    try{ await PM.chat.edit(upd); done++; }catch(e){ console.error('RP mb hide failed', m.id, e); }
-    if (status && done % 10 === 0) status('Скрываю сообщения… ' + done);
-  }
-  return done;
-}
-async function mbUnhideAll(status){
-  var msgs = await mbAllMsgs(), done = 0;
-  for (var i = 0; i < msgs.length; i++){
-    var m = msgs[i]; if (!m || !m.hidden) continue;
-    var upd = { id: m.id, content: m.content, hidden: false };
-    if (m.reasoning) upd.reasoning = m.reasoning;
-    try{ await PM.chat.edit(upd); done++; }catch(e){}
-    if (status && done % 10 === 0) status('Возвращаю сообщения… ' + done);
-  }
-  return done;
-}
-async function mbRun(opts, status){
-  opts = opts || {}; status = status || function(){};
-  if (MB_BUSY){ status('Запись уже идёт…'); return null; }
-  MB_BUSY = true;
-  var conf = await mbConf(), st = await mbState(), names = await getNames();
-  var made = 0, firstErr = null, lastTitle = '', hidden = 0;
-  try{
-    var q = await mbQueue(conf);
-    var chunks = mbChunks(q.all, conf.n, !opts.auto);
-    if (!chunks.length){ status(opts.auto ? '' : 'Пока нечего записывать: новых сообщений ' + q.all.length); return null; }
-    var lb = await mbLorebook(true);
-    if (!lb) throw new Error('не получилось открыть лорбук книги');
-    var mineEntries = (lb.entries || []).filter(function(e){ return /^mb-/.test(e.identifier || ''); });
-    var prev = conf.prev && mineEntries.length ? String(mineEntries[mineEntries.length - 1].content || '').slice(0, 1500) : '';
-    for (var c = 0; c < chunks.length; c++){
-      var take = chunks[c];
-      status('Запись ' + (c + 1) + ' из ' + chunks.length + ': сообщения ' + (take[0]._idx + 1) + '–' + (take[take.length - 1]._idx + 1) + '…');
-      var res;
-      try{ res = await mbCall(conf, mbBuildPrompt(conf, take, names, prev)); }
-      catch(e){ firstErr = 'ошибка запроса: ' + (e && e.message ? e.message : e); break; }
-      var chk = mbCheck(res);
-      if (chk.err){ firstErr = chk.err; break; }
-      var p = chk.ok;
-      var cur = await PM.lore.get(lb.id) || lb;
-      var n = (st.entries || 0) + 1, ident = 'mb-' + uid();
-      var title = p.title || ('Эпизод ' + n);
-      var content = (p.date ? '[' + p.date + ']\n' : '') + rpNoTags(p.text);
-      var entry = { identifier: ident, name: '📖 ' + n + '. ' + (p.date ? p.date + ' — ' : '') + title, content: content, enabled: true, strategy: 'constant', keywords: p.keys.length ? p.keys : [names.charName], scanDepth: Math.max(2, conf.scan || 8) };
-      cur.entries = (cur.entries || []).concat([entry]);
-      mbApplyStrategy(cur.entries, conf);
-      await PM.lore.save(cur);
-      var check = await PM.lore.get(lb.id);
-      if (!check || !(check.entries || []).some(function(e){ return e.identifier === ident; })){ firstErr = 'лорбук не сохранил запись'; break; }
-      var lastMsg = take[take.length - 1];
-      st.lastId = lastMsg.id; st.lastIdx = lastMsg._idx; st.entries = n;
-      st.log = [{ at: Date.now(), ok:true, title: title, date: p.date, from: take[0]._idx + 1, to: lastMsg._idx + 1 }].concat(st.log || []);
-      await mbStateSave(st);
-      prev = content.slice(0, 1500); lastTitle = title; made++;
-    }
-    if (made && conf.autoHide){
-      status('Записей: ' + made + '. Скрываю записанные сообщения…');
-      var fresh = await mbAllMsgs();
-      hidden = await mbHideUpTo(fresh, mbBoundary(fresh, st), conf.keep, status);
-    }
-    if (firstErr){
-      st.log = [{ at: Date.now(), ok:false, err: firstErr.slice(0, 200) }].concat(st.log || []);
-      status((made ? 'Записей: ' + made + (conf.autoHide ? ', скрыто сообщений: ' + hidden : '') + '. Дальше ' : 'Не записалось: ') + firstErr + '. ' + (made ? 'Остальное не тронуто.' : 'Сообщения не скрывала.'));
-      if (!opts.silent) toast('Книга памяти: ' + firstErr);
-    } else {
-      status('Готово: записей ' + made + ' (последняя — «' + lastTitle + '»)' + (conf.autoHide ? ', скрыто сообщений: ' + hidden : ''));
-      if (!opts.silent) toast('Книга памяти: записей ' + made);
-    }
-    if (made && conf.autoHide){ var okRec = (st.log || []).filter(function(r){ return r.ok; })[0]; if (okRec) okRec.hidden = hidden; }
-    return { ok: !firstErr, made: made, hidden: hidden, err: firstErr };
-  }catch(e){
-    var msg = String(e && e.message ? e.message : e).slice(0, 200);
-    st.log = [{ at: Date.now(), ok:false, err: msg }].concat(st.log || []);
-    status('Не записалось: ' + msg + '. Сообщения не скрывала.');
-    if (!opts.silent) toast('Книга памяти: ' + msg);
-    return { ok:false, err: msg };
-  }finally{
-    await mbStateSave(st);
-    MB_BUSY = false;
-  }
-}
-async function mbMaybeAuto(){
-  try{
-    var conf = await mbConf();
-    if (!conf.auto || MB_BUSY) return;
-    var q = await mbQueue(conf);
-    if (q.all.length >= Math.max(2, conf.n)) await mbRun({ silent:true, auto:true });
-  }catch(e){ console.error('RP mb auto failed', e); }
-}
-SCREENS.memorybook = {
-  title: 'Книга памяти',
-  async render(container){
-    container.style.flexDirection = ''; container.style.height = ''; container.style.minHeight = '';
-    container.style.padding = '10px 14px 16px';
-    backTarget = openHome;
-    await mbRender(container);
-  }
-};
-async function mbRender(container){
-  container.innerHTML = '';
-  var tabs = el('div', 'rp_love_tabs');
-  [['main','rpi-book','Запись'],['list','rpi-list','Записи'],['set','rpi-gear','Настройки']].forEach(function(t){
-    var b = el('div', 'rp_love_tab' + (MB_TAB === t[0] ? ' on' : ''));
-    b.innerHTML = '<svg><use href="#' + t[1] + '"/></svg><span>' + t[2] + '</span>';
-    b.addEventListener('click', function(){ MB_TAB = t[0]; mbRender(container); });
-    tabs.appendChild(b);
-  });
-  container.appendChild(tabs);
-  var body = el('div'); container.appendChild(body);
-  if (MB_TAB === 'list') return mbRenderList(body, container);
-  if (MB_TAB === 'set') return mbRenderSettings(body, container);
-  return mbRenderMain(body, container);
-}
-function mbChk(id, on){ return '<div class="rp_conseq_check' + (on ? ' on' : '') + '" id="' + id + '">' + (on ? '<svg><use href="#rpi-check"/></svg>' : '') + '</div>'; }
-async function mbRenderMain(body, container){
-  var conf = await mbConf(), st = await mbState(), q = await mbQueue(conf), lb = await mbLorebook(false);
-  var plan = mbChunks(q.all, conf.n, true);
-  if (lb){
-    var before = JSON.stringify((lb.entries || []).map(function(e){ return [e.strategy, e.scanDepth]; }));
-    mbApplyStrategy(lb.entries || [], conf);
-    if (JSON.stringify((lb.entries || []).map(function(e){ return [e.strategy, e.scanDepth]; })) !== before){ try{ await PM.lore.save(lb); }catch(e){} }
-  }
-  var rng = q.all.length ? ' (с №' + (q.all[0]._idx + 1) + ' по №' + (q.all[q.all.length - 1]._idx + 1) + ')' : '';
-  var card = el('div', 'rp_card');
-  card.innerHTML =
-    '<div class="rp_h" style="font-size:15px;margin-bottom:4px;">' + (q.all.length ? 'Не записано сообщений: ' + q.all.length + rng : 'Всё записано') + '</div>'+
-    '<div class="rp_muted" style="font-size:11px;line-height:1.5;">' + (plan.length ? 'Кнопка сделает записей: ' + plan.length + ' (по ' + conf.n + ' сообщений, по порядку).' + (conf.autoHide ? ' Потом скроет всё записанное, кроме ' + (conf.keep > 1 ? conf.keep + ' последних' : 'последнего') + ' сообщения.' : '') : 'Новых сообщений пока нет.') + '</div>'+
-    '<div class="rp_muted" style="font-size:11px;line-height:1.5;margin-top:4px;">' + (conf.auto ? 'Автозапись: сама, когда наберётся ' + conf.n + ' новых.' : 'Автозапись выключена.') + '</div>'+
-    '<div class="rp_muted" style="font-size:11px;line-height:1.5;margin-top:4px;">Лорбук: <b style="color:var(--text);">' + escapeHtml(lb ? lb.name : 'создастся при первой записи') + '</b></div>'+
-    '<div class="rp_muted" style="font-size:11px;line-height:1.5;">Нейросеть: <b style="color:var(--text);">' + (conf.mode === 'custom' && conf.apiKey ? escapeHtml((conf.format === 'gemini' ? 'Gemini' : 'OpenAI') + ' · ' + (conf.model || '')) : 'подключение SillyTavern') + '</b> · язык: <b style="color:var(--text);">' + (conf.lang === 'en' ? 'English' : 'русский') + '</b></div>'+
-    '<div style="height:12px;"></div>'+
-    '<div class="rp_btn" id="mb_go"><span>Записать память сейчас</span></div>'+
-    '<div class="rp_muted" id="mb_status" style="font-size:11px;margin-top:10px;min-height:14px;line-height:1.45;"></div>';
-  body.appendChild(card);
-  var status = function(t){ var s = $('#mb_status', card); if (s) s.textContent = t || ''; };
-  $('#mb_go', card).addEventListener('click', async function(){
-    var r = await mbRun({}, status);
-    if (r && r.ok) setTimeout(function(){ if (MB_TAB === 'main' && container.isConnected) mbRender(container); }, 1600);
-  });
-  var logCard = el('div', 'rp_card');
-  logCard.style.marginTop = '10px';
-  var log = (st.log || []).slice(0, 8);
-  logCard.innerHTML = '<div class="rp_h" style="margin-bottom:6px;">Последние попытки</div>' + (log.length ? log.map(function(r){
-    var d = new Date(r.at), tm = ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2);
-    return '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;"><span style="color:' + (r.ok ? '#34d399' : '#f87171') + ';font-weight:900;">' + (r.ok ? '✓' : '✕') + '</span><span class="rp_muted" style="flex-shrink:0;">' + tm + '</span><span style="color:var(--text);min-width:0;">' + escapeHtml(r.ok ? (r.title || '') + (r.from ? ' · №' + r.from + '–' + r.to : '') + (r.hidden != null ? ' · скрыто ' + r.hidden : '') : r.err || 'ошибка') + '</span></div>';
-  }).join('') : '<div class="rp_muted" style="font-size:11px;">Ещё ничего не записывалось.</div>') +
-  '<div style="height:10px;"></div><div class="rp_btn rp_ghost rp_sm" id="mb_unhide"><span>Вернуть все скрытые сообщения</span></div>';
-  body.appendChild(logCard);
-  $('#mb_unhide', logCard).addEventListener('click', async function(){
-    var ch = await showChoiceModal({ title:'Вернуть все скрытые?', message:'Все скрытые сообщения в этом чате снова станут видны нейросети. Записи в книге останутся.', buttons:[{ label:'Вернуть', value:'y' },{ label:'Отмена', value:null, ghost:true }] });
-    if (!ch) return;
-    var n = await mbUnhideAll(status);
-    status('Вернула сообщений: ' + n);
-  });
-}
-async function mbRenderList(body, container){
-  var lb = await mbLorebook(false);
-  var mine = lb ? (lb.entries || []).filter(function(e){ return /^mb-/.test(e.identifier || ''); }) : [];
-  if (!mine.length){ body.appendChild(el('div', 'rp_empty', 'Записей пока нет. Первая появится после «Записать память».')); return; }
-  mine.slice().reverse().forEach(function(e){
-    var c = el('div', 'rp_card'); c.style.marginBottom = '8px';
-    c.innerHTML = '<div class="rp_title_row"><span class="rp_h" style="min-width:0;">' + escapeHtml(e.name || '') + '</span>' + mbChk('mb_en_' + e.identifier, e.enabled !== false) + '</div>'+
-      '<div class="rp_muted" style="font-size:10px;margin-bottom:6px;">' + escapeHtml((e.keywords || []).join(', ')) + '</div>'+
-      '<textarea class="rp_input" rows="6" style="font-size:11.5px;line-height:1.45;">' + escapeHtml(e.content || '') + '</textarea>'+
-      '<div style="display:flex;gap:6px;margin-top:8px;"><div class="rp_btn rp_sm" data-a="save"><span>Сохранить</span></div><div class="rp_btn rp_ghost rp_sm" data-a="del"><span>Удалить</span></div></div>';
-    body.appendChild(c);
-    var upd = async function(fn){ var cur = await mbLorebook(false); if (!cur) return; fn(cur); await PM.lore.save(cur); };
-    c.querySelector('.rp_conseq_check').addEventListener('click', async function(){
-      var on = !this.classList.contains('on'); this.classList.toggle('on', on); this.innerHTML = on ? '<svg><use href="#rpi-check"/></svg>' : '';
-      await upd(function(cur){ cur.entries.forEach(function(x){ if (x.identifier === e.identifier) x.enabled = on; }); });
-    });
-    c.querySelector('[data-a="save"]').addEventListener('click', async function(){
-      var v = c.querySelector('textarea').value;
-      await upd(function(cur){ cur.entries.forEach(function(x){ if (x.identifier === e.identifier) x.content = v; }); });
-      toast('Запись сохранена');
-    });
-    c.querySelector('[data-a="del"]').addEventListener('click', async function(){
-      var ch = await showChoiceModal({ title:'Удалить запись?', message: e.name || '', buttons:[{ label:'Удалить', value:'y' },{ label:'Отмена', value:null, ghost:true }] });
-      if (!ch) return;
-      await upd(function(cur){ cur.entries = cur.entries.filter(function(x){ return x.identifier !== e.identifier; }); });
-      mbRender(container);
-    });
-  });
-}
-async function mbRenderSettings(body, container){
-  var c = await mbConf(), lbId = await rpGet('rp_mb_lb', null);
-  var books = []; try{ books = (await PM.lore.all()) || []; }catch(e){ books = []; }
-  var card = el('div', 'rp_card');
-  card.innerHTML =
-    '<div class="rp_h" style="margin-bottom:4px;">Нейросеть для книги</div>'+
-    '<div class="rp_muted" style="font-size:10.5px;line-height:1.45;margin-bottom:8px;">Отдельно от телефона. «Подключение SillyTavern» — модель, выбранная в Таверне. «Свой ключ» — свой провайдер только для записей.</div>'+
-    '<div class="rp_chipsel" style="margin-bottom:10px;"><label><input type="radio" name="mb_mode" value="st"' + (c.mode !== 'custom' ? ' checked' : '') + '><span>Подключение SillyTavern</span></label><label><input type="radio" name="mb_mode" value="custom"' + (c.mode === 'custom' ? ' checked' : '') + '><span>Свой ключ</span></label></div>'+
-    '<div id="mb_custom">'+
-      '<div class="rp_chipsel" style="margin-bottom:8px;"><label><input type="radio" name="mb_fmt" value="gemini"' + (c.format !== 'openai' ? ' checked' : '') + '><span>Gemini</span></label><label><input type="radio" name="mb_fmt" value="openai"' + (c.format === 'openai' ? ' checked' : '') + '><span>OpenAI-совместимый</span></label></div>'+
-      '<div class="rp_muted" style="margin-bottom:3px;font-size:11px;">Адрес API <span class="rp_muted">(для Gemini можно пусто)</span></div><input class="rp_input" id="mb_url" placeholder="https://generativelanguage.googleapis.com/v1beta" value="' + escapeHtml(c.baseUrl || '') + '">'+
-      '<div class="rp_muted" style="margin:8px 0 3px;font-size:11px;">API-ключ</div><input class="rp_input rp_secret" id="mb_key" type="password" autocomplete="off" placeholder="ключ" value="' + escapeHtml(c.apiKey || '') + '">'+
-      '<div class="rp_muted" style="margin:8px 0 3px;font-size:11px;">Модель</div><input class="rp_input" id="mb_model" placeholder="gemini-2.5-pro" value="' + escapeHtml(c.model || '') + '">'+
-      '<div style="height:8px;"></div><div class="rp_btn rp_ghost rp_sm" id="mb_test"><span>Проверить ключ</span></div>'+
-    '</div>';
-  body.appendChild(card);
-  var card2 = el('div', 'rp_card'); card2.style.marginTop = '10px';
-  card2.innerHTML =
-    '<div class="rp_h" style="margin-bottom:4px;">Лорбук книги</div>'+
-    '<div class="rp_muted" style="font-size:10.5px;line-height:1.45;margin-bottom:8px;">Свой для этого чата, отдельно от лорбука телефона. Выбранный сразу подключается к чату.</div>'+
-    '<select class="rp_input" id="mb_lb"><option value="">Создать новый при первой записи</option>' + books.map(function(b){ return '<option value="' + escapeHtml(String(b.id)) + '"' + (String(b.id) === String(lbId) ? ' selected' : '') + '>' + escapeHtml(b.name || ('#' + b.id)) + '</option>'; }).join('') + '</select>'+
-    '<div style="height:12px;"></div>'+
-    '<div class="rp_h" style="margin-bottom:4px;">Как подключать записи</div>'+
-    '<div class="rp_muted" style="font-size:10.5px;line-height:1.45;margin-bottom:8px;">«Всегда» — нейросеть видит все записи в каждом ответе, ничего не забывает, но тратит больше токенов. «Свежие всегда» — последние записи видны всегда, старые всплывают по ключевым словам. «По ключам» — только когда в последних сообщениях встречается ключ.</div>'+
-    '<div class="rp_chipsel" style="margin-bottom:8px;"><label><input type="radio" name="mb_str" value="constant"' + (c.strategy === 'constant' ? ' checked' : '') + '><span>Всегда</span></label><label><input type="radio" name="mb_str" value="hybrid"' + (c.strategy === 'hybrid' ? ' checked' : '') + '><span>Свежие всегда</span></label><label><input type="radio" name="mb_str" value="keyword"' + (c.strategy === 'keyword' ? ' checked' : '') + '><span>По ключам</span></label></div>'+
-    '<div class="rp_muted" style="margin:2px 0 3px;font-size:11px;">Сколько свежих записей видно всегда</div><input class="rp_input" id="mb_recent" type="number" min="1" max="50" step="1" value="' + c.recent + '">'+
-    '<div class="rp_muted" style="margin:8px 0 3px;font-size:11px;">В скольких последних сообщениях искать ключи</div><input class="rp_input" id="mb_scan" type="number" min="2" max="50" step="1" value="' + c.scan + '">'+
-    '<div style="height:12px;"></div>'+
-    '<div class="rp_h" style="margin-bottom:4px;">Язык записей</div>'+
-    '<div class="rp_chipsel" style="margin-bottom:8px;"><label><input type="radio" name="mb_lang" value="ru"' + (c.lang !== 'en' ? ' checked' : '') + '><span>Русский</span></label><label><input type="radio" name="mb_lang" value="en"' + (c.lang === 'en' ? ' checked' : '') + '><span>English</span></label></div>'+
-    '<div class="rp_h" style="margin-bottom:4px;">Язык ключей</div>'+
-    '<div class="rp_muted" style="font-size:10.5px;line-height:1.45;margin-bottom:8px;">Ролишь на русском — бери русские ключи, на английском — английские. «Оба» ловит любой язык, но работает тяжелее.</div>'+
-    '<div class="rp_chipsel"><label><input type="radio" name="mb_klang" value="same"' + (c.keyLang === 'same' ? ' checked' : '') + '><span>Как записи</span></label><label><input type="radio" name="mb_klang" value="ru"' + (c.keyLang === 'ru' ? ' checked' : '') + '><span>Русские</span></label><label><input type="radio" name="mb_klang" value="en"' + (c.keyLang === 'en' ? ' checked' : '') + '><span>English</span></label><label><input type="radio" name="mb_klang" value="both"' + (c.keyLang === 'both' ? ' checked' : '') + '><span>Оба</span></label></div>';
-  body.appendChild(card2);
-  var card3 = el('div', 'rp_card'); card3.style.marginTop = '10px';
-  card3.innerHTML =
-    '<div class="rp_h" style="margin-bottom:4px;">Сколько сообщений в одну запись</div>'+
-    '<div class="rp_muted" style="font-size:10.5px;line-height:1.45;margin-bottom:6px;">Только для книги, контекст телефона не трогает. Если новых сообщений больше, книга сделает несколько записей подряд, по порядку.</div>'+
-    '<input class="rp_input" id="mb_n" type="number" min="2" max="300" step="1" value="' + c.n + '">'+
-    '<div style="height:12px;"></div>'+
-    '<div class="rp_title_row" style="margin-bottom:8px;"><div><div class="rp_h" style="font-size:12px;">Записывать самой</div><div class="rp_muted" style="font-size:10px;margin-top:1px;">Когда наберётся нужное число новых сообщений.</div></div>' + mbChk('mb_auto', c.auto) + '</div>'+
-    '<div class="rp_title_row" style="margin-bottom:8px;"><div><div class="rp_h" style="font-size:12px;">Автоскрытие</div><div class="rp_muted" style="font-size:10px;margin-top:1px;">После успешной записи без цензуры и ошибок скрывает все записанные сообщения подряд, кроме последних. Если запись не удалась — ничего не трогает.</div></div>' + mbChk('mb_hide', c.autoHide) + '</div>'+
-    '<div class="rp_muted" style="margin:2px 0 3px;font-size:11px;">Сколько последних оставлять видимыми</div><input class="rp_input" id="mb_keep" type="number" min="1" max="20" step="1" value="' + c.keep + '">'+
-    '<div style="height:10px;"></div>'+
-    '<div class="rp_title_row"><div><div class="rp_h" style="font-size:12px;">Учитывать прошлую запись</div><div class="rp_muted" style="font-size:10px;margin-top:1px;">Чтобы записи шли связно и не повторялись.</div></div>' + mbChk('mb_prev', c.prev) + '</div>'+
-    '<div style="height:14px;"></div><div class="rp_btn" id="mb_save"><span>Сохранить настройки</span></div>';
-  body.appendChild(card3);
-  var vis = function(){ $('#mb_custom', card).style.display = card.querySelector('input[name=mb_mode]:checked').value === 'custom' ? '' : 'none'; };
-  card.querySelectorAll('input[name=mb_mode]').forEach(function(r){ r.addEventListener('change', vis); }); vis();
-  ['mb_auto','mb_hide','mb_prev'].forEach(function(id){ $('#' + id, card3).addEventListener('click', function(){ var on = !this.classList.contains('on'); this.classList.toggle('on', on); this.innerHTML = on ? '<svg><use href="#rpi-check"/></svg>' : ''; }); });
-  var read = function(){
-    return Object.assign({}, c, {
-      mode: card.querySelector('input[name=mb_mode]:checked').value,
-      format: card.querySelector('input[name=mb_fmt]:checked').value,
-      baseUrl: $('#mb_url', card).value.trim(), apiKey: $('#mb_key', card).value.trim(), model: $('#mb_model', card).value.trim(),
-      strategy: card2.querySelector('input[name=mb_str]:checked').value,
-      recent: Math.max(1, Math.min(50, parseInt($('#mb_recent', card2).value, 10) || 5)),
-      scan: Math.max(2, Math.min(50, parseInt($('#mb_scan', card2).value, 10) || 8)),
-      lang: card2.querySelector('input[name=mb_lang]:checked').value,
-      keyLang: card2.querySelector('input[name=mb_klang]:checked').value,
-      n: Math.max(2, Math.min(300, parseInt($('#mb_n', card3).value, 10) || 20)),
-      keep: Math.max(1, Math.min(20, parseInt($('#mb_keep', card3).value, 10) || 1)),
-      auto: $('#mb_auto', card3).classList.contains('on'), autoHide: $('#mb_hide', card3).classList.contains('on'), prev: $('#mb_prev', card3).classList.contains('on')
-    });
-  };
-  $('#mb_test', card).addEventListener('click', async function(){
-    var r = read(); if (!r.apiKey || !r.model){ toast('Впиши ключ и модель'); return; }
-    if (r.format === 'openai' && !r.baseUrl){ toast('Для OpenAI нужен адрес API'); return; }
-    toast('Проверяю…');
-    try{ var res = await mbCall(Object.assign({}, r, { mode:'custom' }), 'Ответь одним словом: работает'); toast(res.blocked ? 'Ответ заблокирован: ' + res.blocked : (res.text ? 'Работает: ' + String(res.text).trim().slice(0, 40) : 'Пустой ответ')); }
-    catch(e){ toast('Ошибка: ' + (e && e.message ? e.message : e)); }
-  });
-  $('#mb_save', card3).addEventListener('click', async function(){
-    var r = read();
-    if (r.mode === 'custom' && (!r.apiKey || !r.model)){ toast('Для своего ключа нужны ключ и модель'); return; }
-    if (r.mode === 'custom' && r.format === 'openai' && !r.baseUrl){ toast('Для OpenAI нужен адрес API'); return; }
-    if (!(await mbConfSave(r))) return;
-    try{ var lbx = await mbLorebook(false); if (lbx){ mbApplyStrategy(lbx.entries || [], r); await PM.lore.save(lbx); } }catch(e){}
-    var sel = $('#mb_lb', card2).value;
-    if (sel){ var idv = isFinite(Number(sel)) ? Number(sel) : sel; await rpSet('rp_mb_lb', idv); await mbAttach(idv); }
-    else await rpSet('rp_mb_lb', null);
-    toast('Настройки книги сохранены');
-  });
-}
+var MB_DEF = { lang:'ru', keyLang:'same' };
+async function mbConf(){ var v = null; try{ v = await PM.store.get(MB_CONF_KEY, 'global'); }catch(e){} return Object.assign({}, MB_DEF, v || {}); }
+async function mbConfSave(c){ try{ await PM.store.set(MB_CONF_KEY, c, 'global'); return true; }catch(e){ toast('Не удалось сохранить настройку'); return false; } }
 function diagReqHtml(q){
   if (!q || !q.sent) return '';
   var refs = (q.refs || []).map(function(x, k){
@@ -14505,7 +14041,7 @@ function toggleAppbarMenu(){
 }
 
 function openHome(){
-  stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown();
+  stopDeliveryCountdown(); stopMarketCountdown();
   closeNotifPanel();
   currentScreen = null;
   var home = $('#rp_home');
@@ -14532,7 +14068,7 @@ async function openScreen(id){
   var s = SCREENS[id];
   if (!s) return;
   await rpLocLoad();
-  stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown();
+  stopDeliveryCountdown(); stopMarketCountdown();
   backTarget = openHome;
   hlExitEdit();
   currentScreen = id;
@@ -14551,6 +14087,2339 @@ async function openScreen(id){
   try{ await s.render(scr); }
   catch(e){ console.error('RP render failed for', id, e); scr.innerHTML = '<div class="rp_empty">Не удалось отобразить экран.</div>'; }
   scr.style.visibility = '';
+}
+var CX_KC = 'rp_cx_contacts', CX_KT = 'rp_cx_threads', CX_KS = 'rp_cx_set', CX_KCALL = 'rp_cx_calls', CX_KGONE = 'rp_cx_gone';
+var CX_LIM = 300;
+var CX = { tab:'chats', open:null, hubOk:false, hubTab:'chats', callTab:'all', q:'', tray:'', busy:{}, again:{}, timers:{}, root:null, cont:null, names:null, cs:[], lastSync:0, scanBusy:false, peekBusy:false, lastCount:null, ticking:false };
+var CX_EVERY = [[0,'Выкл'],[15,'15 мин'],[30,'30 мин'],[60,'1 час'],[120,'2 часа'],[240,'4 часа'],[480,'8 часов']];
+var CX_APPS_BOT = [['memories','Воспоминания'],['diary','Дневник'],['pet','Мой малыш'],['sattok','Сатток (ТикТок)'],['twitter','Твиттер'],['channels','Каналы'],['twitch','Twitch'],['calendar','Календарь'],['love','Love'],['delivery','Доставка'],['bank','Банк'],['rave','Rave']];
+var CX_APPS_PUB = [['channels','Каналы'],['twitch','Twitch'],['twitter','Твиттер'],['rave','Rave']];
+var CX_SMS_RE = /(смс|sms|эсэмэс|сообщени|фотк|фото|селфи|кружо|голосов|видео|скрин|написал|написала|написали|отправил|отправила|прислал|прислала|скинул|скинула|ответил|ответила|напечатал|телефон|мессендж|телеграм|ватсап|whatsapp|telegram|директ|в личк|переписк|уведомлени|завибрир|пиликн|экран|\btext(ed|ing|s)?\b|message|\bdm\b|phone)/i;
+var CX_Q = Promise.resolve();
+function cxSerial(fn){ var p = CX_Q.then(fn, fn); CX_Q = p.then(function(){}, function(){}); return p; }
+function cxSleep(ms){ return new Promise(function(r){ setTimeout(r, ms); }); }
+function cxClip(s, n){ s = String(s == null ? '' : s).replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim(); return s.length > n ? s.slice(0, n).replace(/\s+\S*$/, '') + '…' : s; }
+function cxTok(s){
+  s = String(s || ''); if (!s.trim()) return 0;
+  var cyr = (s.match(/[а-яё]/gi) || []).length, lat = (s.match(/[a-z]/gi) || []).length, dig = (s.match(/[0-9]/g) || []).length, sp = (s.match(/\s/g) || []).length;
+  var oth = Math.max(0, s.length - cyr - lat - dig - sp);
+  return Math.ceil(cyr / 3 + lat / 4 + dig / 2.5 + oth * 0.7);
+}
+function cxTokCut(s, lim){
+  s = String(s || ''); if (cxTok(s) <= lim) return s;
+  var lo = 0, hi = s.length;
+  while (lo < hi){ var mid = (lo + hi + 1) >> 1; if (cxTok(s.slice(0, mid)) <= lim) lo = mid; else hi = mid - 1; }
+  return s.slice(0, lo).replace(/\s+\S*$/, '').trim();
+}
+function cxHM(ts){ var d = new Date(ts || Date.now()); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function cxDayKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+function cxDayLabel(ts){
+  var k = cxDayKey(ts);
+  if (k === cxDayKey(Date.now())) return 'Сегодня';
+  if (k === cxDayKey(Date.now() - 864e5)) return 'Вчера';
+  try{ return new Date(ts).toLocaleDateString('ru-RU', { day:'numeric', month:'long' }); }catch(e){ return ''; }
+}
+function cxAgo(ts){
+  if (!ts) return '';
+  if (cxDayKey(ts) === cxDayKey(Date.now())) return cxHM(ts);
+  if (cxDayKey(ts) === cxDayKey(Date.now() - 864e5)) return 'Вчера';
+  try{ return new Date(ts).toLocaleDateString('ru-RU', { day:'numeric', month:'short' }); }catch(e){ return ''; }
+}
+function cxJson(raw, arr){
+  var s = String(raw || '').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/```(json)?/gi, ' ');
+  var a = s.indexOf(arr ? '[' : '{'), b = s.lastIndexOf(arr ? ']' : '}');
+  if (a < 0 || b <= a) return null;
+  try{ return JSON.parse(s.slice(a, b + 1)); }catch(e){ return null; }
+}
+async function cxSet(){ var s = await rpGet(CX_KS, null); return Object.assign({ every:0, lastInit:0, rpAuto:true, wm:null, hubSeen:0, glow:true, hubNote:true }, s && typeof s === 'object' ? s : {}); }
+async function cxSetSave(p){ return cxSerial(async function(){ var s = await cxSet(); Object.assign(s, p || {}); await rpSet(CX_KS, s); return s; }); }
+async function cxContacts(){ var l = await rpGet(CX_KC, []); return Array.isArray(l) ? l : []; }
+async function cxContactsSave(l){ await rpSet(CX_KC, l); }
+async function cxThreads(){
+  var l = await rpGet(CX_KT, null); if (!Array.isArray(l)) l = [];
+  if (!l.some(function(t){ return t.id === 'main'; })) l.unshift({ id:'main', kind:'dm', owner:'me', who:['char'], title:'', ts:0, unread:0, pin:true });
+  return l;
+}
+async function cxThreadsSave(l){ await rpSet(CX_KT, l); }
+async function cxMsgs(tid){ var l = await rpGet('rp_cx_m_' + tid, []); return Array.isArray(l) ? l : []; }
+async function cxMsgsSave(tid, l){ await rpSet('rp_cx_m_' + tid, l.slice(-500)); }
+async function cxCalls(){ var l = await rpGet(CX_KCALL, []); return Array.isArray(l) ? l : []; }
+async function cxWho(){
+  var n = await getNames(), ref = null; try{ ref = await getAutoCharRef(); }catch(e){}
+  var mp = await rpGet('rp_my_profile', null) || {};
+  var ua = mp.avatar || (n.chat && n.chat.persona && n.chat.persona.avatar) || '';
+  CX.names = { char: n.charName, user: mp.name || n.userName, userTavo: n.userName, charAv: (ref && ref.avatar) || n.charAvatar || '', userAv: ua, handle: mp.user || '', chat: n.chat };
+  return CX.names;
+}
+function cxContact(id, cs){ cs = cs || CX.cs || []; for (var i = 0; i < cs.length; i++){ if (cs[i].id === id) return cs[i]; } return null; }
+function cxPerson(id, cs){
+  var nm = CX.names || { char:'Персонаж', user:'Я', userTavo:'Я', charAv:'', userAv:'' };
+  if (id === 'me') return { id:'me', name: nm.user, av: nm.userAv };
+  if (id === 'char') return { id:'char', name: nm.char, av: nm.charAv, bot:true };
+  var c = cxContact(id, cs);
+  return c ? { id:c.id, name:c.name, av:c.avatar || '', c:c } : { id:id, name:'Неизвестный', av:'' };
+}
+function cxNameOf(id, cs){ return cxPerson(id, cs).name; }
+function cxTitle(t, cs){
+  if (t.title) return t.title;
+  if (t.kind === 'group') return 'Группа';
+  return cxNameOf(t.who[0], cs);
+}
+function cxStkCap(id){ var s = CX_STK_BY[id]; return s ? s.cap : 'стикер'; }
+function cxPreview(m){
+  if (!m) return '';
+  if (m.t === 'sticker') return 'Стикер «' + cxStkCap(m.d && m.d.id) + '»';
+  if (m.t === 'repost') return '↪ Репост: ' + ((m.d && (m.d.title || m.d.text)) || '');
+  if (m.t === 'invite') return '🎬 Зовёт смотреть «' + ((m.d && m.d.title) || '') + '»';
+  if (m.t === 'voice') return '🎤 Голосовое';
+  if (m.t === 'photo') return '📷 Фото' + (m.text ? ': ' + String(m.text).slice(0, 80) : '');
+  if (m.t === 'circle') return '⭕ Кружок';
+  if (m.t === 'video') return '🎬 Видео';
+  if (m.t === 'file') return '📎 ' + ((m.d && m.d.name) || 'Файл');
+  if (m.t === 'call') return m.d && m.d.dir === 'missed' ? '📞 Пропущенный звонок' : '📞 Звонок';
+  return String(m.text || '').replace(/\s+/g, ' ').slice(0, 120);
+}
+function cxMsgLine(m){
+  if (m.t === 'sticker') return '[стикер «' + cxStkCap(m.d && m.d.id) + '»]';
+  if (m.t === 'repost'){ var d = m.d || {}; return '[репост из ' + (d.label || d.app || 'приложения') + ': ' + (d.title ? d.title + ' — ' : '') + '«' + cxClip(d.text, 200) + '»]' + (m.text ? ' ' + m.text : ''); }
+  if (m.t === 'invite') return '[приглашение посмотреть вместе в Rave «' + ((m.d && m.d.title) || '') + '»]';
+  if (m.t === 'voice') return '[голосовое: ' + (m.text || '') + ']';
+  if (m.t === 'photo'){ var dp = m.d || {}; return '[фото' + (dp.asFile ? ' файлом' : '') + ': ' + (dp.desc || 'без описания') + (dp.inn && dp.inn.length ? '; в кадре: ' + dp.inn.join(', ') : '') + ']' + (m.text ? ' ' + m.text : ''); }
+  if (m.t === 'circle') return '[кружок: ' + ((m.d && m.d.desc) || '') + (m.text ? '; говорит: «' + m.text + '»' : '') + ']';
+  if (m.t === 'video') return '[видео: ' + ((m.d && m.d.desc) || (m.d && m.d.name) || '') + ']' + (m.text ? ' ' + m.text : '');
+  if (m.t === 'file') return '[файл «' + ((m.d && m.d.name) || 'файл') + '»' + (m.d && m.d.desc ? ': ' + m.d.desc : '') + ']' + (m.text ? ' ' + m.text : '');
+  if (m.t === 'call') return m.d && m.d.dir === 'missed' ? '[пропущенный звонок]' : '[звонок' + (m.d && m.d.dur ? ' ' + cxDur(m.d.dur) : '') + ']';
+  if (m.t === 'sys') return '[' + (m.text || '') + ']';
+  return String(m.text || '');
+}
+function cxPlural(n, a, b, c){ var m = n % 10, h = n % 100; return n + ' ' + (m === 1 && h !== 11 ? a : (m >= 2 && m <= 4 && (h < 12 || h > 14) ? b : c)); }
+async function cxShareAvatar(name, url){
+  var upd = async function(key){ var l = await rpGet(key, []), ch = false; (Array.isArray(l) ? l : []).forEach(function(x){ if (x && !x.photo && rpSameContact({ name:x.name }, name)){ x.photo = url; ch = true; } }); if (ch) await rpSet(key, l); };
+  try{ await upd('rp_npcs2'); await upd('rp_pb_contacts'); }catch(e){}
+}
+function cxDur(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function cxHistory(list, n, nameFn){
+  var out = [], day = '';
+  list.filter(function(m){ return m.t !== 'sys' || /звон/i.test(m.text || ''); }).slice(-n).forEach(function(m){
+    var k = cxDayKey(m.ts || 0);
+    if (k !== day){ day = k; out.push('— ' + cxDayLabel(m.ts || 0) + ' —'); }
+    out.push('[' + cxHM(m.ts) + '] ' + nameFn(m.from) + ': ' + cxMsgLine(m));
+  });
+  return out.join('\n');
+}
+function cxMacro(s){ var nm = CX.names || {}; return String(s || '').replace(/\{\{\s*char\s*\}\}/gi, nm.char || '').replace(/\{\{\s*user\s*\}\}/gi, nm.userTavo || ''); }
+async function cxCardFull(){
+  try{
+    var chat = await withTimeout(Promise.resolve(PM.who.current()), 5000, null);
+    var sm = chat && chat.characters && chat.characters[0];
+    if (!sm) return { text:'', c:null, chat:chat };
+    var c = null; try{ c = await withTimeout(Promise.resolve(PM.who.character(sm.id)), 6000, null); }catch(e){ c = null; }
+    c = c || sm;
+    var d = c.data && typeof c.data === 'object' ? c.data : {};
+    var f = function(){ for (var i = 0; i < arguments.length; i++){ var k = arguments[i]; if (c[k]) return String(c[k]); if (d[k]) return String(d[k]); } return ''; };
+    var parts = [], desc = f('description'), pers = f('personality'), scen = (chat && chat.overrideScenario) || f('scenario'), ex = f('mesExample', 'mes_example'), fm = f('firstMes', 'first_mes');
+    if (desc) parts.push('Описание: ' + cxClip(desc, 4200));
+    if (pers) parts.push('Характер: ' + cxClip(pers, 1500));
+    if (scen) parts.push('Сценарий: ' + cxClip(scen, 1400));
+    if (ex) parts.push('Примеры его речи:\n' + cxClip(ex, 1600));
+    else if (fm) parts.push('Как он говорит (первое сообщение):\n' + cxClip(fm, 900));
+    return { text: cxMacro(parts.join('\n\n')), c:c, chat:chat };
+  }catch(e){ return { text:'', c:null, chat:null }; }
+}
+async function cxLoreLoad(chat, c){
+  var ids = [], seen = {};
+  var add = function(x){ var id = x && typeof x === 'object' ? (x.id != null ? x.id : x.uid) : x; if (id == null || id === '' || seen[id]) return; seen[id] = 1; ids.push(id); };
+  ((chat && chat.lorebooks) || []).forEach(add);
+  [c && c.lorebooks, c && c.lorebook, c && c.lorebookIds, c && c.data && c.data.lorebooks].forEach(function(v){ if (Array.isArray(v)) v.forEach(add); else if (v != null && typeof v !== 'object') add(v); });
+  var books = [];
+  for (var i = 0; i < ids.length && i < 10; i++){
+    try{ var b = await withTimeout(Promise.resolve(PM.lore.get(ids[i])), 6000, null); if (b && String(b.name || '').indexOf(LB_NAME_PREFIX) !== 0) books.push(b); }catch(e){}
+  }
+  var cb = c && ((c.data && c.data.character_book) || c.character_book);
+  if (cb && Array.isArray(cb.entries)) books.push({ name: cb.name || '', entries: cb.entries.map(function(e){ return { name: e.name || e.comment, content: e.content, enabled: e.enabled !== false, strategy: e.constant ? 'constant' : 'keyword', keywords: e.keys || [] }; }) });
+  return books;
+}
+async function cxLore(chat, c, scan, cap){
+  var books = await cxLoreLoad(chat, c);
+  var low = String(scan || '').toLowerCase(), con = [], hit = [];
+  books.forEach(function(b){ (b.entries || []).forEach(function(e){
+    if (!e || e.enabled === false || !e.content) return;
+    var kw = e.keywords || e.keys || [];
+    var line = (e.name ? '[' + String(e.name).slice(0, 60) + '] ' : '') + cxClip(cxMacro(e.content), 900);
+    if (e.strategy === 'constant' || e.constant === true) con.push(line);
+    else if (kw.some(function(k){ k = String(k || '').toLowerCase().trim(); return k.length >= 2 && low.indexOf(k) >= 0; })) hit.push(line);
+  }); });
+  var out = '', all = hit.concat(con);
+  for (var j = 0; j < all.length; j++){ if (out.length + all[j].length > cap) continue; out += (out ? '\n' : '') + all[j]; }
+  return out;
+}
+async function cxPersonaGet(chat){
+  try{
+    var pid = chat && chat.persona && chat.persona.id;
+    if (pid == null) return null;
+    return await withTimeout(Promise.resolve(PM.who.persona(pid)), 4000, null);
+  }catch(e){ return null; }
+}
+async function cxPersonaText(chat){
+  var p = await cxPersonaGet(chat);
+  return p ? cxClip(cxMacro(p.description || p.desc || ''), 1500) : '';
+}
+async function cxLongMem(cap){
+  try{
+    var m = PM.who.memory();
+    if (!m || m.enabled === false || !Array.isArray(m.memories)) return '';
+    var out = [], len = 0;
+    for (var i = m.memories.length - 1; i >= 0; i--){
+      var t = cxMacro(String(m.memories[i] || '')).replace(/\s+/g, ' ').trim(); if (!t) continue;
+      if (len + t.length > cap){ if (!out.length) out.push('- ' + cxClip(t, cap)); break; }
+      out.unshift('- ' + t); len += t.length + 3;
+    }
+    return out.join('\n');
+  }catch(e){ return ''; }
+}
+function cxGather(id){
+  var f = { memories:gatherOocMemories, diary:gatherOocDiary, pet:gatherOocPet, sattok:gatherOocSattok, twitter:gatherOocTwitter, channels:gatherOocChannels, status:gatherOocStatus, twitch:gatherOocTwitch, calendar:gatherOocCalendar, love:gatherOocLove, delivery:gatherOocDelivery, bank:gatherOocBank, rave:gatherOocRave, profile:gatherOocProfile, npcs:gatherOocNpcs }[id];
+  return f ? Promise.resolve().then(function(){ return f(); }).then(function(r){ return Array.isArray(r) ? r : []; }, function(){ return []; }) : Promise.resolve([]);
+}
+async function cxAppsText(list, each, cap){
+  var res = await Promise.all(list.map(function(a){ return cxGather(a[0]).then(function(p){ return [a[1], p]; }); }));
+  var out = [];
+  res.forEach(function(r){ var t = (r[1] || []).join('\n').trim(); if (t) out.push('— ' + r[0] + ':\n' + cxClip(t, each)); });
+  return cxClip(out.join('\n'), cap);
+}
+async function cxRelText(){ var a = await cxGather('status'), b = await cxGather('npcs'); return cxClip(a.concat(b).join('\n'), 1800); }
+async function cxRpText(n, cap){
+  try{
+    var count = await PM.chat.count(); if (!count) return '';
+    var msgs = await PM.chat.slice([Math.max(0, count - n), count - 1]);
+    var nm = CX.names;
+    var lines = (Array.isArray(msgs) ? msgs : []).filter(function(m){ return m && !m.hidden && (m.role === 'user' || m.role === 'assistant'); }).map(function(m){
+      var c = stripBrailleNoise(String(m.content || '')).replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n{2,}/g, '\n').trim();
+      return (m.role === 'user' ? nm.userTavo : nm.char) + ': ' + (c.length > 1600 ? c.slice(0, 500) + ' […] ' + c.slice(-1000) : c);
+    }).filter(function(l){ return l.length > 8; });
+    var out = lines.join('\n\n');
+    return out.length > cap ? out.slice(-cap) : out;
+  }catch(e){ return ''; }
+}
+function cxAppMeta(id){ var a = APPS.filter(function(x){ return x.id === id; })[0]; return a || { id:id, label:id, icon:'rpi-chat', c1:'#8B5CF6' }; }
+async function cxCatalog(pubOnly){
+  var out = [];
+  var add = function(app, title, text, img){ text = cxClip(text, 280); if (!text) return; var m = cxAppMeta(app); out.push({ k:'R' + (out.length + 1), app:app, label:m.label, title:cxClip(title, 70), text:text, img: (typeof img === 'string' && /^(https?:|data:image)/.test(img)) ? img : '' }); };
+  var safe = async function(fn){ try{ await fn(); }catch(e){} };
+  await safe(async function(){ (await rpGet('rp_tweets', [])).filter(function(t){ return !t.hidden; }).slice(0, 5).forEach(function(t){ add('twitter', (t.author || '') + (t.handle ? ' @' + t.handle : ''), t.text, t.img); }); });
+  await safe(async function(){ var chs = await rpGet('rp_tg_channels', []); (await rpGet('rp_tg_posts', [])).filter(function(p){ return !p.hidden; }).slice(0, 4).forEach(function(p){ var ch = chs.filter(function(c){ return c.id === p.channelId; })[0]; add('channels', ch ? ch.name : 'Канал', p.text, p.img); }); });
+  await safe(async function(){
+    var feed = await rpGet('rp_stream_feed', []), arch = await rpGet('rp_stream_archive', []), ses = await rpGet('rp_stream_session', null);
+    if (ses && feed.length){ var lf = feed[feed.length - 1]; add('twitch', 'Сейчас в эфире', (lf.author ? lf.author + ': ' : '') + lf.text); }
+    arch.slice(-2).reverse().forEach(function(a){ add('twitch', 'Стрим №' + a.n, a.summary); });
+  });
+  await safe(async function(){
+    var st = await rpGet('rp_rave_state', null), mv = await raveLoadMovies();
+    if (st && st.movieId && !st.finished){ var cm = mv.filter(function(m){ return m.id === st.movieId; })[0]; if (cm) add('rave', 'Rave', 'Сейчас смотрим «' + cm.title + '», ' + raveFmtTime(st.elapsedMin) + ' из ' + raveFmtTime(cm.durationMin)); }
+    mv.slice(-2).reverse().forEach(function(m){ if (!st || m.id !== st.movieId) add('rave', 'Rave', 'Фильм «' + m.title + '»'); });
+  });
+  if (!pubOnly){
+    await safe(async function(){
+      var me = await stkMe();
+      (await stkFeed()).slice(0, 4).forEach(function(p){ add('sattok', (p.name || '') + (p.user ? ' ' + p.user : ''), p.caption || p.scene, p.img); });
+      (await stkMine()).slice(0, 2).forEach(function(p){ add('sattok', ((me && me.name) || 'Моё видео') + ' ' + (p.user || ''), p.caption || p.scene, p.img); });
+    });
+    await safe(async function(){ var today = await getStoryDate(); (await rpGet('rp_calendar_events', [])).filter(function(e){ return !e.hidden && e.iso >= today; }).sort(function(a, b){ return a.iso < b.iso ? -1 : 1; }).slice(0, 3).forEach(function(e){ add('calendar', e.iso, (e.icon ? e.icon + ' ' : '') + e.text); }); });
+    await safe(async function(){ (await rpGet('rp_memories', [])).filter(function(m){ return !m.hidden; }).slice(-3).reverse().forEach(function(m){ add('memories', m.dateLabel || 'Воспоминание', m.text, m.img || m.photo); }); });
+    await safe(async function(){ var pt = await gatherOocPet(); if (pt[0]) add('pet', 'Мой малыш', pt[0].replace(/^Мой малыш:\s*/, '')); });
+  }
+  return out;
+}
+function cxCatText(cat){ return cat.map(function(c){ return c.k + ' — ' + c.label + (c.title ? ' · ' + c.title : '') + ': «' + cxClip(c.text, 160) + '»'; }).join('\n'); }
+function cxStkText(){ return CX_STK.map(function(s){ return s.id + ' — «' + s.cap + '»'; }).join(', '); }
+function cxContactLine(c, n){ return c.name + (c.aliases && c.aliases.length ? ' (ещё зовут: ' + c.aliases.slice(0, 4).join(', ') + ')' : '') + (c.desc ? ' — ' + cxClip(c.desc, n || 90) : ''); }
+async function cxStoryNow(){ var l = ''; try{ l = await currentRpLabel(); }catch(e){} return l; }
+var CX_TAG_RULES = function(withRave){
+  return '- Стикер — отдельной строкой: [стикер: id]. Доступные стикеры: ' + cxStkText() + '.\n' +
+    '- Репост — отдельной строкой: [репост: R2], рядом напиши, что думаешь, или спроси об этом. Бери только номера из списка «Можно переслать».\n' +
+    (withRave ? '- Позвать смотреть фильм вместе в Rave: [кино: Название | минуты]. Только если это к месту.\n' : '') +
+    '- Голосовое: [голосовое: что говоришь].\n' +
+    '- Фото: [фото: что на снимке | кто в кадре]. Кто в кадре: я, ты, мы, имя или никто — если это еда, вещь, вид.\n' +
+    '- Кружок — видео с фронталки: [кружок: что в кадре | что говоришь].\n' +
+    '- Видео: [видео: что на видео]. Файл: [файл: название.pdf | что внутри].\n' +
+    '- Фото, кружки и видео от собеседника ты видишь по описанию в квадратных скобках — реагируй на них как на настоящие.\n' +
+    '- Всё это редко и к месту, не в каждом ответе. Если тебя просят прислать фото или кружок — присылай. Обычные эмодзи — только если они в манере этого человека.';
+};
+async function cxPromptBot(t, list, cs, mode){
+  var nm = CX.names;
+  var card = await cxCardFull();
+  var rpN = Math.max(4, Math.min(20, +cfg('contextRange', 20) || 20));
+  var rp = await cxRpText(rpN, 9000);
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
+  var lore = await cxLore(card.chat, card.c, rp + '\n' + hist.slice(-2500), 4500);
+  var per = await cxPersonaText(card.chat);
+  var lmem = await cxLongMem(2500);
+  var rel = await cxRelText();
+  var apps = await cxAppsText(CX_APPS_BOT, 650, 6500);
+  var cat = await cxCatalog(false);
+  var when = await cxStoryNow();
+  var known = cs.filter(function(c){ return c.desc || c.src !== 'auto'; }).slice(0, 18).map(function(c){ return '- ' + cxContactLine(c, 80); }).join('\n');
+  var p = 'Ты — ' + nm.char + '. Сейчас ты переписываешься с ' + nm.userTavo + ' в мессенджере на телефоне. Это живая переписка, а не ролевая сцена: пиши только свои сообщения — так, как пишет ' + nm.char + ', его словами, манерой и характером из карточки.\n\n' +
+    '[КАРТОЧКА ' + nm.char + ']\n' + (card.text || '(нет данных)') + '\n\n' +
+    (lore ? '[ЛОРБУК И ПАМЯТЬ]\n' + lore + '\n\n' : '') +
+    (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
+    (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userTavo + ']\n' + per + '\n\n' : '') +
+    (rel ? '[ОТНОШЕНИЯ]\n' + rel + '\n\n' : '') +
+    (apps ? '[ЧТО ПРОИСХОДИТ В ПРИЛОЖЕНИЯХ ТЕЛЕФОНА — ' + nm.char + ' это знает]\n' + apps + '\n\n' : '') +
+    (rp ? '[РОЛЕВАЯ — последние события истории]\n' + rp + '\n\n' : '') +
+    (when ? 'Сейчас в истории: ' + when + '.\n\n' : '') +
+    (known ? '[ЛЮДИ ВОКРУГ]\n' + known + '\n\n' : '') +
+    (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
+    '[ПЕРЕПИСКА В ЭТОМ ЧАТЕ]\n' + (hist || '(пока пусто)') + '\n\n' +
+    (mode === 'init'
+      ? '[СЕЙЧАС] ' + nm.userTavo + ' давно не писал(а) — ты пишешь ПЕРВЫМ. Найди живой повод: чаще всего перешли что-то интересное из «Можно переслать» и спроси мнение или подколи, либо напиши по тому, что сейчас происходит в истории и в его жизни. Можно начать с [звонок] — если характер такой, что он сначала позвонит, а потом напишет.\n'
+      : '[СЕЙЧАС] Ответь на последние сообщения ' + nm.userTavo + '.\n') +
+    'ПРАВИЛА:\n- 1–4 коротких сообщения, каждое с новой строки, без имени в начале. Как в мессенджере, а не как в книге.\n' +
+    '- Никаких описаний действий, звёздочек, ремарок, рассказчика и перевода.\n' +
+    '- Пиши из своего текущего положения в истории: где он и чем занят. Не противоречь сюжету и не двигай его сам.\n' +
+    '- Не пиши за ' + nm.userTavo + ', не повторяй уже сказанное, не прощайся без причины.\n' +
+    CX_TAG_RULES(true) + '\nОтветь только сообщениями.';
+  return { prompt:p, cat:cat, ctx:{ def:'char', isSelf:function(n){ return rpSameContact({ name:nm.char }, n); } } };
+}
+async function cxPromptNpc(t, list, cs, mode){
+  var nm = CX.names, c = cxContact(t.who[0], cs);
+  if (!c) return null;
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : cxNameOf(id, cs); });
+  var pub = await cxAppsText(CX_APPS_PUB, 600, 3200);
+  var prof = await cxAppsText([['profile', 'Профиль ' + nm.userTavo]], 500, 600);
+  var cat = await cxCatalog(true);
+  var p = 'Ты — ' + c.name + '. Ты переписываешься с ' + nm.userTavo + ' в мессенджере. Пиши только свои сообщения, своим голосом.\n\n' +
+    '[АНКЕТА ' + c.name + ']\n' + (c.desc ? 'Кто это: ' + c.desc + '\n' : '') + (c.pers ? 'Характер: ' + c.pers + '\n' : '') + (c.ex ? 'Как пишет (примеры):\n' + c.ex + '\n' : '') + (c.mem ? 'Что было между вами: ' + c.mem + '\n' : '') +
+    (c.aliases && c.aliases.length ? 'Также зовут: ' + c.aliases.join(', ') + '\n' : '') + '\n' +
+    (pub ? '[ПУБЛИЧНЫЕ НОВОСТИ — это видят все]\n' + pub + '\n\n' : '') +
+    (prof ? '[ПУБЛИЧНОЕ О ' + nm.userTavo + ']\n' + prof + '\n\n' : '') +
+    (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
+    '[ПЕРЕПИСКА]\n' + (hist || '(пока пусто)') + '\n\n' +
+    'ПРАВИЛА:\n- Ты знаешь только себя, публичные новости выше и то, что тебе написали здесь. Что происходит наедине у ' + nm.userTavo + ' и ' + nm.char + ', их переписки и личные приложения ты НЕ знаешь.\n' +
+    '- Можно обсуждать новости из каналов, твиттера, стримов и Rave — это хороший повод сблизиться.\n' +
+    '- 1–3 коротких сообщения, каждое с новой строки, без имени в начале. Без описаний действий и звёздочек.\n' +
+    CX_TAG_RULES(false) + '\nОтветь только сообщениями.';
+  return { prompt:p, cat:cat, ctx:{ def:c.id, isSelf:function(n){ return rpSameContact(c, n); } } };
+}
+async function cxPromptGroup(t, list, cs, mode){
+  var nm = CX.names, mem = t.who.filter(function(w){ return w !== 'me'; });
+  var people = mem.map(function(id){
+    if (id === 'char') return '- ' + nm.char + ' — главный герой истории.';
+    var c = cxContact(id, cs); if (!c) return '';
+    return '- ' + c.name + ': ' + cxClip([c.desc, c.pers ? 'характер: ' + c.pers : '', c.ex ? 'пишет так: ' + c.ex.replace(/\n/g, ' / ') : ''].filter(Boolean).join('. '), 420);
+  }).filter(Boolean).join('\n');
+  var hasChar = mem.indexOf('char') >= 0;
+  var card = hasChar ? await cxCardFull() : null;
+  var rp = hasChar ? await cxRpText(8, 3000) : '';
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
+  var pub = await cxAppsText(CX_APPS_PUB, 500, 3000);
+  var cat = await cxCatalog(true);
+  var p = 'Это групповой чат «' + cxTitle(t, cs) + '» в мессенджере. В нём ' + nm.userTavo + ' и участники:\n' + people + '\n\n' +
+    (hasChar ? '[КАРТОЧКА ' + nm.char + ']\n' + cxClip(card.text, 2200) + '\n' + (rp ? '[ЧТО СЕЙЧАС В ИСТОРИИ — знает только ' + nm.char + ']\n' + rp + '\n' : '') + nm.char + ' в группе ведёт себя публично и не выдаёт личного.\n\n' : '') +
+    (pub ? '[ПУБЛИЧНЫЕ НОВОСТИ — это видят все]\n' + pub + '\n\n' : '') +
+    (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
+    '[ПЕРЕПИСКА]\n' + (hist || '(пока пусто)') + '\n\n' +
+    (mode === 'auto'
+      ? '[СЕЙЧАС] В чате тихо. Кто-то из участников сам начинает разговор: новость, мем, вопрос, планы. Остальные могут подхватить. ' + nm.userTavo + ' сейчас не пишет. 2–5 строк.\n'
+      : '[СЕЙЧАС] Ответь одним ответом сразу за всех, кому есть что сказать: кому адресовано сообщение — обязательно; остальные — если захотят вмешаться, поддержать, поспорить или перебить друг друга. Обычно 2–4 участника, каждый своей строкой. 3–8 строк.\n') +
+    'ПРАВИЛА:\n- Формат строго: Имя: текст — одна строка, одно сообщение. Имена только участников из списка выше, точно как в списке, без перевода и транслитерации.\n' +
+    '- У каждого свой голос по анкете. Участники знают только публичное и то, что написано в этом чате.\n' +
+    '- Не пиши за ' + nm.userTavo + '. Без описаний действий и звёздочек.\n' +
+    CX_TAG_RULES(false) + '\n- В группе тег пишется после имени: Имя: [стикер: id].\nОтветь только строками чата.';
+  var res = function(n){
+    if (rpSameContact({ name:nm.userTavo }, n) || rpSameContact({ name:nm.user }, n)) return null;
+    for (var i = 0; i < mem.length; i++){
+      if (mem[i] === 'char'){ if (rpSameContact({ name:nm.char }, n)) return 'char'; continue; }
+      var c = cxContact(mem[i], cs); if (c && rpSameContact(c, n)) return c.id;
+    }
+    var cand = [], names = [];
+    mem.forEach(function(id){ var cn = id === 'char' ? nm.char : (cxContact(id, cs) || {}).name; if (cn){ cand.push(id); names.push(cn); } });
+    var pk = rpPickMember(names, n);
+    if (pk) return cand[names.indexOf(pk)];
+    var onlyNpc = mem.filter(function(x){ return x !== 'char'; });
+    return onlyNpc.length === 1 ? onlyNpc[0] : null;
+  };
+  return { prompt:p, cat:cat, ctx:{ def:null, resolve:res, mem:mem, skip:[] } };
+}
+async function cxGroupMore(tid, t, cs, mode, built, items){
+  var mem = (built.ctx && built.ctx.mem) || []; if (mem.length < 2) return;
+  var nm = CX.names, spoken = {}, order = [];
+  items.forEach(function(i){ if (i.from && !spoken[i.from]){ spoken[i.from] = 1; order.push(i.from); } });
+  var queue = mem.filter(function(id){ return !spoken[id]; });
+  if (!queue.length && order.length >= 2 && Math.random() < 0.5){
+    var last = items[items.length - 1].from, rest = mem.filter(function(id){ return id !== last; });
+    if (rest.length) queue = [rest[Math.floor(Math.random() * rest.length)]];
+  }
+  queue = queue.slice(0, 1);
+  for (var q = 0; q < queue.length; q++){
+    var id = queue[q], who = id === 'char' ? nm.char : cxNameOf(id, cs);
+    var cur = await cxMsgs(tid);
+    var b2 = { self: built.self, ctx: built.ctx, cat: [] };
+    var cardTxt = ''; if (mem.indexOf('char') >= 0){ try{ cardTxt = cxClip((await cxCardFull()).text, 700); }catch(eC){} }
+    var ppl = mem.map(function(m2){ if (m2 === 'char') return '- ' + nm.char + (cardTxt ? ': ' + cardTxt : ''); var c = cxContact(m2, cs); return c ? '- ' + c.name + ': ' + cxClip([c.desc, c.pers ? 'характер: ' + c.pers : '', c.ex ? 'пишет так: ' + c.ex.replace(/\n/g, ' / ') : ''].filter(Boolean).join('. '), 360) : ''; }).filter(Boolean).join('\n');
+    var hist2 = cxHistory(cur, 14, function(id2){ return id2 === 'me' ? nm.userTavo : (id2 === 'char' ? nm.char : cxNameOf(id2, cs)); });
+    var raw2 = await callModel('Это групповой чат «' + cxTitle(t, cs) + '» в мессенджере. В нём ' + nm.userTavo + ' и участники:\n' + ppl + '\n\n[ПЕРЕПИСКА]\n' + (hist2 || '(пока пусто)') + '\n\nНе пиши за ' + nm.userTavo + '. Без описаний действий и звёздочек.\n\n[ТЕПЕРЬ] Сейчас пишет только ' + who + ': живая реакция на последние сообщения чата, в своём голосе, 1–2 строки, формат «' + who + ': текст». Можно отвечать другим участникам и спорить с ними. Если по смыслу ему нечего добавить, ответь одним словом SKIP.');
+    var clean = String(raw2 || '').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, '').trim();
+    if (!clean || /^SKIP\b/i.test(clean)) continue;
+    var it2 = cxFinal(cxParse(clean, 'dm', { def: id, isSelf: function(n){ return rpSameContact({ name: nm.userTavo }, n) || rpSameContact({ name: nm.user }, n) || rpSameContact(id === 'char' ? { name: nm.char } : (cxContact(id, cs) || { name: who }), n); } }), b2);
+    it2.forEach(function(x){ x.from = id; });
+    if (!it2.length) continue;
+    await cxDeliver(tid, it2, b2);
+  }
+}
+function rpPickMember(members, label){
+  var l = String(label || '').trim().toLowerCase();
+  var norm = function(s){ return rpTranslit(String(s)).replace(/[^a-z0-9 ]/g, '').trim(); };
+  var tl = norm(l);
+  if (!tl) return null;
+  var hit = members.filter(function(x){
+    var tx = norm(x), first = tx.split(' ')[0];
+    if (tx === tl) return true;
+    if (!first || first.length < 3) return false;
+    var a = first.slice(0, Math.max(3, first.length - 2)), b = tl.slice(0, Math.max(3, tl.length - 2));
+    return tl.indexOf(a) === 0 || first.indexOf(b) === 0;
+  });
+  return hit.length === 1 ? hit[0] : null;
+}
+function cxParse(raw, mode, ctx){
+  var out = [];
+  String(raw || '').replace(/\r/g, '').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, '').split('\n').forEach(function(ln){
+    ln = ln.trim().replace(/^[>•\-–—#\s]+/, '').replace(/^\[([^\]:]{1,40})\]\s*:/, '$1:').replace(/^<([^>:]{1,40})>\s*:/, '$1:'); if (!ln || /^```/.test(ln)) return;
+    var who = ctx.def;
+    var m = /^\**([^:*\[\]]{1,40})\**\s*:\s*(.*)$/.exec(ln);
+    if (mode === 'group'){ if (!m) return; who = ctx.resolve(m[1].trim()); if (!who){ if (ctx.skip) ctx.skip.push(m[1].trim()); return; } ln = m[2].trim(); }
+    else if (m && ctx.isSelf(m[1].trim())) ln = m[2].trim();
+    ln = ln.replace(/^["«“*]+|["»”*]+$/g, '').trim();
+    if (/^\*[^*]+\*$/.test(ln) || /^\([^)]*\)$/.test(ln)) return;
+    ln = ln.replace(/\*[^*]{1,80}\*/g, ' ').trim();
+    var rest = ln.replace(/\[(стикер|sticker|репост|repost|кино|фильм|movie|голосовое|голос|voice|фото|photo|кружочек|кружок|circle|видео|video|файл|file|документ|звонок|call)\s*(?::\s*([^\]]*))?\]/gi, function(all, k, v){
+      var kk = k.toLowerCase(); v = String(v || '').trim();
+      var mk = /^(фото|photo)$/.test(kk) ? 'photo' : (/^(кружочек|кружок|circle)$/.test(kk) ? 'circle' : (/^(видео|video)$/.test(kk) ? 'video' : (/^(файл|file|документ)$/.test(kk) ? 'file' : (/^(голосовое|голос|voice)$/.test(kk) ? 'voice' : ''))));
+      if (mk){ var mi = cxMediaItem(mk, v); if (mi){ mi.from = who; out.push(mi); } return ' '; }
+      if (/^(стикер|sticker)$/.test(kk)) out.push({ from:who, t:'sticker', d:{ id: v.toLowerCase().replace(/[^a-z0-9_]/g, '') } });
+      else if (/^(репост|repost)$/.test(kk)) out.push({ from:who, t:'repost', d:{ k: v.toUpperCase().replace(/[^R0-9]/g, '') } });
+      else if (/^(кино|фильм|movie)$/.test(kk)){ var pp = v.split('|'); var tt = cxClip(String(pp[0] || '').replace(/[«»"]/g, ''), 80); if (tt) out.push({ from:who, t:'invite', d:{ title: tt, dur: parseInt(pp[1], 10) || 0 } }); }
+      else out.push({ from:who, t:'call', d:{ dir:'missed' } });
+      return ' ';
+    }).replace(/\s+/g, ' ').trim();
+    if (rest && !/^[-—–.…,!?]+$/.test(rest)) out.push({ from:who, t:'text', text: rest.slice(0, 900) });
+  });
+  return out;
+}
+function cxFinal(items, built){
+  var calls = 0;
+  return items.filter(function(it){
+    if (!it.from) return false;
+    if (it.t === 'sticker') return !!CX_STK_BY[it.d.id];
+    if (it.t === 'repost'){ var r = (built.cat || []).filter(function(c){ return c.k === it.d.k; })[0]; if (!r) return false; it.d = { app:r.app, label:r.label, title:r.title, text:r.text, img:r.img }; return true; }
+    if (it.t === 'call'){ calls++; return calls === 1 && it.from === 'char'; }
+    return true;
+  }).slice(0, 7);
+}
+function cxNotify(t, m, cs){
+  if (!m || m.from === 'me' || t.owner !== 'me') return;
+  var viewing = panelOpen && currentScreen === 'messenger' && CX.open === t.id;
+  if (viewing) return;
+  var nm = cxNameOf(m.from, cs);
+  if (!(panelOpen && currentScreen === 'messenger')){ unreadCount++; updateBadge(); pushHomeNotification('Чат', (t.kind === 'group' ? cxTitle(t, cs) + ' · ' : '') + nm + ': ' + cxPreview(m)); }
+}
+async function cxPush(tid, add, opts){
+  opts = opts || {};
+  return cxSerial(async function(){
+    var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return null;
+    var l = await cxMsgs(tid);
+    add.forEach(function(m){ m.id = m.id || uid(); m.ts = m.ts || Date.now(); l.push(m); });
+    await cxMsgsSave(tid, l);
+    var last = add[add.length - 1];
+    t.ts = Math.max(t.ts || 0, last.ts); t.last = { f: last.from, x: cxPreview(last) };
+    var viewing = panelOpen && currentScreen === 'messenger' && CX.open === tid;
+    var inc = add.filter(function(m){ return m.from !== 'me' && m.t !== 'sys'; }).length;
+    if (inc && !viewing && !opts.silent) t.unread = (t.unread || 0) + inc;
+    await cxThreadsSave(ts);
+    return { t:t, viewing:viewing };
+  });
+}
+async function cxPatchMsg(tid, mid, fn){
+  return cxSerial(async function(){ var l = await cxMsgs(tid), hit = false; l.forEach(function(m){ if (m.id === mid){ fn(m); hit = true; } }); if (hit) await cxMsgsSave(tid, l); return hit; });
+}
+function cxAfter(tid){
+  if (!(panelOpen && currentScreen === 'messenger') || !CX.cont || !CX.cont.isConnected) return;
+  if (CX.open === tid) cxDrawMsgs(); else if (!CX.open) cxRender();
+}
+async function cxDeliver(tid, items, built){
+  var cs = await cxContacts(), photoOn = false; try{ photoOn = await imagesEnabled(); }catch(e){}
+  for (var i = 0; i < items.length; i++){
+    var it = items[i];
+    await cxSleep(i === 0 ? 350 : Math.min(2200, 500 + String(it.text || '').length * 22));
+    var m = { from: it.from, t: it.t, text: it.text || '', d: it.d || null, self: built.self ? 1 : undefined };
+    if (cxNeedsImg(m)) m.d.busy = photoOn;
+    if (m.t === 'call'){
+      var cl = await cxCalls(); cl.unshift({ id:uid(), who:m.from, dir:'missed', ts:Date.now(), dur:0 }); await rpSet(CX_KCALL, cl.slice(0, 80));
+      m.t = 'call'; m.d = { dir:'missed' };
+    }
+    var r = await cxPush(tid, [m]);
+    if (!r) return;
+    if (i === items.length - 1) cxNotify(r.t, m, cs);
+    cxAfter(tid);
+    if (photoOn && cxNeedsImg(m)) cxDrawMedia(tid, m, cs);
+  }
+}
+var CX_DOC_RE = /(\.|\b)(pdf|docx?|xlsx?|pptx?|txt|zip|rar|apk|mp3|wav|csv|rtf|odt|epub)\b|документ|таблиц|презентац|резюме|договор|архив|аудиофайл|трек|справк|счёт|счет|отчёт|отчет|скан|выписк|квитанц/i;
+var CX_IMG_T = { photo:1, circle:1, video:1 };
+function cxNeedsImg(m){ return !!(m && CX_IMG_T[m.t] && m.d && !m.d.img && !m.d.vid); }
+function cxNm(id, cs){ return id === 'me' ? (CX.names && CX.names.userTavo) || 'Я' : cxNameOf(id, cs); }
+function cxSec(s){ var m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '').trim()); return m ? (+m[1]) * 60 + (+m[2]) : 0; }
+function cxFileD(b){
+  b = String(b || '').trim();
+  var m = /([^\s|«»"]{1,60}\.(pdf|docx?|xlsx?|pptx?|txt|zip|rar|apk|mp3|wav|csv|rtf|odt|epub|png|jpe?g))/i.exec(b);
+  if (m) return { name: m[1].slice(0, 60), desc: cxClip(b.replace(m[0], '').replace(/^[\s|:,—-]+|[\s|:,—-]+$/g, ''), 300) };
+  return { name: cxClip(b, 48), desc: '' };
+}
+function cxMediaItem(kind, v){
+  var pp = String(v || '').split('|').map(function(x){ return x.trim(); });
+  if (kind === 'photo'){
+    var cast = String(pp[1] || '').replace(/^(кто\s+в\s+кадре|в\s+кадре)\s*:?\s*/i, '').trim();
+    return pp[0] ? { t:'photo', text:'', d:{ desc: cxClip(pp[0], 400), cast: cxClip(cast, 80) } } : null;
+  }
+  if (kind === 'circle') return pp[0] || pp[1] ? { t:'circle', text: cxClip(pp.slice(1).join(' | '), 500), d:{ desc: cxClip(pp[0], 400) } } : null;
+  if (kind === 'video') return pp[0] ? { t:'video', text: cxClip(pp.slice(1).join(' | '), 300), d:{ desc: cxClip(pp[0], 400) } } : null;
+  if (kind === 'file'){
+    if (!pp[0]) return null;
+    if (pp.length > 1) return { t:'file', text:'', d:{ name: cxClip(pp[0], 60), desc: cxClip(pp.slice(1).join(' | '), 300) } };
+    return CX_DOC_RE.test(pp[0]) ? { t:'file', text:'', d: cxFileD(pp[0]) } : { t:'photo', text:'', d:{ desc: cxClip(pp[0], 400), asFile:1 } };
+  }
+  if (kind === 'voice'){
+    var dur = /^\d{1,2}:\d{2}$/.test(pp[0]) ? cxSec(pp.shift()) : 0;
+    var tx = pp.length > 1 ? pp.slice(1).join(' | ') : (pp[0] || '');
+    return tx ? { t:'voice', text: cxClip(tx, 500), d: dur ? { dur:dur } : null } : null;
+  }
+  return null;
+}
+function cxPayload(p){
+  p = String(p || '').trim();
+  var m = /^(?:📷|📎|⭕|🎤|🎬|🎥)?\s*\[?\s*(ГОЛОСОВОЕ|ГОЛОС|КРУЖОЧЕК|КРУЖОК|КРУГ|ВИДЕО|ФАЙЛ|ФОТО)\s*:\s*([\s\S]*?)\s*\]?$/i.exec(p);
+  if (!m) return null;
+  var k = m[1].toUpperCase();
+  var kind = /^ГОЛОС/.test(k) ? 'voice' : (/^КРУ/.test(k) ? 'circle' : (k === 'ВИДЕО' ? 'video' : (k === 'ФАЙЛ' ? 'file' : 'photo')));
+  var it = cxMediaItem(kind, m[2]);
+  return it ? [it] : null;
+}
+function cxChatN(text){
+  var blocks = [], re = /\[CHAT_N\]([\s\S]*?)\[\/CHAT_N\]/g, bm, TM = /\|\s*(\d{1,2}:\d{2})\s*\|/g;
+  var split = function(gap, last){
+    if (last) return { before: gap.trim(), after:'' };
+    var nl = gap.lastIndexOf('\n');
+    if (nl !== -1) return { before: gap.slice(0, nl).trim(), after: gap.slice(nl + 1).trim() };
+    var t = gap.trim(), sp = t.lastIndexOf(' ');
+    if (sp === -1) return { before:'', after:t };
+    return { before: t.slice(0, sp).trim(), after: t.slice(sp + 1).trim() };
+  };
+  while ((bm = re.exec(String(text || '')))){
+    var block = bm[1], marks = [], tm;
+    TM.lastIndex = 0;
+    while ((tm = TM.exec(block))) marks.push({ s: tm.index, e: tm.index + tm[0].length, time: tm[1] });
+    var cn = /chat_name\s*:\s*/i.exec(block), after = cn ? cn.index + cn[0].length : 0, name = '', pend = null, lines = [];
+    if (marks.length){ var pre = split(block.slice(after, marks[0].s), false); name = pre.before; pend = pre.after; }
+    else if (cn) name = block.slice(after).trim();
+    for (var i = 0; i < marks.length; i++){
+      var snd = pend !== null ? pend : block.slice(i === 0 ? after : marks[i - 1].e, marks[i].s).trim();
+      var sp2 = split(block.slice(marks[i].e, i + 1 < marks.length ? marks[i + 1].s : block.length), i + 1 >= marks.length);
+      pend = sp2.after || null;
+      if (snd) lines.push({ sender: snd.replace(/[*_]/g, '').trim(), time: marks[i].time, payload: sp2.before });
+    }
+    if (lines.length) blocks.push({ name: name.replace(/[*_]/g, '').trim(), lines: lines });
+  }
+  return blocks;
+}
+function cxChatNRows(text){
+  var nm = CX.names, rows = [];
+  cxChatN(text).forEach(function(b){
+    var isI = function(s){ return /^(я|i|me)$/i.test(String(s || '').trim()); };
+    var others = [];
+    b.lines.forEach(function(l){ if (!isI(l.sender) && !others.some(function(o){ return rpSameContact({ name:o }, l.sender); })) others.push(l.sender); });
+    var nameIsSender = b.name && others.some(function(o){ return rpSameContact({ name:o }, b.name) || rpSameContact({ name:b.name }, o); });
+    var group = others.length > 1 && !nameIsSender;
+    var partner = b.name || others[0] || '';
+    b.lines.forEach(function(l){
+      var from = isI(l.sender) ? nm.char : l.sender;
+      var items = cxPayload(l.payload);
+      var row = { from: from, text: l.payload, items: items };
+      if (group) row.grp = { title: b.name || others.join(', '), who: others.concat([nm.char]) };
+      else { if (!partner) return; row.to = isI(l.sender) ? partner : nm.char; }
+      if (!items && !String(l.payload || '').trim()) return;
+      rows.push(row);
+    });
+  });
+  return rows;
+}
+function cxCastNames(cast, sender, other){
+  var out = [];
+  String(cast || '').split(/\s*(?:,|;|&|\+|\s+и\s+)\s*/).forEach(function(x){
+    x = x.trim().toLowerCase(); if (!x) return;
+    if (/^(никто|никого|нет|none|nobody|-)$/.test(x)) return;
+    if (/^(я|меня|сам|сама|селфи)$/.test(x)) out.push(sender);
+    else if (/^(ты|тебя)$/.test(x)){ if (other) out.push(other); }
+    else if (/^(мы|оба|вдвоём|вдвоем|нас)$/.test(x)){ out.push(sender); if (other) out.push(other); }
+    else out.push(x);
+  });
+  return out;
+}
+function cxCastWho(names, cs){
+  var ids = [], npcs = [];
+  (names || []).forEach(function(n){
+    n = String(n || '').trim(); if (!n || /^(никто|нет|none|nobody)$/i.test(n)) return;
+    var id = cxIdOf(n, cs, false);
+    if (!id){ if (!npcs.some(function(x){ return rpSameContact({ name:x }, n); })) npcs.push(n); return; }
+    if (ids.indexOf(id) < 0) ids.push(id);
+  });
+  var hasC = ids.indexOf('char') >= 0, hasU = ids.indexOf('me') >= 0;
+  ids.forEach(function(id){ if (id !== 'char' && id !== 'me') npcs.unshift(cxNameOf(id, cs)); });
+  if (npcs.length && !hasC) return { refWho:'npc:' + npcs[0], withUser: hasU };
+  if (hasC && hasU) return { refWho:'both' };
+  if (hasC) return { refWho:'char' };
+  if (hasU) return { refWho:'user' };
+  return { refWho:'none' };
+}
+async function cxDirect(tid, m, cs){
+  var nm = CX.names, d = m.d || {};
+  var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
+  var sender = cxNm(m.from, cs), other = '';
+  if (t && t.kind === 'dm'){ var own = t.owner === 'char' ? 'char' : 'me'; other = cxNm(m.from === own ? t.who[0] : own, cs); }
+  var fb = cxCastNames(d.cast, sender, other);
+  if (!fb.length && m.t === 'circle') fb = [sender];
+  var fallback = { in: fb, prompt: [d.desc, m.t === 'photo' ? m.text : ''].filter(Boolean).join('. ') || ('a candid phone photo sent by ' + sender) };
+  try{
+    var list = await cxMsgs(tid), at = -1;
+    list.forEach(function(x, i){ if (x.id === m.id) at = i; });
+    var prev = (at > 0 ? list.slice(Math.max(0, at - 8), at) : list.slice(-8)).filter(function(x){ return x.t !== 'sys' && x.id !== m.id; });
+    var hist = prev.map(function(x){ return cxNm(x.from, cs) + ': ' + cxMsgLine(x); }).join('\n');
+    var rp = (m.from === 'char' || m.from === 'me') ? await cxRpText(6, 2400) : '';
+    var when = await cxStoryNow();
+    var people = ['- ' + nm.char + ' — главный персонаж', '- ' + nm.userTavo + ' — игрок'].concat(cs.slice(0, 30).map(function(c){ return '- ' + cxContactLine(c, 50); })).join('\n');
+    var kl = m.t === 'circle' ? 'видеосообщение-кружок — его снимают на фронтальную камеру, отправитель смотрит в камеру и говорит' : (m.t === 'video' ? 'видео — опиши один характерный кадр' : (d.asFile ? 'фото файлом' : 'фото'));
+    var raw = await callModel('Подготовь кадр для генератора картинок. ' + sender + ' отправляет ' + (other ? other + ' ' : '') + 'в мессенджере ' + kl + '.\n' +
+      'Что на нём, со слов отправителя: ' + (d.desc || '(не сказано)') + '\n' +
+      (m.text ? (m.t === 'circle' ? 'Говорит: «' + m.text + '»' : 'Подпись: ' + m.text) + '\n' : '') +
+      (d.cast ? 'Кто в кадре, со слов отправителя: ' + d.cast + '\n' : '') + '\n' +
+      '[ЛЮДИ]\n' + people + '\n\n' +
+      (hist ? '[ПЕРЕПИСКА ДО ЭТОГО]\n' + hist + '\n\n' : '') +
+      (rp ? '[ЧТО СЕЙЧАС В ИСТОРИИ]\n' + rp + '\n\n' : '') +
+      (when ? 'Время в истории: ' + when + '\n\n' : '') +
+      'Реши, кто в кадре. «я» — это ' + sender + (other ? ', «ты» — ' + other : '') + ', «мы» — оба. Если в кадре нет людей — еда, вещь, животное, вид из окна, экран, документ — "in": [].\n' +
+      'prompt — по-английски: что в кадре, ракурс, место, одежда, свет, время суток, детали из истории. Людей в кадре называй ТОЧНО как в списке, кириллицей. Если людей нет — никаких имён. Без надписей на картинке.\n' +
+      'Ответь только JSON: {"in":["Имя"],"prompt":"..."}');
+    var o = cxJson(raw, false);
+    if (!o){ var s0 = String(raw || ''), a = s0.indexOf('{'), b = s0.lastIndexOf('}'); if (a >= 0 && b > a){ try{ o = JSON.parse(cxJsonFix(s0.slice(a, b + 1))); }catch(e){ o = null; } } }
+    if (!o || !o.prompt) return fallback;
+    return { in: Array.isArray(o.in) ? o.in.map(String).slice(0, 4) : fallback.in, prompt: cxClip(String(o.prompt), 1400) };
+  }catch(e){ return fallback; }
+}
+async function cxDrawMedia(tid, m, cs){
+  cs = cs || await cxContacts();
+  try{
+    var dir = await cxDirect(tid, m, cs);
+    var who = cxCastWho(dir.in, cs);
+    var conf = Object.assign({}, await getImgConfig(), { galleryTag:'Чат', refWho: who.refWho, withUser: !!who.withUser });
+    if (m.t === 'circle') conf.aspectRatio = '1:1'; else if (m.t === 'video') conf.aspectRatio = '9:16';
+    var url = await rpGenerateImage(buildChatImagePrompt(dir.prompt, cxNm(m.from, cs), m.t === 'circle' ? 'circle' : ''), conf);
+    try{ var sh = await galKeep(url, 900, 0.84); if (sh && sh.data) url = sh.data; }catch(eS){}
+    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.img = url; x.d.busy = false; x.d.err = 0; x.d.inn = (dir.in || []).slice(0, 4); });
+  }catch(e){
+    console.error('RP chat media failed', e);
+    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.busy = false; x.d.err = 1; });
+  }
+  cxAfter(tid);
+}
+async function cxMediaQueue(jobs){
+  if (!jobs || !jobs.length) return;
+  var on = false; try{ on = await imagesEnabled(); }catch(e){}
+  if (!on) return;
+  var cs = await cxContacts();
+  for (var i = 0; i < jobs.length; i++){
+    var j = jobs[i];
+    await cxPatchMsg(j.tid, j.m.id, function(x){ x.d = x.d || {}; x.d.busy = true; });
+    cxAfter(j.tid);
+    await cxDrawMedia(j.tid, j.m, cs);
+  }
+}
+async function cxVisionOk(){ try{ var c = await getApiConfig(); return !!(c && c.enabled && c.apiKey && c.model && (c.format === 'gemini' || c.baseUrl)); }catch(e){ return false; } }
+async function cxSee(src){
+  var c = await getApiConfig();
+  if (!(c && c.enabled && c.apiKey && c.model && (c.format === 'gemini' || c.baseUrl))) return null;
+  var inl = await urlToInline(src); if (!inl) return null;
+  if (inl.data.length > 1400000){ var sh = await galShrink('data:' + inl.mimeType + ';base64,' + inl.data, 1024, 0.85); if (sh && sh.data) inl = dataUrlToInline(sh.data); }
+  await cxWho();
+  var nm = CX.names, cs = await cxContacts(), refs = {}, cr = {}, ur = {};
+  try{ refs = await getImgRefs() || {}; }catch(e){}
+  try{ cr = await getAutoCharRef() || {}; }catch(e){}
+  try{ ur = await getAutoUserRef() || {}; }catch(e){}
+  var look = function(r, a){ return cxClip((r && r.text) || (a && a.desc) || '', 260); };
+  var people = ['- ' + nm.char + ': ' + (look(refs.char, cr) || 'главный персонаж'), '- ' + nm.userTavo + ': ' + (look(refs.user, ur) || 'игрок, отправитель фото')].concat(cs.filter(function(x){ return x.desc; }).slice(0, 15).map(function(x){ return '- ' + x.name + ': ' + cxClip(x.desc, 120); })).join('\n');
+  var prompt = 'Это фото, которое ' + nm.userTavo + ' отправляет в мессенджере. Опиши по-русски в 1–2 предложениях, что на нём: что видно, где, какое настроение. Если на фото люди — внешность, одежда, эмоции. Если кто-то похож на людей из списка — назови их.\n\n[ЛЮДИ]\n' + people + '\n\nОтветь только JSON: {"desc":"...","in":["Имя"]}';
+  var text = '';
+  if (c.format === 'gemini'){
+    var base = (c.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+    var r1 = await fetch(base + '/models/' + encodeURIComponent(c.model) + ':generateContent?key=' + encodeURIComponent(c.apiKey), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ contents:[{ parts:[{ text: prompt }, { inlineData:{ mimeType: inl.mimeType, data: inl.data } }] }] }) });
+    if (!r1.ok) throw new Error('API вернул ошибку ' + r1.status);
+    var j1 = await r1.json();
+    text = (((j1.candidates || [])[0] || {}).content || {}).parts ? j1.candidates[0].content.parts.map(function(p){ return p.text || ''; }).join('') : '';
+  } else {
+    var r2 = await fetch(c.baseUrl.replace(/\/+$/, '') + '/chat/completions', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.apiKey }, body: JSON.stringify({ model: c.model, messages:[{ role:'user', content:[{ type:'text', text: prompt }, { type:'image_url', image_url:{ url:'data:' + inl.mimeType + ';base64,' + inl.data } }] }] }) });
+    if (!r2.ok) throw new Error('API вернул ошибку ' + r2.status);
+    var j2 = await r2.json();
+    var cc = j2 && j2.choices && j2.choices[0] && j2.choices[0].message && j2.choices[0].message.content;
+    text = Array.isArray(cc) ? cc.map(function(p){ return (p && p.text) || ''; }).join('') : String(cc || '');
+  }
+  var o = cxJson(text, false);
+  if (o && o.desc) return { desc: cxClip(String(o.desc), 400), inn: Array.isArray(o.in) ? o.in.map(String).slice(0, 4) : [] };
+  var plain = cxClip(String(text || '').replace(/[{}"]/g, ' '), 400);
+  return plain ? { desc: plain, inn: [] } : null;
+}
+function cxPickMedia(kind){
+  return new Promise(function(res){
+    var native = false; try{ native = rpNativeOk(); }catch(e){}
+    var ext = kind === 'video' ? ['mp4','mov','webm','m4v','3gp'] : (kind === 'image' ? ['png','jpg','jpeg','webp','gif','heic'] : ['pdf','doc','docx','txt','rtf','odt','xls','xlsx','csv','ppt','pptx','zip','rar','7z','mp3','wav','m4a','epub','png','jpg','jpeg','webp','mp4','mov']);
+    if (native){
+      var o = { multiple:false, extensions: ext };
+      rpImport(o).then(function(r){ var p = r && r[0] && r[0].path ? String(r[0].path) : ''; res(p ? { src:p, name: (r[0].name || p.split(/[\\/]/).pop() || '').slice(0, 60) } : null); }, function(){ toast('Не удалось выбрать файл'); res(null); });
+      return;
+    }
+    var inp = document.createElement('input'); inp.type = 'file';
+    if (kind === 'image') inp.accept = 'image/*'; else if (kind === 'video') inp.accept = 'video/*';
+    inp.onchange = function(){
+      var f = inp.files && inp.files[0]; if (!f){ res(null); return; }
+      if (kind !== 'image'){ res({ src:'', name: String(f.name || '').slice(0, 60) }); return; }
+      var rd = new FileReader();
+      rd.onload = async function(){ var sh = await galKeep(String(rd.result), 1024, 0.84); res(sh ? { src: sh.data, name: String(f.name || '').slice(0, 60) } : null); };
+      rd.onerror = function(){ res(null); };
+      rd.readAsDataURL(f);
+    };
+    inp.click();
+  });
+}
+function cxView(src){
+  if (!src) return;
+  var ov = el('div', 'cx_view');
+  ov.innerHTML = '<img src="' + escapeHtml(src) + '" alt=""><div class="cx_viewx">' + cxI('back') + '</div>';
+  (CX.root || $('#rp_screen')).appendChild(ov);
+  ov.addEventListener('click', function(){ ov.remove(); });
+}
+function cxMediaTray(body){
+  var tiles = [
+    ['gal', 'img', '#8B5CF6', 'Фото', 'с телефона'],
+    ['shot', 'cam', '#F43F5E', 'Снять фото', 'опиши кадр'],
+    ['circ', 'circ', '#06B6D4', 'Кружок', 'видео с фронталки'],
+    ['vid', 'film', '#F59E0B', 'Видео', 'с телефона или кадр'],
+    ['file', 'file', '#10B981', 'Файл', 'документ'],
+    ['voice', 'mic', '#EC4899', 'Голосовое', 'расшифровка']
+  ];
+  body.innerHTML = '<div class="cx_mgrid">' + tiles.map(function(x){ return '<div class="cx_mt" data-mk="' + x[0] + '"><i style="background:' + x[2] + '">' + cxI(x[1]) + '</i>' + x[3] + '<small>' + x[4] + '</small></div>'; }).join('') + '</div>';
+  body.querySelectorAll('[data-mk]').forEach(function(b){ b.addEventListener('click', function(){ var k = b.getAttribute('data-mk'); if (k === 'voice') cxVoiceSheet(); else cxMediaSheet(k); }); });
+}
+async function cxMediaSheet(kind){
+  var picked = null;
+  if (kind === 'gal'){ picked = await cxPickMedia('image'); if (!picked || !picked.src) return; }
+  var imgOn = false; try{ imgOn = await imagesEnabled(); }catch(e){}
+  var vis = kind === 'gal' ? await cxVisionOk() : false;
+  var T = { gal:'Фото с телефона', shot:'Снять фото', circ:'Кружок', vid:'Видео', file:'Файл' }[kind];
+  var S = {
+    gal: vis ? 'Собеседник не видит картинку напрямую — ему уйдёт описание. Нажми «Распознать», и я опишу фото сама, или напиши своё.' : 'Собеседник не видит картинку напрямую — ему уйдёт описание. Напиши, что на фото. Распознавать фото само умеет только своё API в настройках.',
+    shot: imgOn ? 'Опиши кадр — фото сгенерируется. Кто в кадре, Чат поймёт сам: ты, бот, НПС или вообще банан.' : 'Генерация картинок выключена — собеседник получит фото как описание.',
+    circ: imgOn ? 'Видео-кружок с фронталки: опиши кадр и что говоришь. Сгенерируется стоп-кадр.' : 'Видео-кружок: опиши кадр и что говоришь.',
+    vid: 'Выбери видео с телефона или просто опиши его' + (imgOn ? ' — тогда сгенерируется кадр.' : '.'),
+    file: 'Название файла и что в нём — собеседник это «откроет».'
+  }[kind];
+  var h = '<div class="cx_sht">' + T + '</div><div class="cx_shs">' + escapeHtml(S) + '</div>';
+  if (kind === 'gal') h += '<div class="cx_mprev"><img src="' + escapeHtml(picked.src) + '" alt=""></div>';
+  if (kind === 'vid' || kind === 'file') h += '<div class="cx_btn ghost" id="cx_md_pick" style="margin-bottom:10px;">' + cxI(kind === 'vid' ? 'film' : 'file') + '<span>' + (kind === 'vid' ? 'Выбрать видео с телефона' : 'Выбрать файл с телефона') + '</span></div>';
+  if (kind === 'file') h += '<div class="cx_fld"><label><span>Название</span></label><input id="cx_md_name" maxlength="60" placeholder="Например: билеты.pdf"></div>';
+  var dl = { gal:'Что на фото', shot:'Что на фото', circ:'Что в кадре', vid:'Что на видео', file:'Что внутри' }[kind];
+  var dp = { gal:'Например: я в примерочной в чёрном платье', shot:'Например: банан без кожуры на тарелке', circ:'Например: я в машине, вечер, фонари', vid:'Например: снег за окном, кот ловит снежинки', file:'Например: билеты на концерт в субботу' }[kind];
+  h += '<div class="cx_fld"><label><span>' + dl + '</span>' + (kind === 'gal' && vis ? '<em id="cx_md_see" class="cx_see">Распознать</em>' : '') + '</label><textarea id="cx_md_desc" rows="3" maxlength="600" placeholder="' + escapeHtml(dp) + '"></textarea></div>';
+  if (kind === 'circ') h += '<div class="cx_fld"><label><span>Что говоришь</span></label><textarea id="cx_md_say" rows="2" maxlength="500" placeholder="Например: смотри, где я"></textarea></div>';
+  if (kind !== 'circ' && kind !== 'file') h += '<div class="cx_fld"><label><span>Подпись</span></label><input id="cx_md_cap" maxlength="300" placeholder="Необязательно"></div>';
+  h += '<div class="cx_btns"><div class="cx_btn ghost" data-x="0">Отмена</div><div class="cx_btn" data-x="1">' + cxI('send') + 'Отправить</div></div>';
+  var bg = cxSheet(h), inn = [];
+  var pk = $('#cx_md_pick', bg);
+  if (pk) pk.addEventListener('click', async function(){
+    var r = await cxPickMedia(kind === 'vid' ? 'video' : 'any'); if (!r) return;
+    picked = r; pk.querySelector('span').textContent = (kind === 'vid' ? 'Видео: ' : 'Файл: ') + (r.name || 'выбрано');
+    var ni = $('#cx_md_name', bg); if (ni && !ni.value) ni.value = r.name || '';
+  });
+  var see = $('#cx_md_see', bg), ta = $('#cx_md_desc', bg);
+  var recog = async function(){
+    if (see) see.textContent = 'Смотрю…';
+    try{ var v = await cxSee(picked.src); if (v && v.desc){ ta.value = v.desc; inn = v.inn || []; } else toast('Не получилось распознать — опиши сама'); }
+    catch(e){ toast('Не получилось распознать: ' + (e && e.message ? e.message : e)); }
+    if (see) see.textContent = 'Распознать';
+  };
+  if (see) see.addEventListener('click', function(){ if (see.textContent === 'Распознать') recog(); });
+  bg.querySelector('[data-x="0"]').addEventListener('click', function(){ bg.remove(); });
+  bg.querySelector('[data-x="1"]').addEventListener('click', async function(){
+    var desc = ta.value.trim(), capI = $('#cx_md_cap', bg), cap = capI ? capI.value.trim() : '', sayI = $('#cx_md_say', bg), say = sayI ? sayI.value.trim() : '';
+    var m = null;
+    if (kind === 'gal'){
+      if (!desc && vis){ this.classList.add('busy'); await recog(); desc = ta.value.trim(); this.classList.remove('busy'); }
+      m = { t:'photo', text:cap, d:{ img: picked.src, desc: desc, src:'dev', inn: inn } };
+    } else if (kind === 'shot'){ if (!desc){ toast('Опиши, что на фото'); return; } m = { t:'photo', text:cap, d:{ desc: desc, busy: imgOn } }; }
+    else if (kind === 'circ'){ if (!desc && !say){ toast('Опиши кадр или что говоришь'); return; } m = { t:'circle', text:say, d:{ desc: desc || 'селфи-кружок', busy: imgOn, dur: Math.max(4, Math.min(60, Math.ceil(say.length / 12))) } }; }
+    else if (kind === 'vid'){
+      if (!desc && !(picked && picked.src)){ toast('Выбери видео или опиши его'); return; }
+      m = { t:'video', text:cap, d:{ desc: desc, vid: picked && picked.src ? picked.src : '', name: picked ? picked.name : '', busy: imgOn && !(picked && picked.src) } };
+    } else {
+      var nmI = $('#cx_md_name', bg), fn = nmI ? nmI.value.trim() : '';
+      if (!fn && !desc){ toast('Напиши название или что внутри'); return; }
+      m = { t:'file', text:'', d:{ name: fn || 'файл', desc: desc, path: picked && picked.src ? picked.src : '' } };
+    }
+    bg.remove();
+    await cxSendItem(m);
+  });
+}
+function cxQueue(tid, ms){ clearTimeout(CX.timers[tid]); CX.timers[tid] = setTimeout(function(){ cxReply(tid, 'reply'); }, ms || 2400); }
+function cxTypingUi(tid){
+  if (!(panelOpen && currentScreen === 'messenger')) return;
+  if (CX.open === tid){ cxDrawMsgs(); cxHeadSub(); }
+  else if (!CX.open && CX.tab === 'chats') cxRender();
+}
+async function cxReply(tid, mode){
+  if (CX.busy[tid]){ CX.again[tid] = true; return; }
+  CX.busy[tid] = true; cxTypingUi(tid);
+  try{
+    await cxWho();
+    var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
+    if (!t || t.owner !== 'me') return;
+    var cs = await cxContacts(), list = await cxMsgs(tid);
+    if (mode === 'reply'){ var lm = list[list.length - 1]; if (!lm || lm.from !== 'me') return; }
+    var built = t.kind === 'group' ? await cxPromptGroup(t, list, cs, mode) : (t.who[0] === 'char' ? await cxPromptBot(t, list, cs, mode) : await cxPromptNpc(t, list, cs, mode));
+    if (!built) return;
+    built.self = mode !== 'reply';
+    var raw = await callModel(built.prompt);
+    var items = cxFinal(cxParse(raw, t.kind === 'group' ? 'group' : 'dm', built.ctx), built);
+    if (t.kind === 'group' && built.ctx.skip && built.ctx.skip.length){
+      try{ await rpSet('rp_cx_lastraw', { at: Date.now(), tid: tid, mode: mode, skipped: built.ctx.skip.slice(0, 6), raw: String(raw || '').slice(0, 1500) }); }catch(eK){}
+      if (mode === 'reply') toast('Не узнала в группе: ' + built.ctx.skip.slice(0, 3).join(', '));
+    }
+    if (!items.length && t.kind === 'group' && built.ctx.mem && built.ctx.mem.length){
+      var dm = built.ctx.mem.indexOf('char') >= 0 ? 'char' : built.ctx.mem[0];
+      items = cxFinal(cxParse(raw, 'dm', { def: dm, isSelf: function(n){ return rpSameContact({ name: CX.names.userTavo }, n) || rpSameContact({ name: CX.names.user }, n); } }), built);
+    }
+    if (!items.length){
+      try{ await rpSet('rp_cx_lastraw', { at: Date.now(), tid: tid, mode: mode, raw: String(raw || '').slice(0, 1500) }); }catch(eR){}
+      if (mode === 'reply') toast('Ответ не распознан: ' + cxClip(String(raw || '').replace(/\s+/g, ' '), 160));
+      return;
+    }
+    await cxDeliver(tid, items, built);
+    if (t.kind === 'group' && mode !== 'auto' && Math.random() < 0.2) await cxGroupMore(tid, t, cs, mode, built, items);
+  }catch(e){
+    console.error('RP chat reply failed', e);
+    if (mode === 'reply') toast('Ответ не пришёл: ' + (e && e.message ? e.message : e));
+  }finally{
+    CX.busy[tid] = false; cxTypingUi(tid);
+    if (CX.again[tid]){ CX.again[tid] = false; cxQueue(tid, 900); }
+  }
+}
+async function cxTick(){
+  if (!cfg('enabled', true) || CX.ticking) return;
+  CX.ticking = true;
+  try{
+    var s = await cxSet(), ts = await cxThreads(), now = Date.now();
+    if (s.every > 0 && !CX.busy.main){
+      var main = ts.filter(function(t){ return t.id === 'main'; })[0];
+      var last = Math.max(s.lastInit || 0, (main && main.ts) || 0);
+      if (!last) await cxSetSave({ lastInit: now });
+      else if (now - last >= s.every * 60000){ await cxSetSave({ lastInit: now }); cxReply('main', 'init'); }
+    }
+    for (var i = 0; i < ts.length; i++){
+      var g = ts[i];
+      if (g.kind !== 'group' || g.owner !== 'me' || !g.auto || !(g.every > 0) || CX.busy[g.id]) continue;
+      if (now - Math.max(g.ts || 0, g.autoAt || 0) < g.every * 60000) continue;
+      await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === g.id) x.autoAt = now; }); await cxThreadsSave(l); });
+      cxReply(g.id, 'auto');
+      break;
+    }
+    if (s.rpAuto){
+      var c = -1; try{ c = await PM.chat.count(); }catch(e){}
+      if (c >= 0 && c !== CX.lastCount){ CX.lastCount = c; cxScanRp({ auto:true }); }
+    }
+  }catch(e){ console.error('RP chat tick failed', e); }
+  finally{ CX.ticking = false; }
+}
+function cxIdOf(name, cs, mk){
+  var n = String(name || '').trim().replace(/^@/, ''); if (!n) return null;
+  var nm = CX.names;
+  if (/^(я|ты|me|you|user|игрок|пользователь)$/i.test(n) || rpSameContact({ name:nm.userTavo, aliases:[nm.user] }, n)) return 'me';
+  if (rpSameContact({ name:nm.char }, n)) return 'char';
+  for (var i = 0; i < cs.length; i++){ if (rpSameContact(cs[i], n)) return cs[i].id; }
+  if (!mk) return null;
+  if (/^(неизвестн|unknown|other|кто-то|someone)/i.test(n)) return null;
+  var nc = { id:uid(), name: n.slice(0, 40), aliases:[], avatar:'', desc:'', pers:'', ex:'', mem:'', src:'auto', ts:Date.now() };
+  cs.push(nc);
+  return nc.id;
+}
+function cxFindDm(ts, owner, x){ return ts.filter(function(t){ return t.owner === owner && t.kind === 'dm' && t.who.length === 1 && t.who[0] === x; })[0] || null; }
+function cxNorm(s){ return String(s || '').toLowerCase().replace(/[^a-zа-яё0-9]+/gi, ' ').trim(); }
+function cxMsgKey(m){ var d = m.d || {}; return m.t === 'text' ? cxNorm(m.text) : m.t + ':' + cxNorm(d.desc || d.name || d.id || d.title || m.text); }
+async function cxRoute(rows, opts){
+  opts = opts || {};
+  return cxSerial(async function(){
+    var cs = await cxContacts(), csN = cs.length, ts = await cxThreads(), put = {}, made = 0, lists = {}, media = [], fresh = {}, ban = opts.rp ? await cxNotMsg() : null;
+    var core = function(x){ return x === 'me' || x === 'char'; };
+    for (var i = 0; i < rows.length; i++){
+      var r = rows[i], f = null, tid = null;
+      if (r.grp){
+        f = cxIdOf(r.from, cs, true); if (!f) continue;
+        var mem = [];
+        (r.grp.who || []).concat([r.from]).forEach(function(n){ var id = cxIdOf(n, cs, true); if (id && mem.indexOf(id) < 0) mem.push(id); });
+        var gOwner = mem.indexOf('me') >= 0 ? 'me' : 'char';
+        var gwho = mem.filter(function(x){ return x !== gOwner; });
+        if (!gwho.length) continue;
+        var gt = cxNorm(r.grp.title), gk = gwho.slice().sort().join(',');
+        var g = ts.filter(function(t){ return t.kind === 'group' && t.owner === gOwner && gt && (cxNorm(t.title) === gt || (t.alias || []).some(function(a){ return cxNorm(a) === gt; })); })[0] || ts.filter(function(t){ return t.kind === 'group' && t.owner === gOwner && t.who.slice().sort().join(',') === gk; })[0];
+        if (!g){ g = { id:uid(), kind:'group', owner:gOwner, who:gwho, title: String(r.grp.title || '').slice(0, 48) || 'Группа', ts:0, unread:0, auto:false }; ts.push(g); fresh[g.id] = 1; }
+        else gwho.forEach(function(x){ if (g.who.indexOf(x) < 0) g.who.push(x); });
+        tid = g.id;
+      } else {
+        f = cxIdOf(r.from, cs, false);
+        var to = cxIdOf(r.to, cs, false);
+        if (!core(f) && !core(to)) continue;
+        if (!f) f = cxIdOf(r.from, cs, true);
+        if (!to) to = cxIdOf(r.to, cs, true);
+        if (!f || !to || f === to) continue;
+        var owner = null, other = null;
+        if ((f === 'me' && to === 'char') || (f === 'char' && to === 'me')) tid = 'main';
+        else if (f === 'me' || to === 'me'){ owner = 'me'; other = f === 'me' ? to : f; }
+        else if (f === 'char' || to === 'char'){ owner = 'char'; other = f === 'char' ? to : f; }
+        else continue;
+        if (!tid){
+          if (!other) continue;
+          var th = cxFindDm(ts, owner, other);
+          if (!th){ th = { id:uid(), kind:'dm', owner:owner, who:[other], title:'', ts:0, unread:0 }; ts.push(th); fresh[th.id] = 1; }
+          tid = th.id;
+        }
+      }
+      if (!lists[tid]) lists[tid] = await cxMsgs(tid);
+      var parsed = r.items ? r.items.map(function(it){ return { from:f, t:it.t, text:it.text || '', d:it.d ? Object.assign({}, it.d) : null }; })
+        : cxParse(r.text, 'dm', { def:f, isSelf:function(){ return false; } }).filter(function(it){ return it.t !== 'repost' && it.t !== 'call' && (it.t !== 'sticker' || CX_STK_BY[it.d.id]); });
+      if (!parsed.length && r.text) parsed = [{ from:f, t:'text', text: cxClip(r.text, 900) }];
+      var tail = lists[tid].slice(-20).map(cxMsgKey);
+      parsed.forEach(function(it){
+        var k = cxMsgKey(it);
+        if (it.t !== 'sticker' && k && tail.indexOf(k) >= 0) return;
+        if (ban && k && ban.indexOf(k) >= 0) return;
+        var m = { id:uid(), from:it.from, t:it.t, text:it.text || '', d:it.d || null, ts: Date.now() + made, rp: opts.rp ? 1 : undefined, rb: opts.rb || undefined, self: opts.peek ? 1 : undefined };
+        lists[tid].push(m); tail.push(k); made++;
+        put[tid] = (put[tid] || 0) + 1;
+        if (cxNeedsImg(m)) media.push({ tid: tid, m: m });
+      });
+    }
+    if (cs.length !== csN) await cxContactsSave(cs);
+    var keys = Object.keys(put);
+    for (var k = 0; k < keys.length; k++){
+      var id = keys[k], l = lists[id]; await cxMsgsSave(id, l);
+      var t = ts.filter(function(x){ return x.id === id; })[0]; if (!t) continue;
+      var lm = l[l.length - 1]; t.ts = lm.ts; t.last = { f: lm.from, x: cxPreview(lm) };
+      var viewing = panelOpen && currentScreen === 'messenger' && CX.open === id;
+      if (!viewing && t.owner === 'me') t.unread = (t.unread || 0) + put[id];
+    }
+    await cxThreadsSave(ts.filter(function(t){ if (fresh[t.id] && !put[t.id]) return false; return t.id === 'main' || t.owner === 'me' || put[t.id] || (t.ts || 0) > 0 || t.title; }));
+    return { n: made, threads: keys, ts: ts, cs: cs, media: media };
+  });
+}
+var CX_ACT_RE = /(пиш|напис|набр|набир|печат|отправ|присл|присыл|скин|кинул|черкн|строч|маякн|ответ|прочит|чита|пришл|приход|прилет|высвет|всплы|пиликн|вибр|дзын|звякн|пискн|загорел|вспыхн|уведомл|сообщ|смс|sms|голосов|кружо|текст|чат|личк|директ|мессендж|телег|ватсап|whatsapp|telegram|экран|text|typ|\bdm\b|sent|send|messag)/i;
+var CX_TRAP_RE = /(нащуп|доста|вытащ|сжим|сжал|держ|иска|ищ|показ|убра|спрят|полож|клад|взя|верт|крут|выключ|разряд|забы|потеря)/i;
+function cxNormP(s){ return String(s || '').toLowerCase().replace(/ё/g, 'е').replace(/[^a-zа-я0-9]+/g, ' ').trim(); }
+function cxFindAt(hay, s){
+  var n = cxNormP(s); if (n.length < 6) return -1;
+  var i = hay.indexOf(n); if (i >= 0) return i;
+  if (n.length > 36){ i = hay.indexOf(n.slice(0, 30)); if (i >= 0) return i; i = hay.indexOf(n.slice(-30)); if (i >= 0) return Math.max(0, i - (n.length - 30)); }
+  return -1;
+}
+async function cxNotMsg(){ var l = await rpGet('rp_cx_notmsg', []); return Array.isArray(l) ? l : []; }
+async function cxDropMsgs(pick, ban){
+  return cxSerial(async function(){
+    var ts = await cxThreads(), cs = await cxContacts(), banL = ban ? await cxNotMsg() : null, total = 0, keep = [];
+    for (var i = 0; i < ts.length; i++){
+      var t = ts[i], l = await cxMsgs(t.id), gone = l.filter(function(m){ return pick(m, t); });
+      if (!gone.length){ keep.push(t); continue; }
+      total += gone.length;
+      if (banL) gone.forEach(function(m){ var k = cxMsgKey(m); if (k && banL.indexOf(k) < 0) banL.push(k); });
+      var rest = l.filter(function(m){ return gone.indexOf(m) < 0; });
+      await cxMsgsSave(t.id, rest);
+      if (!rest.length && t.id !== 'main' && !t.title && t.kind !== 'group'){ await rpSet('rp_cx_m_' + t.id, []); continue; }
+      var lm = rest[rest.length - 1];
+      t.last = lm ? { f: lm.from, x: cxPreview(lm) } : null;
+      t.unread = Math.max(0, (t.unread || 0) - gone.filter(function(m){ return m.from !== 'me'; }).length);
+      keep.push(t);
+    }
+    if (total) await cxThreadsSave(keep);
+    if (banL) await rpSet('rp_cx_notmsg', banL.slice(-400));
+    return total;
+  });
+}
+async function cxAfterDrop(tid){
+  if (!(panelOpen && currentScreen === 'messenger')) return;
+  var ts = await cxThreads();
+  if (tid && CX.open === tid && ts.some(function(t){ return t.id === tid; })) cxOpenChat(tid, true);
+  else if (CX.open && !ts.some(function(t){ return t.id === CX.open; })) cxCloseChat();
+  else if (CX.open) cxOpenChat(CX.open, true);
+  else cxRender();
+}
+async function cxUndoBatch(rb){ return cxDropMsgs(function(m){ return m.rb === rb; }, true); }
+function cxUndoBar(n, rb){
+  var host = $('#rp_screen'); if (!host) return;
+  var old = $('.cx_undo', host); if (old) old.remove();
+  var b = el('div', 'cx_undo'); b.innerHTML = '<span>📱 Из ролевой в Чат: ' + n + '</span><b>Отменить</b>';
+  host.appendChild(b);
+  var tm = setTimeout(function(){ b.remove(); }, 9000);
+  $('b', b).addEventListener('click', async function(){
+    clearTimeout(tm); b.remove();
+    var k = await cxUndoBatch(rb);
+    toast(k ? 'Отменено сообщений: ' + k : 'Уже нечего отменять');
+    cxAfterDrop(null);
+  });
+}
+async function cxMsgMenu(tid, mid){
+  var l = await cxMsgs(tid), m = l.filter(function(x){ return x.id === mid; })[0]; if (!m) return;
+  var batch = [];
+  if (m.rp){
+    var ts = await cxThreads();
+    for (var i = 0; i < ts.length; i++){ (await cxMsgs(ts[i].id)).forEach(function(x){ if (x.rp && (m.rb ? x.rb === m.rb : (!x.rb && Math.abs((x.ts || 0) - (m.ts || 0)) <= 5000))) batch.push(x.id); }); }
+  }
+  var acts = [{ ic:'trash', t:'Удалить', red:true, fn:async function(){ await cxDropMsgs(function(x, t){ return t.id === tid && x.id === mid; }, false); cxAfterDrop(tid); } }];
+  if (m.t !== 'sys' && typeof m.text === 'string' && m.text !== ''){
+    acts.unshift({ ic:'edit', t:'Редактировать', s:'Изменить текст сообщения', fn:async function(){
+      var res = await rpEditFields('Сообщение', [{ k:'text', label:'Текст', rows:6, value:m.text }]);
+      if (!res || !res.text.trim()) return;
+      await cxPatchMsg(tid, mid, function(x){ x.text = res.text; x.edited = true; });
+      cxAfter(tid);
+    } });
+  }
+  if (m.rp){
+    acts.unshift({ ic:'eye', t:'Это не переписка', s:'Удалю и запомню — при следующем разборе это сообщение не вернётся', fn:async function(){ await cxDropMsgs(function(x, t){ return t.id === tid && x.id === mid; }, true); toast('Убрано'); cxAfterDrop(tid); } });
+    if (batch.length > 1) acts.splice(1, 0, { ic:'refresh', t:'Убрать весь этот разбор (' + batch.length + ')', s:'Всё, что этот разбор ролевой добавил в Чат, во всех переписках', fn:async function(){ var k = await cxDropMsgs(function(x){ return batch.indexOf(x.id) >= 0; }, true); toast('Убрано сообщений: ' + k); cxAfterDrop(tid); } });
+  }
+  cxActions(cxPreview(m).slice(0, 60) || 'Сообщение', m.rp ? 'Пришло из ролевой' : '', acts);
+}
+async function cxScanRp(opts){
+  opts = opts || {};
+  if (CX.scanBusy) return null;
+  CX.scanBusy = true;
+  try{
+    await cxWho();
+    var count = 0; try{ count = await PM.chat.count(); }catch(e){}
+    if (!count) return 0;
+    var s = await cxSet(), from;
+    if (opts.depth) from = Math.max(0, count - opts.depth);
+    else {
+      if (s.wm == null || s.wm > count){ await cxSetSave({ wm: count }); return 0; }
+      if (count <= s.wm) return 0;
+      from = Math.max(0, s.wm - 1, count - 6);
+    }
+    var msgs = []; try{ msgs = await PM.chat.slice([from, count - 1]); }catch(e){ msgs = []; }
+    await cxSetSave({ wm: count });
+    var nm = CX.names;
+    var vis = (Array.isArray(msgs) ? msgs : []).filter(function(m){ return m && !m.hidden && (m.role === 'assistant' || m.role === 'user'); });
+    var bridge = cxChatNRows(vis.map(function(m){ return String(m.content || ''); }).join('\n'));
+    var rb = uid();
+    var res0 = bridge.length ? await cxRoute(bridge, { rp:true, rb:rb }) : null;
+    var text = vis.map(function(m){
+      return (m.role === 'user' ? nm.userTavo : nm.char) + ': ' + stripBrailleNoise(String(m.content || '')).replace(/\[CHAT_N\][\s\S]*?\[\/CHAT_N\]/g, ' ').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').trim();
+    }).join('\n\n').slice(-14000);
+    var done = function(res){
+      var all = [res0, res].filter(function(x){ return x && x.n; });
+      var n = all.reduce(function(a, x){ return a + x.n; }, 0);
+      if (!n){ if (!opts.auto) toast(res === null ? 'В этом отрывке переписок не нашлось' : 'Новых сообщений не нашлось — всё уже в Чате'); return 0; }
+      if (panelOpen) cxUndoBar(n, rb); else toast('📱 Из ролевой в Чат: ' + n);
+      var last = all[all.length - 1], cs2 = last.cs, ids = [], jobs = [];
+      all.forEach(function(x){ x.threads.forEach(function(id){ if (ids.indexOf(id) < 0) ids.push(id); }); jobs = jobs.concat(x.media || []); });
+      ids.forEach(function(id){ var t = last.ts.filter(function(x){ return x.id === id; })[0]; if (t && t.owner === 'me' && !(panelOpen && currentScreen === 'messenger')){ unreadCount++; updateBadge(); pushHomeNotification('Чат', cxTitle(t, cs2) + ': ' + ((t.last && t.last.x) || '')); } });
+      if (panelOpen && currentScreen === 'messenger'){ if (CX.open && ids.indexOf(CX.open) >= 0) cxDrawMsgs(); else if (!CX.open) cxRender(); }
+      cxMediaQueue(jobs);
+      return n;
+    };
+    if (!text.replace(/[^:\n]*:\s*/g, '').trim()) return done(null);
+    if (!opts.depth && !CX_SMS_RE.test(text)) return done(null);
+    var cs = await cxContacts();
+    var people = ['- ' + nm.userTavo + ' — игрок, это его/её телефон', '- ' + nm.char + ' — главный персонаж'].concat(cs.slice(0, 40).map(function(c){ return '- ' + cxContactLine(c, 60); }));
+    var raw = await callModel('Ниже фрагмент ролевой истории. Разбери, как переданы реплики персонажей.\n\n' +
+      'Шаг 1. Пойми сцену: где сейчас каждый из героев и кто с кем рядом. Если двое рядом и разговаривают, их слова друг другу почти всегда сказаны вслух, даже если у кого-то в руках телефон. Исключение — когда прямо сказано, что это напечатали или отправили.\n' +
+      'Шаг 2. Для каждой реплики — прямая речь в кавычках или без, текст после двоеточия, слова в отдельной строке — реши, как она передана:\n' +
+      '- «вслух» — сказана голосом, в том числе по телефонному звонку;\n- «телефон» — напечатана, отправлена или прочитана в мессенджере, смс, директе, чате; голосовые и кружки тоже сюда;\n- «мысли»;\n- «неясно».\n' +
+      'Если сомневаешься — это «вслух» или «неясно», но не «телефон».\n\n' +
+      'Признаки переписки — по смыслу, а не по точным словам: достала телефон и набрала сообщение, написала в мессенджере, отправила сообщение, напечатала, набрала текст, черкнула пару слов, настрочила, маякнула, скинула в личку, ответила в чате, пальцы забегали по экрану, телефон пиликнул или завибрировал и там сообщение, на экране высветилось, пришло сообщение от, прочитала сообщение, увидела уведомление, записала голосовое, texted, typed, DM.\n' +
+      'Ловушки — это НЕ переписка: достала или нащупала телефон, но ничего не отправила; сказала, сжимая телефон в руке; показала экран; крикнула в трубку — это звонок; хотела написать, но не стала; «напишу потом»; вспомнила старое сообщение; разговор лицом к лицу.\n\n' +
+      '[ЛЮДИ]\n' + people.join('\n') + '\n\n' +
+      'Для реплик «телефон» заполни: from и to — имена ТОЧНО как в списке, даже если в тексте человека назвали иначе; если человека нет в списке — имя, как оно было бы записано в телефоне. text — дословно, если процитировано, иначе коротко, как напечатал бы отправитель. kind — text, photo, circle (видео-кружок), video, file или voice; для медиа в desc — что на фото или видео, название файла, а в text — подпись или что сказано. proof — ДОСЛОВНО скопированная из фрагмента фраза, по которой видно, что это напечатали, отправили или прочитали в телефоне, 3–20 слов; не сама реплика.\n' +
+      'Для остальных реплик — только how и q (первые 3–5 слов реплики).\n' +
+      'Ответь только JSON: {"scene":"кто где, одной фразой","lines":[{"how":"вслух","q":"..."},{"how":"телефон","from":"","to":"","kind":"text","text":"","desc":"","proof":""}]}\n\n[ФРАГМЕНТ]\n' + text);
+    var o = cxJson(raw, false), arr = (o && Array.isArray(o.lines)) ? o.lines : (o && Array.isArray(o.msgs) ? o.msgs : cxJsonItems(raw, 'lines'));
+    var hay = cxNormP(text);
+    arr = arr.filter(function(x){
+      if (!x || !x.from || !x.to || !(x.text || x.desc)) return false;
+      if (x.how != null && !/телефон|phone|переписк|мессендж/i.test(String(x.how))) return false;
+      var pf = String(x.proof || ''), pAt = cxFindAt(hay, pf);
+      if (pAt < 0) return false;
+      if (CX_TRAP_RE.test(pf) && !CX_ACT_RE.test(pf)) return false;
+      var np = cxNormP(pf), nt = cxNormP(x.text || '');
+      if (nt && (np === nt || (nt.length >= 12 && np.indexOf(nt) >= 0 && np.length - nt.length < 12))) return false;
+      var tAt = cxFindAt(hay, x.text || '');
+      if (tAt >= 0 && Math.abs(tAt - pAt) > 600) return false;
+      return true;
+    }).slice(0, 12);
+    if (!arr.length) return done(null);
+    var res = await cxRoute(arr.map(function(x){
+      var k = String(x.kind || 'text').toLowerCase(), row = { from:String(x.from), to:String(x.to), text:String(x.text || '') };
+      var mk = { photo:'photo', фото:'photo', circle:'circle', кружок:'circle', video:'video', видео:'video', file:'file', файл:'file', voice:'voice', голосовое:'voice' }[k];
+      if (mk){ var it = cxMediaItem(mk, mk === 'voice' ? String(x.text || x.desc || '') : (mk === 'file' ? String(x.desc || x.text || '') : String(x.desc || x.text || '') + (mk === 'circle' && x.text && x.desc ? ' | ' + x.text : ''))); if (it){ if (mk === 'photo' || mk === 'video'){ it.text = x.desc ? String(x.text || '').slice(0, 300) : ''; } row.items = [it]; } }
+      return row;
+    }), { rp:true, rb:rb });
+    return done(res);
+  }catch(e){ console.error('RP chat scan failed', e); if (!opts.auto) toast('Разбор не удался: ' + (e && e.message ? e.message : e)); return null; }
+  finally{ CX.scanBusy = false; }
+}
+async function cxPeek(){
+  if (CX.peekBusy) return;
+  CX.peekBusy = true; cxHubBusyUi();
+  try{
+    await cxWho();
+    var nm = CX.names, cs = await cxContacts(), ts = await cxThreads();
+    var card = await cxCardFull();
+    var rp = await cxRpText(10, 5000);
+    var apps = await cxAppsText(CX_APPS_BOT, 300, 2400);
+    var lore = await cxLore(card.chat, card.c, rp, 2400), lmem = await cxLongMem(1500);
+    var mine = ts.filter(function(t){ return t.owner === 'char'; }).sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); }).slice(0, 5);
+    var have = [];
+    for (var i = 0; i < mine.length; i++){
+      var l = await cxMsgs(mine[i].id);
+      if (l.length) have.push('С ' + cxTitle(mine[i], cs) + ':\n' + l.slice(-4).map(function(m){ return (m.from === 'char' ? nm.char : cxNameOf(m.from, cs)) + ': ' + cxMsgLine(m); }).join('\n'));
+    }
+    var known = cs.slice(0, 30).map(function(c){ return '- ' + cxContactLine(c, 90); }).join('\n');
+    var raw = await callModel('[КАРТОЧКА ' + nm.char + ']\n' + cxClip(card.text, 2600) + '\n\n' +
+      (lore ? '[ЛОРБУК]\n' + lore + '\n\n' : '') +
+      (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
+      (rp ? '[РОЛЕВАЯ — последние события]\n' + rp + '\n\n' : '') +
+      (apps ? '[ТЕЛЕФОН]\n' + apps + '\n\n' : '') +
+      (known ? '[ЛЮДИ ИЗ ЖИЗНИ ' + nm.char + ']\n' + known + '\n\n' : '') +
+      (have.length ? '[УЖЕ ЕСТЬ ПЕРЕПИСКИ — их можно продолжить]\n' + have.join('\n\n') + '\n\n' : '') +
+      'Покажи, с кем и о чём ' + nm.char + ' переписывался в своём телефоне за последнее время — НЕ с ' + nm.userTavo + '. 1–3 переписки, в каждой 3–8 коротких сообщений.\n' +
+      'Переписки вытекают из сюжета, характера и его жизни: друзья, работа, семья, люди из истории. Каждый пишет своим голосом. ' + nm.char + ' может обсуждать ' + nm.userTavo + ' за глаза — это его личная переписка.\n' +
+      'Имена бери ТОЧНО из списка «Люди». Если нужного человека нет — придумай уместного и напиши имя так, как ' + nm.char + ' записал бы его в телефоне.\n' +
+      'Можно стикер внутри текста: [стикер: id] из списка: ' + cxStkText() + '. Изредка — фото: [фото: что на снимке | кто в кадре] или голосовое: [голосовое: текст].\n' +
+      'Ответь только JSON-массивом: [{"with":"Имя","msgs":[{"from":"' + nm.char + ' или Имя","text":"..."}]}]');
+    var arr = cxJson(raw, true);
+    if (!Array.isArray(arr) || !arr.length){ toast('Ничего не подсмотрели — попробуй ещё раз'); return; }
+    var rows = [];
+    arr.slice(0, 3).forEach(function(cv){
+      if (!cv || !cv.with || !Array.isArray(cv.msgs)) return;
+      cv.msgs.slice(0, 10).forEach(function(m){
+        if (!m || !m.text) return;
+        var fromChar = rpSameContact({ name:nm.char }, String(m.from || '')) || /^(char|он|я)$/i.test(String(m.from || ''));
+        rows.push({ from: fromChar ? nm.char : String(cv.with), to: fromChar ? String(cv.with) : nm.char, text: String(m.text) });
+      });
+    });
+    var res = await cxRoute(rows, { peek:true });
+    toast(res && res.n ? 'Подсмотрено сообщений: ' + res.n : 'Нового не нашлось');
+    if (res && res.media && res.media.length) cxMediaQueue(res.media);
+  }catch(e){ console.error('RP chat peek failed', e); toast('Не удалось: ' + (e && e.message ? e.message : e)); }
+  finally{ CX.peekBusy = false; if (panelOpen && currentScreen === 'messenger' && !CX.open) cxRender(); }
+}
+async function cxMerge(srcId, dstId){
+  if (srcId === 'main' || srcId === dstId) return false;
+  return cxSerial(async function(){
+    var ts = await cxThreads(), cs = await cxContacts();
+    var src = ts.filter(function(t){ return t.id === srcId; })[0], dst = ts.filter(function(t){ return t.id === dstId; })[0];
+    if (!src || !dst) return false;
+    var a = await cxMsgs(srcId), b = await cxMsgs(dstId);
+    var so = src.who.filter(function(w){ return w !== 'char' && w !== 'me'; }), dO = dst.who.filter(function(w){ return w !== 'char' && w !== 'me'; });
+    var srcSelf = src.owner === 'char' ? 'char' : 'me', dstSelf = dst.owner === 'char' ? 'char' : 'me';
+    if (dstId === 'main'){
+      a.forEach(function(m){ if (m.t === 'sys') return; if (src.owner === 'char'){ if (m.from !== 'char') m.from = 'me'; } else if (m.from !== 'me') m.from = 'char'; });
+    } else {
+      if (srcSelf !== dstSelf) a.forEach(function(m){ if (m.from === srcSelf) m.from = dstSelf; });
+      if (src.kind === 'dm' && dst.kind === 'dm' && so.length === 1 && dO.length === 1 && so[0] !== dO[0]){
+        var X = so[0], Y = dO[0];
+        a.forEach(function(m){ if (m.from === X) m.from = Y; });
+        var cx = cxContact(X, cs), cy = cxContact(Y, cs);
+        if (cx && cy){
+          cy.aliases = (cy.aliases || []).concat([cx.name], cx.aliases || []).filter(function(v, i, arr){ return v && arr.indexOf(v) === i && v !== cy.name; }).slice(0, 12);
+          ['avatar', 'desc', 'pers', 'ex', 'mem'].forEach(function(k){ if (!cy[k] && cx[k]) cy[k] = cx[k]; });
+          var used = ts.some(function(t){ return t.id !== srcId && t.who.indexOf(X) >= 0; });
+          if (!used){ cs = cs.filter(function(c){ return c.id !== X; }); }
+          await cxContactsSave(cs);
+        }
+      } else if (dst.kind === 'group' || src.kind === 'group'){
+        so.forEach(function(w){ if (dst.who.indexOf(w) < 0) dst.who.push(w); });
+        if (dst.kind !== 'group' && dst.who.length > 1) dst.kind = 'group';
+      }
+    }
+    var seen = {}, all = b.concat(a).filter(function(m){ if (seen[m.id]) return false; seen[m.id] = 1; return true; }).sort(function(x, y){ return (x.ts || 0) - (y.ts || 0); });
+    await cxMsgsSave(dstId, all);
+    await rpSet('rp_cx_m_' + srcId, []);
+    var st = src.title || (src.kind === 'dm' ? cxNameOf(so[0], cs) : '');
+    if (st) dst.alias = (dst.alias || []).concat([st]).slice(-10);
+    var lm = all[all.length - 1];
+    if (lm){ dst.ts = lm.ts; dst.last = { f: lm.from, x: cxPreview(lm) }; }
+    dst.unread = (dst.unread || 0) + (src.unread || 0);
+    await cxThreadsSave(ts.filter(function(t){ return t.id !== srcId; }));
+    return true;
+  });
+}
+async function cxMoveOwner(tid, to){
+  return cxSerial(async function(){
+    var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
+    if (!t || tid === 'main' || t.owner === to) return false;
+    var l = await cxMsgs(tid), a = t.owner === 'char' ? 'char' : 'me', b = to === 'char' ? 'char' : 'me';
+    var hadSelf = l.some(function(m){ return m.from === a; });
+    l.forEach(function(m){ if (m.t !== 'sys' && m.from === a) m.from = b; });
+    if (t.kind === 'group'){
+      if (to === 'char') t.who = t.who.filter(function(w){ return w !== 'char'; });
+      else if (hadSelf && t.who.indexOf('char') < 0) t.who.push('char');
+    }
+    t.owner = to;
+    t.unread = 0;
+    t.auto = false;
+    await cxMsgsSave(tid, l);
+    var lm = l[l.length - 1];
+    if (lm) t.last = { f: lm.from, x: cxPreview(lm) };
+    await cxThreadsSave(ts);
+    return true;
+  });
+}
+async function cxDelete(tid){
+  return cxSerial(async function(){
+    var ts = await cxThreads();
+    await rpSet('rp_cx_m_' + tid, []);
+    if (tid === 'main'){ ts.forEach(function(t){ if (t.id === 'main'){ t.last = null; t.unread = 0; } }); await cxThreadsSave(ts); return true; }
+    await cxThreadsSave(ts.filter(function(t){ return t.id !== tid; }));
+    return true;
+  });
+}
+async function cxRename(tid, title){
+  return cxSerial(async function(){
+    var ts = await cxThreads(), cs = await cxContacts(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return false;
+    var old = cxTitle(t, cs);
+    t.title = String(title || '').trim().slice(0, 48);
+    if (t.title && t.kind === 'dm' && t.who[0] !== 'char'){
+      var c = cxContact(t.who[0], cs);
+      if (c && t.title !== c.name){ c.aliases = (c.aliases || []).concat([t.title]).filter(function(v, i, a){ return v && a.indexOf(v) === i; }).slice(0, 12); await cxContactsSave(cs); }
+    }
+    if (old && old !== t.title) t.alias = (t.alias || []).concat([old]).slice(-10);
+    await cxThreadsSave(ts);
+    return true;
+  });
+}
+async function cxSyncContacts(force){
+  if (!force && Date.now() - CX.lastSync < 60000) return 0;
+  CX.lastSync = Date.now();
+  var nm = CX.names || await cxWho();
+  var all = []; try{ all = await pbCollect(); }catch(e){ all = []; }
+  return cxSerial(async function(){
+    var cs = await cxContacts(), gone = await rpGet(CX_KGONE, []), add = 0;
+    all.forEach(function(p){
+      if (!p || p.src === 'char' || !p.name) return;
+      if (rpSameContact({ name:nm.char }, p.name) || rpSameContact({ name:nm.userTavo }, p.name)) return;
+      if ((gone || []).some(function(g){ return rpSameContact({ name:g }, p.name); })) return;
+      var ex = cs.filter(function(c){ return rpSameContact(c, p.name); })[0];
+      if (ex){ if (!ex.avatar && p.img){ ex.avatar = p.img; add++; } return; }
+      var d = [p.relation, p.about].filter(Boolean).join('. ');
+      cs.push({ id:uid(), name:String(p.name).slice(0, 40), aliases:[], avatar:p.img || '', desc:cxTokCut(d, CX_LIM), pers:'', ex:'', mem:'', src:'import', ts:Date.now() });
+      add++;
+    });
+    if (add) await cxContactsSave(cs);
+    return add;
+  });
+}
+async function cxFillContact(c){
+  await cxWho();
+  var nm = CX.names, card = await cxCardFull();
+  var rp = await cxRpText(Math.max(10, Math.min(40, +cfg('scanDepth', 20) || 20)), 9000);
+  var lore = await cxLore(card.chat, card.c, c.name + ' ' + (c.aliases || []).join(' '), 2500);
+  var lmem = await cxLongMem(1800);
+  var raw = await callModel('Заполни анкету человека «' + c.name + '» для мессенджера по ролевой истории. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n\n' +
+    (c.desc || c.pers ? '[УЖЕ ИЗВЕСТНО]\n' + [c.desc, c.pers].filter(Boolean).join('\n') + '\n\n' : '') +
+    (lore ? '[ЛОРБУК]\n' + lore + '\n\n' : '') +
+    (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
+    (rp ? '[РОЛЕВАЯ]\n' + rp + '\n\n' : '') +
+    'Ответь строго в формате, метки оставь как есть, каждый раздел не длиннее 450 знаков:\n' +
+    'ОПИСАНИЕ: кто это, возраст, внешность, чем занят, кем приходится героям\n' +
+    'ХАРАКТЕР: какой человек\n' +
+    'ПРИМЕРЫ:\n- 2–4 коротких сообщения, как он(а) пишет в мессенджере, каждое с новой строки\n' +
+    'ВОСПОМИНАНИЯ: что было между ' + c.name + ' и ' + nm.userTavo + ' или ' + nm.char + '\n' +
+    'Если чего-то не видно — допиши правдоподобно, но не противоречь истории.');
+  var txt = String(raw || '');
+  var grab = function(lbl, nx){ var re = new RegExp(lbl + '\\s*:\\s*([\\s\\S]*?)(?=\\n\\s*(?:' + nx + ')\\s*:|$)', 'i'); var m = re.exec(txt); return m ? m[1].trim() : ''; };
+  var L = 'ОПИСАНИЕ|ХАРАКТЕР|ПРИМЕРЫ|ВОСПОМИНАНИЯ';
+  return { desc: cxTokCut(grab('ОПИСАНИЕ', L), CX_LIM), pers: cxTokCut(grab('ХАРАКТЕР', L), CX_LIM), ex: cxTokCut(grab('ПРИМЕРЫ', L), CX_LIM), mem: cxTokCut(grab('ВОСПОМИНАНИЯ', L), CX_LIM) };
+}
+var CX_LB_CHUNK = 15000;
+var CX_LB = { busy:'', pc:0, found:null, err:'', over:false, view:null, bg:null, chat:null };
+function cxJsonFix(s){
+  var out = '', q = false, esc = false;
+  for (var i = 0; i < s.length; i++){
+    var ch = s[i];
+    if (q){
+      if (esc){ esc = false; out += ch; continue; }
+      if (ch === '\\'){ esc = true; out += ch; continue; }
+      if (ch === '"'){ q = false; out += ch; continue; }
+      if (ch === '\n'){ out += '\\n'; continue; }
+      if (ch === '\r') continue;
+      if (ch === '\t'){ out += ' '; continue; }
+      out += ch;
+    } else { if (ch === '"') q = true; out += ch; }
+  }
+  return out.replace(/,\s*([}\]])/g, '$1');
+}
+function cxJsonItems(raw, key){
+  var s = String(raw || '').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/```(json)?/gi, ' ');
+  var a = s.indexOf('{'), b = s.lastIndexOf('}'), o = null;
+  if (a >= 0 && b > a){ var body = s.slice(a, b + 1); try{ o = JSON.parse(body); }catch(e){ try{ o = JSON.parse(cxJsonFix(body)); }catch(e2){ o = null; } } }
+  if (o && Array.isArray(o[key])) return o[key];
+  var out = [], m, re = /\{[^{}]*\}/g;
+  while ((m = re.exec(s))){ try{ out.push(JSON.parse(cxJsonFix(m[0]))); }catch(e){} }
+  return out;
+}
+function cxStemRe(names){
+  var toks = [];
+  names.forEach(function(n){ String(n || '').split(/[\s\-]+/).forEach(function(w){
+    w = w.replace(/[^а-яёa-z0-9]/gi, '').toLowerCase(); if (w.length < 3) return;
+    if (w.length >= 4 && /[аяеоуыиьйю]$/.test(w)) w = w.slice(0, -1);
+    if (toks.indexOf(w) < 0) toks.push(w);
+  }); });
+  if (!toks.length) return null;
+  return new RegExp('(^|[^а-яёa-z0-9])(' + toks.map(function(t){ return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|') + ')', 'i');
+}
+function cxSnip(text, re, cap){
+  var g = new RegExp(re.source, 'gi'), m, wins = [], tot = 0;
+  while ((m = g.exec(text))){
+    var a = Math.max(0, m.index - 260), b = Math.min(text.length, m.index + 520), w = wins[wins.length - 1];
+    if (w && a <= w[1]){ tot += Math.max(0, b - w[1]); w[1] = Math.max(w[1], b); } else { wins.push([a, b]); tot += b - a; }
+    if (tot > cap) break;
+    if (g.lastIndex <= m.index) g.lastIndex = m.index + 1;
+  }
+  return cxClip(wins.map(function(w){ return (w[0] > 0 ? '…' : '') + text.slice(w[0], w[1]).trim() + (w[1] < text.length ? '…' : ''); }).join(' '), cap);
+}
+function cxLbSame(f, name, aliases){ return rpSameContact(f, name) || rpSameContact({ name:name, aliases:aliases || [] }, f.name); }
+async function cxLbFind(step){
+  await cxWho();
+  var nm = CX.names, card = await cxCardFull();
+  var books = await cxLoreLoad(card.chat, card.c);
+  var ents = [], seen = {};
+  var push = function(name, kw, text, book){
+    text = cxMacro(String(text || '')).replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+    if (text.length < 15) return;
+    var key = text.slice(0, 160).toLowerCase(); if (seen[key]) return; seen[key] = 1;
+    ents.push({ k:'E' + (ents.length + 1), name:String(name || '').slice(0, 80), kw:(Array.isArray(kw) ? kw : []).map(String).filter(Boolean).slice(0, 8), text:text, book:String(book || '') });
+  };
+  if (card.text) push('Карточка ' + nm.char, [], card.text, '');
+  var n0 = ents.length;
+  books.forEach(function(b){ (b.entries || []).forEach(function(e){ if (e && e.content) push(e.name || e.comment, e.keywords || e.keys, e.content, b.name); }); });
+  if (ents.length === n0) return { err:'К этому чату не прикреплены лорбуки с записями. Прикрепи лорбук к чату или персонажу в Таверне и нажми ещё раз.' };
+  var chunks = [], cur = '';
+  ents.forEach(function(e){
+    var head = e.k + (e.name ? ' [' + e.name + ']' : '') + (e.kw.length ? ' (ключи: ' + e.kw.join(', ') + ')' : '') + ':\n';
+    for (var p = 0; p < e.text.length; p += CX_LB_CHUNK - 600){
+      var piece = head + e.text.slice(p, p + CX_LB_CHUNK - 600);
+      if (cur && cur.length + piece.length > CX_LB_CHUNK){ chunks.push(cur); cur = ''; }
+      cur += (cur ? '\n\n' : '') + piece;
+    }
+  });
+  if (cur) chunks.push(cur);
+  var cut = chunks.length > 24; if (cut) chunks = chunks.slice(0, 24);
+  var po = await cxPersonaGet(card.chat), pName = po && po.name ? String(po.name) : '';
+  var isMain = function(n){ return rpSameContact({ name:nm.char }, n) || rpSameContact({ name:nm.userTavo }, n) || (!!nm.user && rpSameContact({ name:nm.user }, n)) || (!!pName && rpSameContact({ name:pName }, n)); };
+  var clean = function(v){ return String(v || '').replace(/[«»"*_]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); };
+  var found = [], fails = 0;
+  for (var i = 0; i < chunks.length; i++){
+    if (step) step(i, chunks.length);
+    var raw = '';
+    try{
+      raw = await callModel('Ниже записи лорбука и карточка ролевой. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n' +
+        'Выпиши всех НПС — отдельных персонажей с именем или постоянным прозвищем, кроме ' + nm.char + ' и ' + nm.userTavo + '. Не выписывай места, организации, расы, предметы, безымянных людей и массовку.\n' +
+        'name — имя, как его записали бы в телефоне: имя и фамилия, если известны. aliases — другие имена: прозвища, фамилия, уменьшительные, как его зовут другие. e — номера записей, где о нём хоть что-то сказано.\n' +
+        'Ответь только JSON: {"npcs":[{"name":"…","aliases":["…"],"e":["E1"]}]} или {"npcs":[]}.\n\n[ЗАПИСИ]\n' + chunks[i]);
+    }catch(e){ fails++; continue; }
+    var items = cxJsonItems(raw, 'npcs');
+    if (!items.length && !/"npcs"\s*:\s*\[\s*\]/.test(String(raw || ''))) fails++;
+    items.forEach(function(x){
+      if (!x || typeof x !== 'object') return;
+      var name = clean(x.name);
+      if (name.length < 2 || isMain(name)) return;
+      var al = (Array.isArray(x.aliases) ? x.aliases : []).map(clean).filter(function(a){ return a.length >= 2 && a.toLowerCase() !== name.toLowerCase() && !isMain(a); });
+      var es = (Array.isArray(x.e) ? x.e : []).map(function(k){ return String(k).trim().toUpperCase(); }).filter(function(k){ return /^E\d+$/.test(k); });
+      var f = found.filter(function(y){ return cxLbSame(y, name, al); })[0];
+      if (!f){ f = { name:name, aliases:[], e:[], own:[], on:true, res:{} }; found.push(f); }
+      else if (name.length > f.name.length && rpSameContact({ name:name }, f.name)){ al.push(f.name); f.name = name; }
+      al.forEach(function(a){ if (a.toLowerCase() !== f.name.toLowerCase() && !f.aliases.some(function(b){ return b.toLowerCase() === a.toLowerCase(); }) && f.aliases.length < 8) f.aliases.push(a); });
+      es.forEach(function(k){ if (f.e.indexOf(k) < 0) f.e.push(k); });
+    });
+  }
+  if (step) step(chunks.length, chunks.length);
+  if (!found.length) return { err: fails ? 'Модель не ответила в нужном формате — попробуй ещё раз' : 'В лорбуках не нашлось НПС с именами' };
+  var cs = await cxContacts(), npl = await rpGet('rp_npcs2', []);
+  if (!Array.isArray(npl)) npl = [];
+  found.forEach(function(f){
+    var nn = npl.filter(function(n){ return n && n.name && cxLbSame({ name:n.name }, f.name, f.aliases); })[0];
+    f.nid = nn ? nn.id : null;
+    f.re = cxStemRe([f.name].concat(f.aliases.filter(function(a){ return !rpFamKey(a); })));
+    if (f.re) ents.forEach(function(e){
+      if (f.re.test(e.name) || e.kw.some(function(k){ return f.re.test(k); })){ if (f.own.indexOf(e.k) < 0) f.own.push(e.k); }
+      else if (f.e.indexOf(e.k) < 0 && f.re.test(e.text)) f.e.push(e.k);
+    });
+    var c = cs.filter(function(x){ return cxLbSame(x, f.name, f.aliases); })[0];
+    f.cid = c ? c.id : null;
+    f.filled = c ? ['desc', 'pers', 'ex', 'mem'].filter(function(k){ return c[k]; }).length : 0;
+  });
+  found.sort(function(a, b){ return (b.own.length - a.own.length) || (b.e.length - a.e.length) || a.name.localeCompare(b.name, 'ru'); });
+  return { list: found.slice(0, 60), ents:ents, card:card, fails:fails, cut:cut };
+}
+async function cxLbFill(sel, ents, card, step){
+  var nm = CX.names, byK = {};
+  ents.forEach(function(e){ byK[e.k] = e; });
+  var cs = await cxContacts();
+  var per = await cxPersonaText(card.chat), lmem = await cxLongMem(2400), rel = await cxRelText();
+  var rp = await cxRpText(Math.max(10, Math.min(30, +cfg('scanDepth', 20) || 20)), 5000);
+  var info = function(f){
+    var parts = [], len = 0;
+    var add = function(t){ if (!t || 3600 - len < 200) return; t = cxClip(t, 3600 - len); parts.push(t); len += t.length; };
+    f.own.forEach(function(k){ var e = byK[k]; if (e) add((e.name ? '[' + e.name + '] ' : '') + cxClip(e.text, 2600)); });
+    f.e.forEach(function(k){ if (f.own.indexOf(k) >= 0) return; var e = byK[k]; if (!e) return; var sn = f.re ? cxSnip(e.text, f.re, 1200) : ''; add((e.name ? '[' + e.name + '] ' : '') + (sn || cxClip(e.text, 900))); });
+    return parts.join('\n');
+  };
+  var KS = ['desc', 'pers', 'ex', 'mem'];
+  var g = function(v){ if (Array.isArray(v)) v = v.join('\n'); return v == null ? '' : String(v); };
+  var run = async function(batch){
+    var blocks = batch.map(function(f, i){
+      var c = f.cid ? cxContact(f.cid, cs) : null;
+      return '[НПС ' + (i + 1) + ': ' + f.name + ']' + (f.aliases.length ? ' (ещё зовут: ' + f.aliases.join(', ') + ')' : '') + '\n' +
+        (info(f) || '(в лорбуке только упоминание)') +
+        (c && (c.desc || c.pers || c.mem) ? '\nУже в анкете: ' + cxClip([c.desc, c.pers, c.mem].filter(Boolean).join(' / '), 700) : '');
+    }).join('\n\n');
+    var raw = await callModel('Заполни анкеты НПС для мессенджера в телефоне. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n\n' +
+      '[КАРТОЧКА ' + nm.char + ']\n' + cxClip(card.text, 1500) + '\n\n' +
+      (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userTavo + ']\n' + cxClip(per, 600) + '\n\n' : '') +
+      (rel ? '[ОТНОШЕНИЯ]\n' + cxClip(rel, 1000) + '\n\n' : '') +
+      (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
+      (rp ? '[РОЛЕВАЯ — последние события]\n' + rp + '\n\n' : '') +
+      blocks + '\n\n' +
+      'Для КАЖДОГО НПС заполни все четыре поля, ни одно не оставляй пустым:\n' +
+      '- desc — кто это: возраст, внешность, чем занят, кем приходится ' + nm.char + ' и ' + nm.userTavo + '. До 700 знаков.\n' +
+      '- pers — характер: какой человек, как держится, что любит и чего не терпит. До 700 знаков.\n' +
+      '- ex — 3 коротких сообщения, как он(а) пишет в мессенджере, через \\n. Его или её голос: слова, эмодзи, пунктуация.\n' +
+      '- mem — сводка воспоминаний: что было между ним или ней и ' + nm.userTavo + ' или ' + nm.char + ' — по лорбуку, памяти и ролевой. Если вместе ещё ничего не было, напиши, как они связаны и что знают друг о друге. До 700 знаков.\n' +
+      '- rel — кем он(а) приходится ' + nm.userTavo + ', 1–3 слова: подруга, начальник, бывший, сосед.\n' +
+      'Факты бери из лорбука и не противоречь им. Чего не хватает — допиши правдоподобно по характеру и миру.\n' +
+      'Ответь только JSON: {"npcs":[{"name":"имя как в заголовке","desc":"…","pers":"…","ex":"…","mem":"…","rel":"…"}]}');
+    var items = cxJsonItems(raw, 'npcs').filter(function(x){ return x && typeof x === 'object'; });
+    batch.forEach(function(f, i){
+      var it = items.filter(function(x){ return x.name && rpSameContact(f, String(x.name)); })[0] || (items.length === batch.length ? items[i] : null);
+      if (!it) return;
+      KS.forEach(function(k){ var v = cxTokCut(cxClip(g(it[k]).replace(/\\n/g, '\n'), 2400), CX_LIM); if (v) f.res[k] = v; });
+      var rl = cxClip(g(it.rel).replace(/[«»"]/g, ''), 40); if (rl) f.res.rel = rl;
+    });
+  };
+  var need = function(f){ return KS.some(function(k){ return !f.res[k]; }); };
+  var total = sel.length, done = 0;
+  for (var i = 0; i < sel.length; i += 3){
+    if (step) step(done, total);
+    try{ await run(sel.slice(i, i + 3)); }catch(e){ console.error('RP lore npc fill failed', e); }
+    done = Math.min(total, i + 3);
+  }
+  var again = sel.filter(need);
+  for (var j = 0; j < again.length; j++){
+    if (step) step(total, total, again[j].name);
+    try{ await run([again[j]]); }catch(e){}
+  }
+  if (step) step(total, total);
+  return sel.filter(need).map(function(f){ return f.name; });
+}
+async function cxLbSave(list, over){
+  return cxSerial(async function(){
+    var cs = await cxContacts(), gone = await rpGet(CX_KGONE, []), add = 0, upd = 0;
+    if (!Array.isArray(gone)) gone = [];
+    list.forEach(function(f){
+      var c = (f.cid && cxContact(f.cid, cs)) || cs.filter(function(x){ return cxLbSame(x, f.name, f.aliases); })[0];
+      var isNew = !c, ch = false;
+      if (isNew){ c = { id:uid(), name:f.name, aliases:[], avatar:'', desc:'', pers:'', ex:'', mem:'', src:'lore', ts:Date.now() }; cs.push(c); }
+      if (!Array.isArray(c.aliases)) c.aliases = [];
+      f.aliases.forEach(function(a){ if (a.toLowerCase() !== c.name.toLowerCase() && !c.aliases.some(function(b){ return String(b).toLowerCase() === a.toLowerCase(); }) && c.aliases.length < 8){ c.aliases.push(a); ch = true; } });
+      ['desc', 'pers', 'ex', 'mem'].forEach(function(k){ var v = f.res[k]; if (v && (over || !c[k]) && c[k] !== v){ c[k] = v; ch = true; } });
+      if (isNew) add++; else if (ch) upd++;
+      gone = gone.filter(function(n){ return !rpSameContact(c, n); });
+    });
+    await cxContactsSave(cs); await rpSet(CX_KGONE, gone);
+    CX.cs = cs;
+    var npl = await rpGet('rp_npcs2', []), nAdd = 0;
+    if (!Array.isArray(npl)) npl = [];
+    list.forEach(function(f){
+      var n = (f.nid && npl.filter(function(x){ return x.id === f.nid; })[0]) || npl.filter(function(x){ return x && x.name && cxLbSame({ name:x.name }, f.name, f.aliases); })[0];
+      var ab = f.res.desc ? cxClip(f.res.desc.replace(/\s+/g, ' '), 260) : '', rl = f.res.rel || '';
+      if (!n){ npl.push({ id:uid(), name:f.name, about:ab, relation:rl, source:'lore', hidden:false }); nAdd++; return; }
+      if (ab && (over || !n.about)) n.about = ab;
+      if (rl && (over || !n.relation)) n.relation = rl;
+    });
+    await rpSet('rp_npcs2', npl);
+    return { add:add, upd:upd, nAdd:nAdd };
+  });
+}
+function cxLbUi(){ if (CX_LB.view) CX_LB.view(); }
+function npcLoreOpen(box){
+  box.style.display = 'block';
+  var view = function(){
+    if (!box.isConnected || box.style.display === 'none'){ if (CX_LB.view === view) CX_LB.view = null; return; }
+    if (CX_LB.busy){ box.innerHTML = '<div class="rp_card rp_nlb"><div class="rp_nlb_t">НПС из лорбуков</div><div class="rp_nlb_prog"><i style="width:' + Math.max(3, Math.round(CX_LB.pc)) + '%"></i></div><div class="rp_muted rp_nlb_st">' + escapeHtml(CX_LB.busy) + '</div></div>'; return; }
+    if (CX_LB.err){
+      box.innerHTML = '<div class="rp_card rp_nlb"><div class="rp_nlb_t">НПС из лорбуков</div><div class="rp_muted">' + escapeHtml(CX_LB.err) + '</div><div class="rp_nlb_btns"><div class="rp_btn rp_sm" id="rp_nlb_re"><span>Попробовать ещё раз</span></div><div class="rp_btn rp_ghost rp_sm" id="rp_nlb_x"><span>Закрыть</span></div></div></div>';
+      $('#rp_nlb_re', box).addEventListener('click', cxLbStart); $('#rp_nlb_x', box).addEventListener('click', cxLbClose); return;
+    }
+    if (CX_LB.found) npcLoreList(box);
+  };
+  CX_LB.view = view; CX_LB.bg = box;
+  if (!CX_LB.busy && (!CX_LB.found || CX_LB.chat !== RP_CHAT_ID)) cxLbStart(); else view();
+}
+function cxLbClose(){ var b = CX_LB.bg; CX_LB.view = null; if (b && b.isConnected){ b.style.display = 'none'; b.innerHTML = ''; } }
+async function cxLbStart(){
+  if (CX_LB.busy) return;
+  CX_LB.busy = 'Открываю лорбуки…'; CX_LB.pc = 3; CX_LB.found = null; CX_LB.err = ''; cxLbUi();
+  try{
+    await rpChatGuard();
+    var ch0 = RP_CHAT_ID;
+    var r = await cxLbFind(function(i, n){ CX_LB.busy = n > 1 ? 'Ищу НПС: часть ' + Math.min(n, i + 1) + ' из ' + n : 'Ищу НПС в лорбуках…'; CX_LB.pc = 5 + 90 * i / n; cxLbUi(); });
+    CX_LB.busy = '';
+    if (r.err){ CX_LB.err = r.err; cxLbUi(); if (!CX_LB.view) toast(r.err); return; }
+    if (RP_CHAT_ID !== ch0) return;
+    CX_LB.found = r; CX_LB.chat = ch0;
+    cxLbUi();
+    if (!CX_LB.view) toast('Нашла НПС: ' + r.list.length + '. Открой «Сеть НПС» → «Из лорбуков», чтобы заполнить анкеты');
+  }catch(e){ CX_LB.busy = ''; CX_LB.err = 'Не удалось разобрать лорбуки: ' + (e && e.message ? e.message : e); cxLbUi(); }
+}
+function npcLoreList(box){
+  var r = CX_LB.found, L = r.list;
+  var cnt = function(){ return L.filter(function(f){ return f.on; }).length; };
+  box.innerHTML = '<div class="rp_card rp_nlb"><div class="rp_nlb_t">НПС из лорбуков</div>' +
+    (r.fails ? '<div class="rp_muted rp_nlb_warn">Часть лорбука не разобралась — кого-то может не хватать. Можно нажать «Заново».</div>' : '') +
+    (r.cut ? '<div class="rp_muted rp_nlb_warn">Лорбуки очень большие — прочитала только первую часть записей.</div>' : '') +
+    '<div class="rp_nlb_head"><span>Найдено ' + L.length + ', выбрано <b id="rp_nlb_n"></b></span><span class="rp_nlb_all" id="rp_nlb_all"></span></div>' +
+    L.map(function(f, i){
+      var sub = (f.aliases.length ? f.aliases.slice(0, 3).join(', ') + '. ' : '') + (f.nid ? 'Уже в Сети НПС' : 'Новый') + (f.cid ? ', анкета в Чате ' + f.filled + '/4' : '') + ', ' + cxPlural(f.own.length + f.e.length, 'запись', 'записи', 'записей');
+      return '<div class="rp_nlb_row' + (f.on ? '' : ' off') + '" data-l="' + i + '"><div class="rp_npc_avatar">' + escapeHtml(String(f.name).slice(0, 2).toUpperCase()) + '</div><div class="rp_nlb_m"><b>' + escapeHtml(f.name) + '</b><span>' + escapeHtml(sub) + '</span></div><div class="rp_nlb_ck">✓</div></div>';
+    }).join('') +
+    '<label class="rp_nlb_over"><input type="checkbox" id="rp_nlb_over"' + (CX_LB.over ? ' checked' : '') + '><span>Перезаписать заполненные поля<small>Иначе у тех, кто уже есть, дополню только пустое</small></span></label>' +
+    '<div class="rp_nlb_btns"><div class="rp_btn rp_sm" id="rp_nlb_go"><span>Заполнить анкеты</span></div><div class="rp_btn rp_ghost rp_sm" id="rp_nlb_re"><span>Заново</span></div><div class="rp_btn rp_ghost rp_sm" id="rp_nlb_x"><span>Закрыть</span></div></div></div>';
+  var sync = function(){ var n = cnt(); $('#rp_nlb_n', box).textContent = n; $('#rp_nlb_all', box).textContent = n === L.length ? 'Снять все' : 'Выбрать все'; };
+  sync();
+  box.querySelectorAll('[data-l]').forEach(function(row){ row.addEventListener('click', function(){ var f = L[+row.getAttribute('data-l')]; f.on = !f.on; row.classList.toggle('off', !f.on); sync(); }); });
+  $('#rp_nlb_all', box).addEventListener('click', function(){ var v = cnt() !== L.length; L.forEach(function(f){ f.on = v; }); box.querySelectorAll('[data-l]').forEach(function(row){ row.classList.toggle('off', !v); }); sync(); });
+  $('#rp_nlb_over', box).addEventListener('change', function(e){ CX_LB.over = !!e.target.checked; });
+  $('#rp_nlb_re', box).addEventListener('click', cxLbStart);
+  $('#rp_nlb_x', box).addEventListener('click', cxLbClose);
+  $('#rp_nlb_go', box).addEventListener('click', function(){ var sel = L.filter(function(f){ return f.on; }); if (!sel.length){ toast('Выбери хотя бы одного'); return; } cxLbGo(sel); });
+}
+async function cxLbGo(sel){
+  if (CX_LB.busy) return;
+  var r = CX_LB.found;
+  CX_LB.busy = 'Заполняю анкеты: 0 из ' + sel.length; CX_LB.pc = 3; cxLbUi();
+  try{
+    await rpChatGuard();
+    var chat0 = RP_CHAT_ID;
+    if (chat0 !== CX_LB.chat){ CX_LB.busy = ''; CX_LB.found = null; toast('Чат в Таверне сменился — открой поиск заново'); cxLbClose(); return; }
+    var miss = await cxLbFill(sel, r.ents, r.card, function(d, n, who){ CX_LB.busy = who ? 'Дописываю анкету: ' + who : 'Заполняю анкеты: ' + d + ' из ' + n; CX_LB.pc = 3 + 94 * d / n; cxLbUi(); });
+    await rpChatGuard();
+    if (RP_CHAT_ID !== chat0){ CX_LB.busy = ''; CX_LB.found = null; toast('Чат в Таверне сменился — анкеты не сохранены'); cxLbUi(); return; }
+    var sv = await cxLbSave(sel, CX_LB.over);
+    CX_LB.busy = ''; CX_LB.found = null;
+    toast('В Сеть НПС добавлено: ' + sv.nAdd + '. Анкет в Чате новых: ' + sv.add + ', обновлено: ' + sv.upd + (miss.length ? '. Не до конца заполнились: ' + miss.slice(0, 4).join(', ') + (miss.length > 4 ? '…' : '') : ''));
+    cxLbClose();
+    var lw = $('#rp_npc_list'); if (lw && lw.isConnected) renderNpcsList(lw);
+    if (panelOpen && currentScreen === 'messenger' && !CX.open) cxRender();
+  }catch(e){ CX_LB.busy = ''; toast('Не удалось заполнить анкеты: ' + (e && e.message ? e.message : e)); cxLbUi(); }
+}
+async function cxRaveGo(title, dur){
+  var movies = await raveLoadMovies();
+  var m = movies.filter(function(x){ return String(x.title).toLowerCase() === String(title).toLowerCase(); })[0];
+  if (!m){
+    var idx = movies.length % RAVE_PICKER_COLORS.length;
+    m = { id:uid(), title:String(title).slice(0, 80), emoji:RAVE_PICKER_EMOJIS[idx], color:RAVE_PICKER_COLORS[idx], durationMin: dur > 0 ? Math.min(600, dur) : 120 };
+    movies.push(m); await rpSet('rp_rave_movies', movies);
+  }
+  var st = await rpGet('rp_rave_state', null);
+  if (st && st.movieId === m.id && !st.finished){ await openScreen('rave'); return; }
+  if (st && st.movieId && !st.finished){
+    var ch = await showChoiceModal({ title:'Сейчас идёт другой фильм', message:'Переключиться на «' + m.title + '»? Текущий просмотр закончится.', buttons:[{ label:'Переключить', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return;
+  }
+  await openScreen('rave');
+  var sc = $('.rp_rv_scope'); if (sc) await raveStart(sc, m);
+}
+async function gatherOocChat(){
+  await cxWho();
+  var ts = await cxThreads(), cs = await cxContacts(), nm = CX.names, parts = [];
+  var name = function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
+  for (var i = 0; i < ts.length; i++){
+    var t = ts[i]; if (t.owner !== 'me') continue;
+    var l = (await cxMsgs(t.id)).filter(function(m){ return !m.hidden && m.t !== 'sys'; });
+    if (!l.length) continue;
+    parts.push({ main: t.id === 'main', ts: t.ts || 0, txt: (t.id === 'main' ? 'Переписка ' + nm.userTavo + ' и ' + nm.char + ' в мессенджере' : (t.kind === 'group' ? 'Групповой чат «' + cxTitle(t, cs) + '»' : 'Переписка ' + nm.userTavo + ' с ' + cxTitle(t, cs))) + ':\n' + l.slice(t.id === 'main' ? -20 : -8).map(function(m){ return name(m.from) + ': ' + cxMsgLine(m); }).join('\n') });
+  }
+  parts.sort(function(a, b){ return (b.main - a.main) || (b.ts - a.ts); });
+  return parts.slice(0, 5).map(function(p){ return p.txt; });
+}
+async function cxHideAll(on){
+  var ts = await cxThreads(), changed = false;
+  for (var i = 0; i < ts.length; i++){
+    if (ts[i].owner !== 'me') continue;
+    var l = await cxMsgs(ts[i].id), c = false;
+    for (var j = 0; j < l.length - (on ? hk() : 0); j++){ if (!!l[j].hidden !== on){ l[j].hidden = on; c = true; } }
+    if (c){ await cxMsgsSave(ts[i].id, l); changed = true; }
+  }
+  return changed;
+}
+function cxHeartD(x, y, s){ return 'M' + x + ' ' + (y + s * 0.9) + ' C ' + (x - s * 1.6) + ' ' + (y - s * 0.1) + ' ' + (x - s * 0.9) + ' ' + (y - s * 1.3) + ' ' + x + ' ' + (y - s * 0.45) + ' C ' + (x + s * 0.9) + ' ' + (y - s * 1.3) + ' ' + (x + s * 1.6) + ' ' + (y - s * 0.1) + ' ' + x + ' ' + (y + s * 0.9) + ' Z'; }
+function cxSpark(x, y, r, c){ return '<path d="M' + x + ' ' + (y - r) + ' Q' + x + ' ' + y + ' ' + (x + r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y + r) + ' Q' + x + ' ' + y + ' ' + (x - r) + ' ' + y + ' Q' + x + ' ' + y + ' ' + x + ' ' + (y - r) + 'Z" fill="' + (c || '#ffd54a') + '" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>'; }
+function cxFlame(x, y, s){ var p = function(a, b){ return (x + a * s).toFixed(1) + ' ' + (y + b * s).toFixed(1); }; return '<path d="M' + p(0, 0) + ' C' + p(-18, -4) + ' ' + p(-16, -28) + ' ' + p(-4, -46) + ' C' + p(-2, -32) + ' ' + p(8, -30) + ' ' + p(10, -40) + ' C' + p(20, -24) + ' ' + p(16, -4) + ' ' + p(0, 0) + 'Z" fill="#ff7a1a" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M' + p(0, -4) + ' C' + p(-8, -6) + ' ' + p(-8, -20) + ' ' + p(-1, -28) + ' C' + p(1, -20) + ' ' + p(5, -20) + ' ' + p(6, -25) + ' C' + p(11, -14) + ' ' + p(8, -5) + ' ' + p(0, -4) + 'Z" fill="#ffd54a"/>'; }
+function cxFlower(x, y, c){ var s = ''; for (var i = 0; i < 5; i++){ var a = i * Math.PI * 2 / 5 - Math.PI / 2; s += '<circle cx="' + (x + Math.cos(a) * 8).toFixed(1) + '" cy="' + (y + Math.sin(a) * 8).toFixed(1) + '" r="7" fill="' + c + '" stroke="#fff" stroke-width="2"/>'; } return s + '<circle cx="' + x + '" cy="' + y + '" r="5" fill="#ffd54a" stroke="#fff" stroke-width="1.5"/>'; }
+function cxTxt(x, y, sz, col, t, rot){ return '<text x="' + x + '" y="' + y + '" font-size="' + sz + '" font-weight="900" font-family="Arial Black,Arial,sans-serif" fill="' + col + '" stroke="#fff" stroke-width="4" paint-order="stroke" stroke-linejoin="round"' + (rot ? ' transform="rotate(' + rot + ' ' + x + ' ' + y + ')"' : '') + '>' + t + '</text>'; }
+var CX_PROPS = {
+  hearts: function(){ return [[162, 38, 13], [183, 74, 8], [138, 16, 7]].map(function(h){ return '<path d="' + cxHeartD(h[0], h[1], h[2]) + '" fill="#ff4d7e" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>'; }).join(''); },
+  sparkles: function(){ return cxSpark(28, 40, 14) + cxSpark(172, 30, 11) + cxSpark(184, 122, 8, '#c4b5fd') + cxSpark(16, 122, 7, '#f9a8d4'); },
+  anger: function(){ return '<g stroke="#fff" stroke-width="11" fill="none" stroke-linecap="round"><path d="M148 28 Q156 38 148 48 M174 28 Q166 38 174 48 M151 24 Q161 32 171 24 M151 52 Q161 44 171 52"/></g><g stroke="#ff3b3b" stroke-width="6" fill="none" stroke-linecap="round"><path d="M148 28 Q156 38 148 48 M174 28 Q166 38 174 48 M151 24 Q161 32 171 24 M151 52 Q161 44 171 52"/></g>'; },
+  sweat: function(){ return '<path d="M158 30 C 152 44 146 52 146 60 a12 12 0 0 0 24 0 c0-8-6-16-12-30z" fill="#8fd3ff" stroke="#fff" stroke-width="3"/><ellipse cx="153" cy="59" rx="3" ry="5" fill="#fff" opacity=".7"/>'; },
+  zzz: function(){ return cxTxt(138, 54, 30, '#8b5cf6', 'Z') + cxTxt(162, 34, 22, '#a78bfa', 'z') + cxTxt(180, 18, 16, '#c4b5fd', 'z'); },
+  question: function(){ return cxTxt(146, 54, 46, '#fbbf24', '?', 12) + cxTxt(24, 46, 30, '#fbbf24', '?', -14); },
+  exclaim: function(){ return cxTxt(150, 58, 54, '#ff3b3b', '!', 8) + cxTxt(174, 40, 36, '#ff3b3b', '!', 16); },
+  fire: function(){ return cxFlame(26, 196, 1.05) + cxFlame(176, 196, 0.85); },
+  flowers: function(){ return cxFlower(28, 40, '#f9a8d4') + cxFlower(172, 54, '#c4b5fd') + cxFlower(20, 160, '#fda4af'); },
+  coffee: function(){ return '<g transform="rotate(-6 140 160)"><rect x="122" y="138" width="38" height="40" rx="8" fill="#fff" stroke="#3b2a24" stroke-width="3"/><path d="M160 146 q14 0 12 12 q-2 10 -12 10" fill="none" stroke="#3b2a24" stroke-width="3.5"/><rect x="122" y="138" width="38" height="10" rx="4" fill="#8b5a3c"/><path d="M132 130 q-5 -7 0 -14 M144 130 q-5 -7 0 -14" stroke="#cbd5e1" stroke-width="3.5" fill="none" stroke-linecap="round"/><path d="M133 160 l6 0 M146 160 l6 0" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/></g>'; },
+  phone: function(){ return '<g transform="rotate(-12 128 152)"><rect x="112" y="126" width="32" height="54" rx="7" fill="#1f2937" stroke="#fff" stroke-width="3"/><rect x="116" y="133" width="24" height="38" rx="3" fill="#8b5cf6"/><circle cx="128" cy="176" r="2" fill="#fff"/><path d="M121 144 h14 M121 151 h10" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></g>'; },
+  popcorn: function(){ return '<g><circle cx="134" cy="132" r="9" fill="#fff8e1" stroke="#e5c07b" stroke-width="2"/><circle cx="148" cy="126" r="10" fill="#fff8e1" stroke="#e5c07b" stroke-width="2"/><circle cx="162" cy="132" r="9" fill="#fff8e1" stroke="#e5c07b" stroke-width="2"/><circle cx="154" cy="138" r="8" fill="#fff3c4" stroke="#e5c07b" stroke-width="2"/><path d="M124 138 h52 l-8 48 h-36 z" fill="#fff" stroke="#b91c1c" stroke-width="3" stroke-linejoin="round"/><path d="M138 138 l3 48 M152 138 v48 M166 138 l-3 48" stroke="#ef4444" stroke-width="5"/></g>'; },
+  notes: function(){ return '<g><path d="M156 52 V22 L182 15 V44" fill="none" stroke="#fff" stroke-width="10" stroke-linejoin="round"/><path d="M156 52 V22 L182 15 V44" fill="none" stroke="#8b5cf6" stroke-width="5" stroke-linejoin="round"/><ellipse cx="148" cy="54" rx="10" ry="8" fill="#8b5cf6" stroke="#fff" stroke-width="3"/><ellipse cx="174" cy="46" rx="10" ry="8" fill="#8b5cf6" stroke="#fff" stroke-width="3"/></g>' + cxTxt(18, 60, 30, '#ec4899', '♪', -10); },
+  laugh: function(){ return '<path d="M52 90 q-16 -8 -26 4 q12 6 26 -4z M148 90 q16 -8 26 4 q-12 6 -26 -4z" fill="#7cc7ff" stroke="#fff" stroke-width="2.5"/><path d="M30 76 l-10 -6 M28 104 l-11 4 M170 76 l10 -6 M172 104 l11 4" stroke="#fbbf24" stroke-width="4" stroke-linecap="round"/>'; },
+  hearthand: function(){ return '<path d="' + cxHeartD(100, 152, 24) + '" fill="#ff3d71" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><ellipse cx="88" cy="140" rx="6" ry="4" fill="#fff" opacity=".7"/>'; },
+  roof: function(){ return '<rect x="150" y="16" width="16" height="34" fill="#c2410c" stroke="#fff" stroke-width="3"/><path d="M8 96 L100 20 L192 96" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 96 L100 20 L192 96" fill="none" stroke="#f97316" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>'; },
+  sun: function(){ var r = ''; for (var i = 0; i < 8; i++){ var a = i * Math.PI / 4; r += '<path d="M' + (30 + Math.cos(a) * 20).toFixed(1) + ' ' + (32 + Math.sin(a) * 20).toFixed(1) + ' L' + (30 + Math.cos(a) * 28).toFixed(1) + ' ' + (32 + Math.sin(a) * 28).toFixed(1) + '" stroke="#fbbf24" stroke-width="5" stroke-linecap="round"/>'; } return r + '<circle cx="30" cy="32" r="15" fill="#ffd54a" stroke="#fff" stroke-width="3"/>' + cxSpark(178, 40, 9); },
+  broken: function(){ return '<path d="' + cxHeartD(160, 42, 16) + '" fill="#ff3d71" stroke="#fff" stroke-width="3" stroke-linejoin="round"/><path d="M160 28 l-5 10 l7 6 l-6 9 l4 8" fill="none" stroke="#fff" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>'; },
+  laptop: function(){ return '<g><rect x="58" y="128" width="84" height="44" rx="5" fill="#334155" stroke="#fff" stroke-width="3"/><rect x="63" y="133" width="74" height="34" rx="2" fill="#60a5fa"/><path d="M68 142 h40 M68 150 h28 M68 158 h50" stroke="#e0f2fe" stroke-width="3" stroke-linecap="round"/><path d="M46 172 h108 l-10 14 h-88 z" fill="#cbd5e1" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></g>'; },
+  kiss: function(){ return '<path d="M132 118 q8 -9 16 -2 q8 -7 16 2 q-8 12 -16 12 q-8 0 -16 -12z" fill="#ff3d71" stroke="#fff" stroke-width="2.5"/><path d="' + cxHeartD(172, 40, 10) + '" fill="#ff4d7e" stroke="#fff" stroke-width="3"/><path d="' + cxHeartD(150, 22, 6) + '" fill="#ff8fab" stroke="#fff" stroke-width="2.5"/>'; }
+};
+var CX_STK = [
+  { id:'hi', sp:'bunny', face:'happy', prop:'sparkles', cap:'приветик', col:'#8b5cf6' },
+  { id:'love', sp:'cat', face:'love', prop:'hearts', cap:'люблю тебя', col:'#f43f5e' },
+  { id:'miss', sp:'bunny', face:'sad', prop:'', cap:'скучаю', col:'#a855f7' },
+  { id:'hug', sp:'bear', face:'happy', prop:'hearthand', cap:'обнимаю', col:'#ec4899' },
+  { id:'kiss', sp:'fox', face:'wink', prop:'kiss', cap:'чмок', col:'#f43f5e' },
+  { id:'cringe', sp:'frog', face:'shock', prop:'sweat', cap:'кринж', col:'#10b981' },
+  { id:'base', sp:'capybara', face:'meh', acc:'sunglasses', prop:'sparkles', cap:'база', col:'#111827' },
+  { id:'slay', sp:'unicorn', face:'star', acc:'crown', prop:'sparkles', cap:'слэй', col:'#d946ef' },
+  { id:'imba', sp:'dragon', face:'happy', prop:'fire', cap:'имба', col:'#f97316' },
+  { id:'lol', sp:'dog', face:'happy', prop:'laugh', cap:'ору', col:'#f59e0b' },
+  { id:'pon', sp:'penguin', face:'meh', prop:'', cap:'пон', col:'#3b82f6' },
+  { id:'okand', sp:'cat', face:'smug', prop:'', cap:'ок и?', col:'#6366f1' },
+  { id:'nodushni', sp:'hamster', face:'angry', prop:'anger', cap:'не душни', col:'#ef4444' },
+  { id:'offended', sp:'bunny', face:'angry', prop:'anger', cap:'обидка', col:'#be185d' },
+  { id:'house', sp:'hamster', face:'blush', prop:'roof', cap:'я в домике', col:'#f97316' },
+  { id:'wait', sp:'duck', face:'meh', prop:'phone', cap:'жду ответ', col:'#06b6d4' },
+  { id:'sleep', sp:'panda', face:'sleep', prop:'zzz', cap:'споки', col:'#4338ca' },
+  { id:'morning', sp:'duck', face:'happy', prop:'sun', cap:'доброе утро', col:'#f59e0b' },
+  { id:'coffee', sp:'bear', face:'side', prop:'coffee', cap:'кофе срочно', col:'#92400e' },
+  { id:'shock', sp:'owl', face:'shock', prop:'exclaim', cap:'в шоке', col:'#ef4444' },
+  { id:'plak', sp:'axolotl', face:'cry', prop:'', cap:'плак-плак', col:'#60a5fa' },
+  { id:'jealous', sp:'demon', face:'angry', prop:'fire', cap:'ревную', col:'#7c3aed' },
+  { id:'vibe', sp:'fox', face:'smug', acc:'headphones', prop:'notes', cap:'это вайб', col:'#8b5cf6' },
+  { id:'kaif', sp:'capybara', face:'happy', prop:'flowers', cap:'кайф', col:'#10b981' },
+  { id:'moment', sp:'cat', face:'blush', prop:'flowers', cap:'я в моменте', col:'#ec4899' },
+  { id:'genius', sp:'owl', face:'star', acc:'glasses', prop:'sparkles', cap:'гений', col:'#ca8a04' },
+  { id:'dead', sp:'dog', face:'dead', prop:'', cap:'я всё', col:'#6b7280' },
+  { id:'drama', sp:'hamster', face:'shock', prop:'popcorn', cap:'жду драму', col:'#dc2626' },
+  { id:'what', sp:'penguin', face:'shock', prop:'question', cap:'чего?', col:'#0ea5e9' },
+  { id:'foryou', sp:'bear', face:'love', prop:'hearthand', cap:'это тебе', col:'#f43f5e' },
+  { id:'work', sp:'panda', face:'meh', prop:'laptop', cap:'работаю', col:'#334155' },
+  { id:'mur', sp:'cat', face:'blush', prop:'hearts', cap:'мур', col:'#f472b6' },
+  { id:'sorry', sp:'bunny', face:'sad', prop:'flowers', cap:'прости', col:'#a855f7' },
+  { id:'party', sp:'dog', face:'happy', acc:'partyHat', prop:'sparkles', cap:'тусим', col:'#d946ef' },
+  { id:'angel', sp:'duck', face:'blush', acc:'halo', prop:'', cap:'я ангел', col:'#38bdf8' },
+  { id:'hurt', sp:'frog', face:'cry', prop:'broken', cap:'больно', col:'#be123c' }
+];
+var CX_STK_BY = {}; CX_STK.forEach(function(s){ CX_STK_BY[s.id] = s; });
+var CX_STK_CACHE = {};
+function cxStkHtml(id){
+  if (CX_STK_CACHE[id]) return CX_STK_CACHE[id];
+  var s = CX_STK_BY[id]; if (!s) return '';
+  var pet = petRenderSVG({ id:s.sp, variant:0, acc:s.acc || 'none' }, s.face === 'sleep', { noAnim:true, face: s.face === 'sleep' ? '' : s.face });
+  var pr = s.prop && CX_PROPS[s.prop] ? '<div class="prop"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">' + CX_PROPS[s.prop]() + '</svg></div>' : '';
+  var h = '<div class="cx_stk"><div class="pet">' + pet + '</div>' + pr + '<div class="cap" style="background:' + s.col + '">' + escapeHtml(s.cap) + '</div></div>';
+  CX_STK_CACHE[id] = h;
+  return h;
+}
+var CX_EMO = ['❤️','🥺','😂','🤭','😘','😍','🔥','✨','😭','😤','🙄','😏','👀','💀','🫶','🤍','💔','😴','☕','🎬','🍕','🐾','🌙','⭐','🙈','🤗','😳','😌','💅','🤡','👍','🙏','💯','🎉','🫠','😇','😈','💋','🌸','🥰','😡','🤔','😎','🤯','😅','🥲','🫡','💜'];
+var CX_IC = {
+  cam:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
+  circ:'<circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z"/>',
+  file:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  pen:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/>',
+  video:'<path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/>',
+  clip:'<path d="M21.4 11.1l-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+  mic:'<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 18v4"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  fp:'<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 19.5C5.5 18 6 15 6 12c0-.7.1-1.4.4-2"/><path d="M17.3 21.8c.1-.7.7-3.7.7-4.8"/><path d="M12 10a2 2 0 0 0-2 2c0 1 0 4.5-1.2 7.5"/><path d="M8.6 22c.3-.7.8-2 1-3"/><path d="M14 13.1c0 2.5 0 6.5-1 8.9"/><path d="M21.8 16c.2-2 .1-5.4 0-6"/><path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>',
+  lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye:'<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
+  desk:'<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  pulse:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/><path d="M3.2 12h3.8l1.5-3 2 6 2-4.5 1.2 1.5h3"/>',
+  chats:'<path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 0 1 12.5 3 8.4 8.4 0 0 1 21 11.5z"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  bat:'<rect x="1" y="6" width="18" height="12" rx="2"/><path d="M23 13v-2M5 10v4M9 10v4M13 10v4"/>',
+  pin:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>',
+  shield:'<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  cin:'<path d="M17 7L7 17M7 8v9h9"/>',
+  cout:'<path d="M7 17L17 7M8 7h9v9"/>',
+  cmiss:'<path d="M18 6L6 18M6 6l12 12"/>',
+  play:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  users:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  spark:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 3v4M17 5h4"/>',
+  trash:'<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
+  merge:'<path d="M8 6l4-4 4 4M12 2v10.3a4 4 0 0 1-1.2 2.8L4 22M20 22l-5-5"/>',
+  edit:'<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/>',
+  pinr:'<path d="M12 17v5M9 10.8V4h6v6.8l3 3.2v2H6v-2z"/>',
+  refresh:'<path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/>',
+  radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/>',
+  chk2:'<path d="M1.5 12.5l5 5L17 7M9.5 17.5l1 1L22 7"/>',
+  chk:'<path d="M5 12l5 5L20 7"/>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" fill="currentColor"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
+  img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>',
+  film:'<rect x="2" y="2" width="20" height="20" rx="2.2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/>',
+  share:'<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/>',
+  inbox:'<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/>'
+};
+function cxI(n, cls){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (cls ? ' class="' + cls + '"' : '') + '>' + (CX_IC[n] || '') + '</svg>'; }
+function cxIni(name){ var w = String(name || '?').trim().split(/\s+/).filter(Boolean); return ((w[0] || '?').charAt(0) + (w[1] ? w[1].charAt(0) : '')).toUpperCase(); }
+function cxAv(p, cls){
+  var u = p && p.av ? String(p.av) : '';
+  return '<div class="cx_av' + (cls ? ' ' + cls : '') + '"' + (u ? ' style="background-image:' + rpCssUrl(u) + '"' : '') + '>' + (u ? '' : escapeHtml(cxIni(p && p.name))) + '</div>';
+}
+function cxThreadAv(t, cs, cls){
+  if (t.kind === 'group'){ if (t.avatar) return cxAv({ av:t.avatar, name:cxTitle(t, cs) }, (cls || '') + ' grp'); return '<div class="cx_av grp ' + (cls || '') + '">' + escapeHtml(cxIni(cxTitle(t, cs))) + '</div>'; }
+  var p = cxPerson(t.who[0], cs);
+  return cxAv(p, (cls || '') + (p.bot ? ' bot' : ''));
+}
+function cxColor(id){ var s = String(id || ''), h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return 'hsl(' + h + ',75%,70%)'; }
+function cxSheet(html){
+  var host = CX.root || $('#rp_screen');
+  var bg = el('div', 'cx_sheetbg'); bg.innerHTML = '<div class="cx_sheet">' + html + '</div>';
+  host.appendChild(bg);
+  bg.addEventListener('click', function(e){ if (e.target === bg) bg.remove(); });
+  return bg;
+}
+function cxActions(title, sub, acts){
+  var bg = cxSheet('<div class="cx_sht">' + escapeHtml(title) + '</div>' + (sub ? '<div class="cx_shs">' + escapeHtml(sub) + '</div>' : '') + acts.map(function(a, i){ return '<div class="cx_act' + (a.red ? ' red' : '') + '" data-i="' + i + '">' + cxI(a.ic || 'chk') + '<div>' + escapeHtml(a.t) + (a.s ? '<small>' + escapeHtml(a.s) + '</small>' : '') + '</div></div>'; }).join(''));
+  bg.querySelectorAll('[data-i]').forEach(function(d){ d.addEventListener('click', function(){ bg.remove(); var a = acts[+d.getAttribute('data-i')]; if (a && a.fn) a.fn(); }); });
+  return bg;
+}
+function cxAsk(title, val, ph, okLbl){
+  return new Promise(function(res){
+    var bg = cxSheet('<div class="cx_sht">' + escapeHtml(title) + '</div><div class="cx_fld" style="margin-top:10px;"><input id="cx_ask" maxlength="60" placeholder="' + escapeHtml(ph || '') + '" value="' + escapeHtml(val || '') + '"></div><div class="cx_btns"><div class="cx_btn ghost" data-x="0">Отмена</div><div class="cx_btn" data-x="1">' + escapeHtml(okLbl || 'Готово') + '</div></div>');
+    var inp = $('#cx_ask', bg); setTimeout(function(){ try{ inp.focus(); inp.select(); }catch(e){} }, 60);
+    var done = function(v){ bg.remove(); res(v); };
+    bg.querySelector('[data-x="0"]').addEventListener('click', function(){ done(null); });
+    bg.querySelector('[data-x="1"]').addEventListener('click', function(){ done(inp.value.trim()); });
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') done(inp.value.trim()); });
+    bg.addEventListener('click', function(e){ if (e.target === bg) res(null); });
+  });
+}
+function cxLongPress(node, fn){
+  var tm = null, sx = 0, sy = 0;
+  var stop = function(){ clearTimeout(tm); tm = null; node.classList.remove('press'); };
+  node.addEventListener('pointerdown', function(e){ sx = e.clientX; sy = e.clientY; node.classList.add('press'); tm = setTimeout(function(){ tm = null; node.classList.remove('press'); node.dataset.lp = '1'; try{ navigator.vibrate && navigator.vibrate(18); }catch(er){} fn(); }, 480); });
+  node.addEventListener('pointermove', function(e){ if (tm && Math.hypot(e.clientX - sx, e.clientY - sy) > 8) stop(); });
+  node.addEventListener('pointerup', stop); node.addEventListener('pointercancel', stop); node.addEventListener('pointerleave', stop);
+  node.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+}
+function cxLp(node){ if (node.dataset.lp){ delete node.dataset.lp; return true; } return false; }
+async function cxPickImage(){
+  return new Promise(function(res){
+    var native = false; try{ native = rpNativeOk(); }catch(e){}
+    if (native){ rpImport({ multiple:false }).then(function(r){ res(r && r[0] && r[0].path ? String(r[0].path) : null); }, function(){ toast('Не удалось выбрать фото'); res(null); }); return; }
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function(){ var f = inp.files && inp.files[0]; if (!f){ res(null); return; } var rd = new FileReader(); rd.onload = async function(){ var sh = await galKeep(String(rd.result), 320, 0.85); res(sh ? sh.data : null); }; rd.readAsDataURL(f); };
+    inp.click();
+  });
+}
+SCREENS.messenger = {
+  title: 'Чат',
+  async render(container){
+    container.style.padding = '0'; container.style.display = 'flex'; container.style.flexDirection = 'column'; container.style.height = '100%'; container.style.minHeight = '0';
+    CX.cont = container; CX.open = null; CX.tray = '';
+    cxMenu();
+    await cxWho();
+    await cxRender();
+    cxSyncContacts(false).then(function(n){ if (n && currentScreen === 'messenger' && !CX.open) cxRender(); });
+  }
+};
+function cxMenu(){
+  $('#rp_appbar_menu_btn').style.display = 'flex';
+  var menu = buildAppbarMenu();
+  menu.innerHTML =
+    '<div class="rp_btn rp_sm" id="cx_m_lore"><svg><use href="#rpi-note"/></svg><span>Саммари в лорбук</span></div>' +
+    '<div class="rp_btn rp_ghost rp_xs" id="cx_m_scan"><svg><use href="#rpi-search"/></svg><span>Найти переписки в ролевой</span></div>' +
+    '<div class="rp_btn rp_ghost rp_xs" id="cx_m_hide"><svg><use href="#rpi-eyeoff"/></svg><span>Хайд</span></div>' +
+    '<div class="rp_btn rp_ghost rp_xs" id="cx_m_unhide"><svg><use href="#rpi-eye"/></svg><span>Анхайд</span></div>';
+  menu.appendChild(buildOocButton('ooc-chat', gatherOocChat));
+  wireBusyButton($('#cx_m_lore', menu), 'cx-lore', async function(){
+    var parts = await gatherOocChat();
+    if (!parts.length){ toast('Пока нет переписок'); closeAppbarMenu(); return; }
+    await upsertLorebookEntry('rp-chat', 'Чат', parts.join('\n\n'));
+    toast('Сохранено в лорбук'); closeAppbarMenu();
+  });
+  $('#cx_m_scan', menu).addEventListener('click', function(){ closeAppbarMenu(); cxScanSheet(); });
+  wireBusyButton($('#cx_m_hide', menu), 'cx-hide', async function(){ var c = await cxHideAll(true); toast(c ? 'Скрыто (кроме последних сообщений)' : 'Нечего скрывать'); closeAppbarMenu(); });
+  wireBusyButton($('#cx_m_unhide', menu), 'cx-unhide', async function(){ var c = await cxHideAll(false); toast(c ? 'Показано всё скрытое' : 'Нечего показывать'); closeAppbarMenu(); });
+}
+function cxScanSheet(){
+  var d = Math.max(5, Math.min(100, +cfg('scanDepth', 20) || 20));
+  var bg = cxSheet('<div class="cx_sht">Переписки из ролевой</div><div class="cx_shs">Модель прочитает последние сообщения истории и разложит по чатам всё, что герои реально отправили по телефону: твои переписки с ботом и НПС — в «Чаты», переписки бота с другими — в его скрытые чаты. Кто есть кто, определяется по смыслу, а не по названию чата.</div>' +
+    '<div class="cx_btn" data-d="' + d + '">Разобрать последние ' + d + '</div><div class="cx_btns"><div class="cx_btn ghost" data-d="10">10</div><div class="cx_btn ghost" data-d="40">40</div><div class="cx_btn ghost" data-d="80">80</div></div>');
+  bg.querySelectorAll('[data-d]').forEach(function(b){ b.addEventListener('click', async function(){ bg.remove(); toast('Разбираю ролевую…'); await cxScanRp({ depth:+b.getAttribute('data-d') }); }); });
+}
+async function cxRender(){
+  var c = CX.cont; if (!c || !c.isConnected || currentScreen !== 'messenger') return;
+  CX.cs = await cxContacts();
+  var ts = await cxThreads(), s = await cxSet();
+  CX.prevSeen = s.hubSeen || 0;
+  if (CX.tab === 'hub' && CX.hubOk && !CX.open){ s.hubSeen = Date.now(); cxSetSave({ hubSeen: s.hubSeen }); }
+  var keepOpen = CX.open;
+  var app = el('div', 'cx_app' + (s.glow === false ? ' noglow' : ''));
+  var main = el('div', 'cx_main'); app.appendChild(main);
+  var unr = 0; ts.forEach(function(t){ if (t.owner === 'me') unr += t.unread || 0; });
+  var hubNew = s.hubNote !== false && ts.some(function(t){ return t.owner === 'char' && (t.ts || 0) > (s.hubSeen || 0); });
+  var nav = el('div', 'cx_nav');
+  nav.innerHTML = [['chats', 'chats', 'Чаты', unr ? '<i>' + unr + '</i>' : ''], ['calls', 'phone', 'Звонки', ''], ['hub', 'pulse', 'Партнёр', hubNew ? '<i></i>' : ''], ['me', 'gear', 'Профиль', '']].map(function(b){
+    return '<div class="cx_navb' + (b[0] === 'hub' ? ' hub' : '') + (CX.tab === b[0] ? ' on' : '') + '" data-tab="' + b[0] + '">' + cxI(b[1]) + '<span>' + b[2] + '</span>' + b[3] + '</div>';
+  }).join('');
+  app.appendChild(nav);
+  c.innerHTML = ''; c.appendChild(app); CX.root = app;
+  nav.querySelectorAll('[data-tab]').forEach(function(b){ b.addEventListener('click', function(){ CX.tab = b.getAttribute('data-tab'); CX.open = null; cxRender(); }); });
+  if (CX.tab === 'calls') await cxTabCalls(main);
+  else if (CX.tab === 'hub') await cxTabHub(main, ts, s);
+  else if (CX.tab === 'me') await cxTabMe(main, s);
+  else cxTabChats(main, ts, s);
+  if (keepOpen) await cxOpenChat(keepOpen, true);
+  else backTarget = openHome;
+}
+function cxTabChats(main, ts, s){
+  var cs = CX.cs, nm = CX.names;
+  var mine = ts.filter(function(t){ return t.owner === 'me'; }).sort(function(a, b){ return (b.id === 'main') - (a.id === 'main') || (!!b.pin - !!a.pin) || (b.ts || 0) - (a.ts || 0); });
+  var head = el('div', 'cx_head');
+  head.innerHTML = '<div><h1>Чаты <span class="cx_ping"></span></h1><p class="cx_mono">Nexus · сквозное шифрование</p></div><div class="cx_hbtns"><div class="cx_rbtn" id="cx_timer" title="Бот пишет первым">' + cxI('clock') + '</div><div class="cx_rbtn" id="cx_new" title="Новый чат">' + cxI('pen') + '</div></div>';
+  main.appendChild(head);
+  var sr = el('div', 'cx_search'); sr.innerHTML = '<div>' + cxI('search') + '<input id="cx_q" placeholder="Поиск сообщений..." value="' + escapeHtml(CX.q) + '"></div>';
+  main.appendChild(sr);
+  var st = el('div', 'cx_stories');
+  var sh = '<div class="cx_story bot" data-open="main"><div class="cx_ring">' + cxAv(cxPerson('char', cs)) + '<span class="cx_heartb">❤️</span></div><span>' + escapeHtml(nm.char) + '</span></div>';
+  mine.filter(function(t){ return t.id !== 'main'; }).slice(0, 8).forEach(function(t){
+    sh += '<div class="cx_story' + (t.kind === 'group' ? ' grp' : '') + '" data-open="' + t.id + '"><div class="cx_ring">' + cxThreadAv(t, cs) + '</div><span>' + escapeHtml(cxTitle(t, cs)) + '</span></div>';
+  });
+  st.innerHTML = sh; main.appendChild(st);
+  var list = el('div', 'cx_scroll cx_list'); main.appendChild(list);
+  var q = CX.q.trim().toLowerCase();
+  var shown = mine.filter(function(t){ if (!q) return true; return (cxTitle(t, cs) + ' ' + ((t.last && t.last.x) || '') + ' ' + (t.alias || []).join(' ')).toLowerCase().indexOf(q) >= 0; });
+  list.innerHTML = shown.map(function(t){
+    var bot = t.id === 'main', busy = CX.busy[t.id];
+    var prev = busy ? 'печатает…' : ((t.last && t.last.x) ? ((t.last.f === 'me' ? 'Вы: ' : (t.kind === 'group' ? cxNameOf(t.last.f, cs) + ': ' : '')) + t.last.x) : (bot ? 'Напиши первым — или подожди, пока ' + nm.char + ' напишет сам' : 'Пока пусто'));
+    return '<div class="cx_row" data-t="' + t.id + '">' + cxThreadAv(t, cs) + '<div class="cx_rowm"><div class="cx_rowt"><b class="' + (bot ? 'bot' : '') + '">' + escapeHtml(cxTitle(t, cs)) + (t.pin && !bot ? '<span class="cx_pin">●</span>' : '') + '</b><span class="cx_mono">' + escapeHtml(cxAgo(t.ts)) + '</span></div><div class="cx_rowp' + (busy ? ' typing' : '') + '">' + escapeHtml(prev) + '</div></div>' + (t.unread ? '<span class="cx_unr">' + t.unread + '</span>' : '') + '</div>';
+  }).join('') || '<div class="cx_empty"><b>Ничего не нашлось</b>Попробуй другое слово.</div>';
+  list.querySelectorAll('.cx_row').forEach(function(r){
+    var tid = r.getAttribute('data-t');
+    r.addEventListener('click', function(){ if (cxLp(r)) return; cxOpenChat(tid); });
+    cxLongPress(r, function(){ cxThreadMenu(tid); });
+  });
+  st.querySelectorAll('[data-open]').forEach(function(b){ b.addEventListener('click', function(){ cxOpenChat(b.getAttribute('data-open')); }); });
+  $('#cx_timer', head).addEventListener('click', cxTimerSheet);
+  $('#cx_new', head).addEventListener('click', cxNewSheet);
+  var qi = $('#cx_q', sr);
+  qi.addEventListener('input', function(){ CX.q = qi.value; clearTimeout(qi.__t); qi.__t = setTimeout(function(){ cxRender().then(function(){ var n = $('#cx_q'); if (n){ n.focus(); try{ n.setSelectionRange(n.value.length, n.value.length); }catch(e){} } }); }, 250); });
+}
+function cxTimerSheet(){
+  cxSet().then(function(s){
+    var bg = cxSheet('<div class="cx_sht">Бот пишет первым</div><div class="cx_shs">Как часто ' + escapeHtml(CX.names.char) + ' сам начинает разговор, если ты молчишь. Чаще всего он пересылает что-то из приложений — пост, видео, стрим, фильм — и спрашивает, что ты думаешь. Работает, пока открыт чат в Таверне.</div><div class="cx_chips">' +
+      CX_EVERY.map(function(o){ return '<div class="cx_chip' + (s.every === o[0] ? ' on' : '') + '" data-v="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div><div class="cx_btns"><div class="cx_btn soft" id="cx_now">' + cxI('spark') + 'Пусть напишет сейчас</div></div>');
+    bg.querySelectorAll('[data-v]').forEach(function(c){ c.addEventListener('click', async function(){ var v = +c.getAttribute('data-v'); await cxSetSave({ every:v, lastInit:Date.now() }); bg.remove(); toast(v ? 'Бот будет писать первым: ' + CX_EVERY.filter(function(o){ return o[0] === v; })[0][1] : 'Бот больше не пишет первым'); if (CX.open === 'main') cxHeadSub(); }); });
+    $('#cx_now', bg).addEventListener('click', function(){ bg.remove(); cxSetSave({ lastInit:Date.now() }); cxReply('main', 'init'); if (CX.open !== 'main') cxOpenChat('main'); });
+  });
+}
+function cxNewSheet(){
+  var cs = CX.cs, nm = CX.names;
+  var bg = cxSheet('<div class="cx_sht">Новый чат</div><div class="cx_shs">Выбери, кому написать, или собери группу.</div>' +
+    '<div class="cx_btns" style="margin:0 0 12px;"><div class="cx_btn soft" id="cx_ng">' + cxI('users') + 'Группа</div><div class="cx_btn ghost" id="cx_nc">' + cxI('plus') + 'Контакт</div></div>' +
+    '<div class="cx_ctc" data-c="char">' + cxAv(cxPerson('char', cs)) + '<div class="cx_rowm"><b style="color:var(--cx-rose)">' + escapeHtml(nm.char) + '</b><span>Главный персонаж · знает всё из карточки и ролевой</span></div></div>' +
+    cs.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'ru'); }).map(function(c){ return '<div class="cx_ctc" data-c="' + c.id + '">' + cxAv({ name:c.name, av:c.avatar }) + '<div class="cx_rowm"><b>' + escapeHtml(c.name) + '</b><span>' + escapeHtml(c.desc || 'анкета не заполнена') + '</span></div></div>'; }).join(''));
+  bg.querySelectorAll('[data-c]').forEach(function(r){ r.addEventListener('click', async function(){ bg.remove(); var id = r.getAttribute('data-c'); if (id === 'char'){ cxOpenChat('main'); return; } var tid = await cxEnsureDm(id); cxOpenChat(tid); }); });
+  $('#cx_ng', bg).addEventListener('click', function(){ bg.remove(); cxGroupForm(null); });
+  $('#cx_nc', bg).addEventListener('click', function(){ bg.remove(); cxContactForm(null); });
+}
+async function cxEnsureDm(cid){
+  return cxSerial(async function(){
+    var ts = await cxThreads(), t = cxFindDm(ts, 'me', cid);
+    if (t) return t.id;
+    t = { id:uid(), kind:'dm', owner:'me', who:[cid], title:'', ts:Date.now(), unread:0 };
+    ts.push(t); await cxThreadsSave(ts); return t.id;
+  });
+}
+async function cxOpenChat(tid, keep){
+  var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
+  if (!t || !CX.root){ CX.open = null; return; }
+  CX.open = tid; if (!keep) CX.tray = '';
+  backTarget = cxCloseChat;
+  if (t.unread){ await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === tid) x.unread = 0; }); await cxThreadsSave(l); }); }
+  if (t.owner === 'char') await cxSetSave({ hubSeen: Date.now() });
+  CX.cs = await cxContacts();
+  var cs = CX.cs, ro = t.owner === 'char';
+  var old = $('#cx_chat', CX.root); if (old) old.remove();
+  var ov = el('div', 'cx_chat'); ov.id = 'cx_chat';
+  var p = t.kind === 'group' ? null : cxPerson(t.who[0], cs);
+  var right = '';
+  if (tid === 'main') right += '<div class="cx_ib" id="cx_c_timer" title="Бот пишет первым">' + cxI('clock') + '<em id="cx_c_timer_v"></em></div>';
+  if (!ro && t.kind !== 'group') right += '<div class="cx_ib" id="cx_c_call">' + cxI('phone') + '</div><div class="cx_ib" id="cx_c_video">' + cxI('video') + '</div>';
+  if (!ro && t.kind === 'group') right += '<div class="cx_ib" id="cx_c_live" title="Оживить чат">' + cxI('spark') + '</div><div class="cx_ib" id="cx_c_gset">' + cxI('gear') + '</div>';
+  ov.innerHTML = '<div class="cx_chead"><div class="cx_chl"><div class="cx_back" id="cx_c_back">' + cxI('back') + '</div>' + cxThreadAv(t, cs, 'sm') + '<div class="cx_cht" id="cx_c_title"><b>' + (ro ? '[Зеркало] ' : '') + escapeHtml(cxTitle(t, cs)) + '</b><span id="cx_c_sub"></span></div></div><div class="cx_chr">' + right + '</div></div>' +
+    '<div class="cx_msgs" id="cx_msgs"></div>' +
+    (ro ? '<div class="cx_ro">' + cxI('eye') + 'Режим наблюдения — только чтение</div>'
+        : '<div id="cx_tray"></div><div class="cx_in"><div class="cx_inr"><div class="cx_ib" id="cx_c_clip">' + cxI('clip') + '</div><textarea id="cx_c_in" rows="1" placeholder="Сообщение..."></textarea><div class="cx_ib" id="cx_c_mic">' + cxI('mic') + '</div><div class="cx_send" id="cx_c_send">' + cxI('send') + '</div></div></div>');
+  CX.root.appendChild(ov);
+  await cxDrawMsgs(); cxHeadSub(); cxDrawTray();
+  $('#cx_c_back', ov).addEventListener('click', cxCloseChat);
+  $('#cx_c_title', ov).addEventListener('click', function(){
+    if (t.kind === 'group'){ if (!ro) cxGroupForm(t); return; }
+    if (t.who[0] === 'char'){ cxBotSheet(); return; }
+    var c = cxContact(t.who[0], CX.cs); if (c) cxContactForm(c);
+  });
+  var tb = $('#cx_c_timer', ov); if (tb) tb.addEventListener('click', cxTimerSheet);
+  var cb = $('#cx_c_call', ov); if (cb) cb.addEventListener('click', function(){ cxCall(t.who[0], false, tid); });
+  var vb = $('#cx_c_video', ov); if (vb) vb.addEventListener('click', function(){ cxCall(t.who[0], true, tid); });
+  var gs = $('#cx_c_gset', ov); if (gs) gs.addEventListener('click', function(){ cxGroupForm(t); });
+  var lv = $('#cx_c_live', ov); if (lv) lv.addEventListener('click', function(){ if (CX.busy[tid]) return; toast('Участники оживляются…'); cxReply(tid, 'auto'); });
+  if (ro) return;
+  var ta = $('#cx_c_in', ov);
+  var grow = function(){ ta.style.height = 'auto'; ta.style.height = Math.min(96, ta.scrollHeight) + 'px'; };
+  ta.addEventListener('input', grow);
+  ta.addEventListener('keydown', function(e){ if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)){ e.preventDefault(); cxSendText(); } });
+  $('#cx_c_send', ov).addEventListener('click', cxSendText);
+  $('#cx_c_clip', ov).addEventListener('click', function(){ CX.tray = CX.tray ? '' : 'media'; cxDrawTray(); });
+  $('#cx_c_mic', ov).addEventListener('click', cxVoiceSheet);
+}
+function cxCloseChat(){
+  CX.open = null; CX.tray = '';
+  var ov = CX.root && $('#cx_chat', CX.root); if (ov) ov.remove();
+  backTarget = openHome;
+  cxRender();
+}
+async function cxHeadSub(){
+  var sub = CX.root && $('#cx_c_sub', CX.root); if (!sub) return;
+  var tid = CX.open, ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return;
+  var txt, off = false;
+  if (CX.busy[tid]) txt = t.kind === 'group' ? 'кто-то печатает…' : 'печатает…';
+  else if (t.owner === 'char') { txt = 'Режим наблюдения'; off = true; }
+  else if (t.kind === 'group') { txt = cxPlural(t.who.length + 1, 'участник', 'участника', 'участников') + (t.auto && t.every ? ' · пишут сами' : ''); off = true; }
+  else if (t.who[0] === 'char'){ var s = await cxSet(); txt = 'в сети' + (s.every ? ' · пишет сам' : ''); }
+  else { var fresh = t.last && t.last.f !== 'me' && Date.now() - (t.ts || 0) < 3600000; txt = fresh ? 'в сети' : 'был(а) недавно'; off = !fresh; }
+  sub.textContent = txt; sub.className = off ? 'off' : '';
+  var tv = $('#cx_c_timer_v', CX.root);
+  if (tv){ var s2 = await cxSet(); tv.textContent = s2.every ? (s2.every >= 60 ? (s2.every / 60) + 'ч' : s2.every + 'м') : ''; }
+}
+function cxMsgBody(m, t, cs){
+  var d = m.d || {};
+  if (m.t === 'sticker') return { raw:true, h:'<div class="cx_stkm">' + cxStkHtml(d.id) + '</div>' };
+  if (m.t === 'repost'){
+    var am = cxAppMeta(d.app);
+    return { raw:true, h:'<div class="cx_rep" data-app="' + escapeHtml(d.app || '') + '"><div class="cx_reph"><span class="ic" style="background:' + escapeHtml(am.c1) + '"><svg><use href="#' + escapeHtml(am.icon) + '"/></svg></span><div><b>' + escapeHtml(d.label || am.label) + '</b><br>' + escapeHtml(d.title || 'Репост') + '</div></div>' + (d.img ? '<div class="cx_repi" style="background-image:' + rpCssUrl(d.img) + '"></div>' : '') + '<div class="cx_repb">' + escapeHtml(d.text || '') + '</div><div class="cx_repf"><span>↪ Репост</span><span>Открыть</span></div></div>' + (m.text ? '<div class="cx_b" style="margin-top:4px;">' + escapeHtml(m.text) + '</div>' : '') };
+  }
+  if (m.t === 'invite') return { raw:true, h:'<div class="cx_inv"><div class="cx_invh">' + cxI('film') + 'ПРИГЛАШЕНИЕ В RAVE</div><div class="cx_invt">' + escapeHtml(d.title || 'Фильм') + '</div><div class="cx_invs">' + (d.dur ? d.dur + ' мин · ' : '') + 'смотрим вместе?</div><div class="cx_invb" data-rave="' + escapeHtml(d.title || '') + '" data-dur="' + (d.dur || 0) + '">Смотреть вместе</div></div>' };
+  if (m.t === 'voice'){
+    var n = d.dur || Math.max(3, Math.min(60, Math.ceil(String(m.text || '').length / 12))), bars = '', seed = 0, sm = String(m.id || '');
+    for (var i = 0; i < sm.length; i++) seed = (seed * 31 + sm.charCodeAt(i)) % 9973;
+    for (var k = 0; k < 24; k++){ seed = (seed * 57 + 13) % 9973; bars += '<i style="height:' + (5 + seed % 15) + 'px"></i>'; }
+    return { h:'<div class="cx_voice"><div class="cx_vplay">' + cxI('play') + '</div><div class="cx_wave">' + bars + '</div><span class="cx_vdur">' + cxDur(n) + '</span></div><div class="cx_vtx">' + escapeHtml(m.text || '') + '</div>' };
+  }
+  var cap = m.text ? '<div class="cx_cap">' + escapeHtml(m.text) + '</div>' : '';
+  var stat = function(lbl){ return d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg><span>' + lbl + ' загружается… ' + escapeHtml(d.desc || '') + '</span>' : (d.err ? cxI('refresh') + '<span>Не загрузилось — нажми, чтобы повторить. ' + escapeHtml(d.desc || '') + '</span>' : cxI('img') + '<span>' + escapeHtml(d.desc || lbl) + '</span>'); };
+  if (m.t === 'photo'){
+    var ff = d.asFile ? '<div class="cx_phf">' + cxI('file') + '<span>' + escapeHtml(d.name || 'IMG_' + String(m.id || '').slice(-4).toUpperCase() + '.jpg') + '</span></div>' : '';
+    if (d.img) return { raw:true, h:'<div class="cx_ph">' + ff + '<img src="' + escapeHtml(d.img) + '" alt="" data-view="1">' + cap + '</div>' };
+    return { raw:true, h:'<div class="cx_ph">' + ff + '<div class="cx_phd' + (d.err ? ' cx_pherr' : '') + '"' + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + stat('Фото') + '</div>' + cap + '</div>' };
+  }
+  if (m.t === 'circle'){
+    var cd = d.dur || Math.max(4, Math.min(60, Math.ceil(String(m.text || '').length / 12)));
+    return { raw:true, h:'<div class="cx_circw"><div class="cx_circ' + (d.err ? ' err' : '') + '"' + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '><div class="cx_circv"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '"' : '') + '>' + (d.img ? '' : '<span>' + escapeHtml(d.err ? 'Не загрузилось — нажми' : (d.desc || 'Кружок')) + '</span>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err ? 'refresh' : 'play')) + '</i><em class="cx_cdur cx_mono">' + cxDur(cd) + '</em></div></div>' + (m.text ? '<div class="cx_ctx">' + escapeHtml(m.text) + '</div>' : '') + '</div>' };
+  }
+  if (m.t === 'video'){
+    var vd = d.dur || (8 + (String(m.id || '').charCodeAt(2) || 7) % 40);
+    if (d.vid) return { raw:true, h:'<div class="cx_vid"><video src="' + escapeHtml(d.vid) + '" controls playsinline preload="metadata"></video>' + cap + '</div>' };
+    return { raw:true, h:'<div class="cx_vid"><div class="cx_vidf' + (d.err ? ' err' : '') + '"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '" data-viewbg="' + escapeHtml(m.id) + '"' : '') + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + (d.img ? '' : '<em>' + escapeHtml(d.err ? 'Не загрузилось — нажми, чтобы повторить' : (d.desc || 'Видео')) + '</em>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err ? 'refresh' : 'play')) + '</i><span class="cx_vlen cx_mono">' + cxDur(vd) + '</span></div>' + cap + '</div>' };
+  }
+  if (m.t === 'file'){
+    var ext = (/\.([a-z0-9]{1,5})$/i.exec(d.name || '') || [])[1] || 'DOC';
+    return { raw:true, h:'<div class="cx_file"><div class="cx_fic">' + escapeHtml(ext.toUpperCase().slice(0, 4)) + '</div><div class="cx_fm"><b>' + escapeHtml(d.name || 'Файл') + '</b>' + (d.desc ? '<span>' + escapeHtml(d.desc) + '</span>' : '') + '</div></div>' + cap };
+  }
+  return { h: escapeHtml(m.text || '') };
+}
+async function cxDrawMsgs(){
+  var box = CX.root && $('#cx_msgs', CX.root); if (!box) return;
+  var tid = CX.open, ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return;
+  var cs = CX.cs = await cxContacts(), list = await cxMsgs(tid);
+  var self = t.owner === 'char' ? 'char' : 'me';
+  var lastMine = -1; list.forEach(function(m, i){ if (m.from === self) lastMine = i; });
+  var answered = false; for (var j = lastMine + 1; j < list.length; j++){ if (list[j].from !== self && list[j].t !== 'sys') answered = true; }
+  var html = '', day = '', prevFrom = null;
+  list.forEach(function(m, i){
+    var dk = cxDayKey(m.ts || 0);
+    if (dk !== day){ day = dk; html += '<div class="cx_day cx_mono">' + escapeHtml(cxDayLabel(m.ts || 0)) + '</div>'; prevFrom = null; }
+    if (m.t === 'sys' || m.t === 'call'){
+      var miss = m.t === 'call' && m.d && m.d.dir === 'missed';
+      var txt = m.t === 'sys' ? m.text : (miss ? 'Пропущенный звонок · ' + cxNameOf(m.from, cs) : 'Звонок' + (m.d && m.d.dur ? ' · ' + cxDur(m.d.dur) : ''));
+      html += '<div class="cx_sys' + (miss ? ' miss' : '') + '">' + (m.t === 'call' ? cxI(miss ? 'cmiss' : 'phone') : '') + escapeHtml(txt) + '<span class="cx_mono" style="opacity:.6">' + cxHM(m.ts) + '</span></div>';
+      prevFrom = null; return;
+    }
+    var mine = m.from === self, body = cxMsgBody(m, t, cs);
+    var who = (!mine && (t.kind === 'group' || t.owner === 'char' && t.who.length > 1) && prevFrom !== m.from) ? '<div class="cx_mfrom" style="color:' + cxColor(m.from) + '">' + escapeHtml(cxNameOf(m.from, cs)) + '</div>' : '';
+    var tick = mine && self === 'me' ? (i <= lastMine && (answered || i < lastMine) ? cxI('chk2') : cxI('chk', 'wait')) : '';
+    var meta = '<div class="cx_bt cx_mono">' + (m.rp ? '<span class="cx_rp">из ролевой</span>' : '') + '<span>' + cxHM(m.ts) + '</span>' + tick + '</div>';
+    var inner = body.raw ? body.h + (m.t === 'sticker' ? '<div class="cx_stkt cx_mono" style="text-align:' + (mine ? 'right' : 'left') + '">' + (m.rp ? 'из ролевой · ' : '') + cxHM(m.ts) + '</div>' : meta) : '<div class="cx_b">' + body.h + meta + '</div>';
+    html += '<div class="cx_m' + (mine ? ' me' : '') + '" data-mid="' + escapeHtml(m.id) + '">' + who + '<div class="cx_mrow"><div>' + inner + '</div></div></div>';
+    prevFrom = m.from;
+  });
+  if (!list.length) html = '<div class="cx_empty"><b>' + (t.owner === 'char' ? 'Пусто' : 'Начни разговор') + '</b>' + (t.owner === 'char' ? 'Здесь появятся переписки из телефона бота.' : (tid === 'main' ? escapeHtml(CX.names.char) + ' видит твои приложения, помнит ролевую и отвечает в своём стиле.' : 'Напиши что-нибудь — ответ придёт через пару секунд.')) + '</div>';
+  if (CX.busy[tid]) html += '<div class="cx_typing"><i></i><i></i><i></i></div>';
+  var stick = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
+  box.innerHTML = html;
+  if (stick || !box.__init){ box.scrollTop = box.scrollHeight; box.__init = 1; }
+  box.querySelectorAll('.cx_rep').forEach(function(r){ r.addEventListener('click', function(){ var a = r.getAttribute('data-app'); if (a && SCREENS[a]) openScreen(a); }); });
+  box.querySelectorAll('[data-rave]').forEach(function(b){ b.addEventListener('click', function(){ cxRaveGo(b.getAttribute('data-rave'), +b.getAttribute('data-dur') || 0); }); });
+  box.querySelectorAll('.cx_voice').forEach(function(v){ v.addEventListener('click', function(){ v.classList.toggle('open'); }); });
+  box.querySelectorAll('.cx_m[data-mid]').forEach(function(n){ cxLongPress(n, function(){ CX.lpAt = Date.now(); cxMsgMenu(tid, n.getAttribute('data-mid')); }); });
+  if (!box.__lpg){ box.__lpg = 1; box.addEventListener('click', function(e){ if (Date.now() - (CX.lpAt || 0) < 700){ e.stopPropagation(); e.preventDefault(); } }, true); }
+  box.querySelectorAll('.cx_ph img').forEach(function(im){ im.addEventListener('load', function(){ if (stick) box.scrollTop = box.scrollHeight; }); im.addEventListener('click', function(){ cxView(im.getAttribute('src')); }); });
+  box.querySelectorAll('[data-viewbg]').forEach(function(v){ v.addEventListener('click', function(){ var mm = list.filter(function(x){ return x.id === v.getAttribute('data-viewbg'); })[0]; if (mm && mm.d && mm.d.img) cxView(mm.d.img); }); });
+  box.querySelectorAll('.cx_circ:not(.err)').forEach(function(c){ c.addEventListener('click', function(){ c.parentNode.classList.toggle('open'); }); });
+  box.querySelectorAll('[data-regen]').forEach(function(r){ r.addEventListener('click', function(e){ e.stopPropagation(); var mm = list.filter(function(x){ return x.id === r.getAttribute('data-regen'); })[0]; if (mm) cxMediaQueue([{ tid: tid, m: mm }]); }); });
+}
+function cxDrawTray(){
+  var tr = CX.root && $('#cx_tray', CX.root); if (!tr) return;
+  var clip = $('#cx_c_clip', CX.root); if (clip) clip.classList.toggle('on', !!CX.tray);
+  if (!CX.tray){ tr.innerHTML = ''; return; }
+  tr.innerHTML = '<div class="cx_tray"><div class="cx_seg"><div data-tr="media" class="' + (CX.tray === 'media' ? 'on' : '') + '">Медиа</div><div data-tr="stk" class="' + (CX.tray === 'stk' ? 'on' : '') + '">Стикеры</div><div data-tr="emo" class="' + (CX.tray === 'emo' ? 'on' : '') + '">Эмодзи</div><div data-tr="share" class="' + (CX.tray === 'share' ? 'on' : '') + '">Поделиться</div></div><div class="cx_traybody" id="cx_trb"></div></div>';
+  tr.querySelectorAll('[data-tr]').forEach(function(b){ b.addEventListener('click', function(){ CX.tray = b.getAttribute('data-tr'); cxDrawTray(); }); });
+  var body = $('#cx_trb', tr);
+  if (CX.tray === 'media') cxMediaTray(body);
+  else if (CX.tray === 'stk'){
+    body.innerHTML = '<div class="cx_stkgrid">' + CX_STK.map(function(s){ return '<div class="cx_stkcell" data-s="' + s.id + '">' + cxStkHtml(s.id) + '</div>'; }).join('') + '</div>';
+    body.querySelectorAll('[data-s]').forEach(function(c){ c.addEventListener('click', function(){ cxSendItem({ t:'sticker', d:{ id:c.getAttribute('data-s') } }); }); });
+  } else if (CX.tray === 'emo'){
+    body.innerHTML = '<div class="cx_emogrid">' + CX_EMO.map(function(e){ return '<div>' + e + '</div>'; }).join('') + '</div>';
+    body.querySelectorAll('.cx_emogrid div').forEach(function(d){ d.addEventListener('click', function(){ var ta = $('#cx_c_in', CX.root); if (!ta) return; var a = ta.selectionStart || ta.value.length, b = ta.selectionEnd || ta.value.length; ta.value = ta.value.slice(0, a) + d.textContent + ta.value.slice(b); ta.selectionStart = ta.selectionEnd = a + d.textContent.length; ta.dispatchEvent(new Event('input')); }); });
+  } else {
+    body.innerHTML = '<div class="cx_empty" style="padding:20px;"><svg class="rp_spin" style="width:18px;height:18px;"><use href="#rpi-spinner"/></svg></div>';
+    cxCatalog(false).then(function(cat){
+      if (CX.tray !== 'share' || !body.isConnected) return;
+      if (!cat.length){ body.innerHTML = '<div class="cx_empty" style="padding:18px;">Пока нечем поделиться: в Твиттере, Каналах, Сатток, Twitch и Rave пусто.</div>'; return; }
+      body.innerHTML = cat.map(function(c, i){ var am = cxAppMeta(c.app); return '<div class="cx_shrow" data-i="' + i + '"><span class="ic" style="background:' + escapeHtml(am.c1) + '"><svg><use href="#' + escapeHtml(am.icon) + '"/></svg></span><div class="t"><b>' + escapeHtml(c.label + (c.title ? ' · ' + c.title : '')) + '</b>' + escapeHtml(cxClip(c.text, 120)) + '</div></div>'; }).join('');
+      body.querySelectorAll('[data-i]').forEach(function(r){ r.addEventListener('click', function(){ var c = cat[+r.getAttribute('data-i')]; var ta = $('#cx_c_in', CX.root), cm = ta ? ta.value.trim() : ''; if (ta){ ta.value = ''; ta.style.height = 'auto'; } cxSendItem({ t:'repost', text:cm, d:{ app:c.app, label:c.label, title:c.title, text:c.text, img:c.img } }); }); });
+    });
+  }
+}
+async function cxSendItem(m){
+  var tid = CX.open; if (!tid) return;
+  m.from = 'me';
+  CX.tray = ''; cxDrawTray();
+  await cxPush(tid, [m]);
+  await cxDrawMsgs();
+  if (cxNeedsImg(m) && m.d.busy) cxDrawMedia(tid, m);
+  cxQueue(tid);
+}
+async function cxSendText(){
+  var ta = CX.root && $('#cx_c_in', CX.root); if (!ta) return;
+  var v = ta.value.trim(); if (!v) return;
+  ta.value = ''; ta.style.height = 'auto';
+  await cxSendItem({ t:'text', text: v.slice(0, 2000) });
+  try{ ta.focus(); }catch(e){}
+}
+function cxVoiceSheet(){
+  var bg = cxSheet('<div class="cx_sht">Голосовое</div><div class="cx_shs">Напиши, что ты говоришь — собеседник «услышит» это как голосовое.</div><div class="cx_fld"><textarea id="cx_vtx" rows="3" maxlength="600" placeholder="Например: я уже еду, не скучай…"></textarea></div><div class="cx_btns"><div class="cx_btn ghost" data-x="0">Отмена</div><div class="cx_btn" data-x="1">' + cxI('mic') + 'Отправить</div></div>');
+  var ta = $('#cx_vtx', bg); setTimeout(function(){ try{ ta.focus(); }catch(e){} }, 60);
+  bg.querySelector('[data-x="0"]').addEventListener('click', function(){ bg.remove(); });
+  bg.querySelector('[data-x="1"]').addEventListener('click', function(){ var v = ta.value.trim(); if (!v){ toast('Напиши, что сказать'); return; } bg.remove(); cxSendItem({ t:'voice', text:v }); });
+}
+function cxBotSheet(){
+  var nm = CX.names;
+  cxActions(nm.char, 'Главный персонаж. Знает карточку, лорбук, твою персону, отношения, ролевую и всё, что происходит в приложениях телефона.', [
+    { ic:'clock', t:'Бот пишет первым', s:'Как часто он сам начинает разговор', fn:cxTimerSheet },
+    { ic:'phone', t:'Позвонить', fn:function(){ cxCall('char', false, 'main'); } },
+    { ic:'trash', t:'Очистить переписку', red:true, fn:async function(){ var ch = await showChoiceModal({ title:'Очистить основной чат?', message:'Сообщения удалятся без возможности вернуть.', buttons:[{ label:'Очистить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxDelete('main'); cxDrawMsgs(); } }
+  ]);
+}
+async function cxThreadMenu(tid){
+  var ts = await cxThreads(), cs = CX.cs = await cxContacts(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return;
+  var nm = CX.names, title = cxTitle(t, cs), acts = [];
+  acts.push({ ic:'edit', t:'Переименовать', s:'Название меняется только на экране — кто есть кто, Чат помнит по людям', fn:async function(){ var v = await cxAsk('Новое название', t.title || title, 'Название чата'); if (v == null) return; await cxRename(tid, v); cxAfterEdit(); } });
+  if (t.owner === 'me' && tid !== 'main') acts.push({ ic:'pinr', t: t.pin ? 'Открепить' : 'Закрепить', fn:async function(){ await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === tid) x.pin = !x.pin; }); await cxThreadsSave(l); }); cxAfterEdit(); } });
+  if (tid !== 'main'){
+    acts.push({ ic:'heart', t:'Слить в основной чат', s: t.owner === 'char' ? 'Если это на самом деле твоя переписка с ботом' : 'Если на самом деле здесь писал бот: ' + nm.char, fn:async function(){ var ch = await showChoiceModal({ title:'Слить «' + title + '» с основным чатом?', message:'Сообщения перенесутся в твой чат с ботом и встанут по времени. Этот чат исчезнет.', buttons:[{ label:'Слить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMerge(tid, 'main'); toast('Слито с основным чатом'); cxAfterEdit(true); } });
+    if (t.owner === 'char') acts.push({ ic:'merge', t:'Перенести в мои диалоги', s:'Если это писали тебе, а попало в скрытые чаты бота', fn:async function(){ var ch = await showChoiceModal({ title:'Перенести «' + title + '» в твои диалоги?', message:'Реплики, которые числились за ' + nm.char + ', станут твоими.', buttons:[{ label:'Перенести', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMoveOwner(tid, 'me'); toast('Перенесено в твои диалоги'); cxAfterEdit(true); } });
+    else acts.push({ ic:'merge', t:'Перенести к боту', s:'Если это писали боту ' + nm.char + ', а попало к тебе', fn:async function(){ var ch = await showChoiceModal({ title:'Перенести «' + title + '» к боту?', message:'Твои реплики станут репликами ' + nm.char + ', чат уйдёт в «Режим наблюдения».', buttons:[{ label:'Перенести', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMoveOwner(tid, 'char'); toast('Перенесено к боту'); cxAfterEdit(true); } });
+    acts.push({ ic:'merge', t:'Слить с выбранным чатом', s:'Если это один и тот же человек под разными именами', fn:function(){ cxMergePick(t); } });
+  }
+  acts.push({ ic:'trash', t: tid === 'main' ? 'Очистить переписку' : 'Удалить', red:true, fn:async function(){ var ch = await showChoiceModal({ title:(tid === 'main' ? 'Очистить' : 'Удалить') + ' «' + title + '»?', message:'Сообщения удалятся без возможности вернуть.', buttons:[{ label: tid === 'main' ? 'Очистить' : 'Удалить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxDelete(tid); cxAfterEdit(true); } });
+  cxActions(title, t.owner === 'char' ? 'Скрытый чат бота: ' + nm.char : '', acts);
+}
+function cxAfterEdit(closeOpen){ if (closeOpen && CX.open){ var ov = CX.root && $('#cx_chat', CX.root); if (ov) ov.remove(); CX.open = null; } cxRender(); }
+async function cxMergePick(src){
+  var ts = await cxThreads(), cs = CX.cs;
+  var opts = ts.filter(function(t){ return t.id !== src.id; }).sort(function(a, b){ return (a.owner === src.owner ? 0 : 1) - (b.owner === src.owner ? 0 : 1) || (b.ts || 0) - (a.ts || 0); });
+  var bg = cxSheet('<div class="cx_sht">С каким чатом слить «' + escapeHtml(cxTitle(src, cs)) + '»?</div><div class="cx_shs">Сообщения объединятся по времени. Если это два диалога с одним человеком под разными именами, его имена тоже склеятся — и дальше Чат будет узнавать его под любым из них.</div>' +
+    opts.map(function(t){ return '<div class="cx_ctc" data-t="' + t.id + '">' + cxThreadAv(t, cs) + '<div class="cx_rowm"><b>' + escapeHtml(cxTitle(t, cs)) + '</b><span>' + (t.owner === 'char' ? 'Скрытый чат бота' : (t.id === 'main' ? 'Основной чат' : (t.kind === 'group' ? 'Группа' : 'Твой чат'))) + ((t.last && t.last.x) ? ' · ' + escapeHtml(t.last.x) : '') + '</span></div></div>'; }).join(''));
+  bg.querySelectorAll('[data-t]').forEach(function(r){ r.addEventListener('click', async function(){ bg.remove(); await cxMerge(src.id, r.getAttribute('data-t')); toast('Чаты слиты'); cxAfterEdit(true); }); });
+}
+function cxTokField(id, label, val, ph, rows){
+  var n = cxTok(val);
+  return '<div class="cx_fld"><label><span>' + label + '</span><em id="' + id + '_n" class="' + (n >= CX_LIM ? 'max' : (n > CX_LIM * 0.85 ? 'hi' : '')) + '">' + n + ' / ' + CX_LIM + ' ток.</em></label><textarea id="' + id + '" rows="' + (rows || 3) + '" placeholder="' + escapeHtml(ph) + '">' + escapeHtml(val || '') + '</textarea><div class="cx_bar"><i id="' + id + '_b" style="width:' + Math.min(100, n / CX_LIM * 100) + '%"></i></div></div>';
+}
+function cxWireTok(root, id){
+  var ta = $('#' + id, root), cn = $('#' + id + '_n', root), br = $('#' + id + '_b', root), last = ta.value;
+  var upd = function(){ var n = cxTok(ta.value), cls = n >= CX_LIM ? 'max' : (n > CX_LIM * 0.85 ? 'hi' : ''); cn.textContent = n + ' / ' + CX_LIM + ' ток.'; cn.className = cls; br.className = cls; br.style.width = Math.min(100, n / CX_LIM * 100) + '%'; };
+  ta.addEventListener('input', function(e){
+    if (cxTok(ta.value) > CX_LIM){
+      if (e && e.inputType === 'insertFromPaste'){ ta.value = cxTokCut(ta.value, CX_LIM); }
+      else { var pos = Math.max(0, (ta.selectionStart || 0) - (ta.value.length - last.length)); ta.value = last; try{ ta.setSelectionRange(pos, pos); }catch(er){} }
+      toast('Лимит поля — ' + CX_LIM + ' токенов');
+    }
+    last = ta.value; upd();
+  });
+  ta.__set = function(v){ ta.value = cxTokCut(v, CX_LIM); last = ta.value; upd(); };
+}
+function cxContactForm(c){
+  var isNew = !c, cur = c ? JSON.parse(JSON.stringify(c)) : { id:uid(), name:'', aliases:[], avatar:'', desc:'', pers:'', ex:'', mem:'', src:'manual', ts:Date.now() };
+  var nm = CX.names;
+  var bg = cxSheet('<div class="cx_sht">' + (isNew ? 'Новый контакт' : 'Анкета контакта') + '</div><div class="cx_shs">По этой анкете человек пишет в Чате. Каждое поле — до ' + CX_LIM + ' токенов. Контакты знают только публичное: каналы, Twitch, Твиттер, Rave и то, что им написали.</div>' +
+    '<div class="cx_avpick"><div id="cx_f_av">' + cxAv({ name:cur.name || '?', av:cur.avatar }, 'lg') + '</div><div style="flex:1;min-width:0;"><div class="cx_fld" style="margin-bottom:8px;"><label><span>Имя</span></label><input id="cx_f_name" maxlength="40" value="' + escapeHtml(cur.name) + '" placeholder="Как записан в телефоне"></div><div class="cx_btn ghost" id="cx_f_pick" style="padding:8px;">' + cxI('img') + 'Фото на аватарку</div></div></div>' +
+    '<div class="cx_fld"><label><span>Другие имена</span><em>через запятую</em></label><input id="cx_f_al" maxlength="160" value="' + escapeHtml((cur.aliases || []).join(', ')) + '" placeholder="Прозвища, фамилия, как его зовут в истории"></div>' +
+    cxTokField('cx_f_desc', 'Описание', cur.desc, 'Кто это: возраст, внешность, чем занят, кем приходится героям', 3) +
+    cxTokField('cx_f_pers', 'Характер', cur.pers, 'Какой человек: привычки, темперамент, ценности', 3) +
+    cxTokField('cx_f_ex', 'Примеры общения', cur.ex, '- как он(а) пишет в мессенджере\n- пара коротких сообщений', 3) +
+    cxTokField('cx_f_mem', 'Сводка воспоминаний', cur.mem, 'Что было между ним и героями: знакомство, ссоры, общие истории', 3) +
+    '<div class="cx_btn soft" id="cx_f_fill">' + cxI('spark') + 'Заполнить по ролевой</div>' +
+    '<div class="cx_btns">' + (isNew ? '' : '<div class="cx_btn ghost" id="cx_f_msg">' + cxI('chats') + 'Написать</div>') + '<div class="cx_btn" id="cx_f_ok">Сохранить</div></div>' +
+    (isNew ? '' : '<div class="cx_act red" id="cx_f_del" style="justify-content:center;margin-top:8px;">' + cxI('trash') + 'Удалить контакт</div>'));
+  ['cx_f_desc', 'cx_f_pers', 'cx_f_ex', 'cx_f_mem'].forEach(function(id){ cxWireTok(bg, id); });
+  var nameIn = $('#cx_f_name', bg);
+  var redrawAv = function(){ $('#cx_f_av', bg).innerHTML = cxAv({ name: nameIn.value || '?', av: cur.avatar }, 'lg'); };
+  nameIn.addEventListener('input', function(){ if (!cur.avatar) redrawAv(); });
+  var pick = async function(){ var u = await cxPickImage(); if (u){ cur.avatar = u; redrawAv(); } };
+  $('#cx_f_pick', bg).addEventListener('click', pick); $('#cx_f_av', bg).addEventListener('click', pick);
+  var collect = function(){
+    cur.name = nameIn.value.trim().slice(0, 40);
+    cur.aliases = $('#cx_f_al', bg).value.split(',').map(function(x){ return x.trim(); }).filter(function(x, i, a){ return x && x !== cur.name && a.indexOf(x) === i; }).slice(0, 12);
+    cur.desc = cxTokCut($('#cx_f_desc', bg).value.trim(), CX_LIM); cur.pers = cxTokCut($('#cx_f_pers', bg).value.trim(), CX_LIM); cur.ex = cxTokCut($('#cx_f_ex', bg).value.trim(), CX_LIM); cur.mem = cxTokCut($('#cx_f_mem', bg).value.trim(), CX_LIM);
+    if (cur.src === 'auto') cur.src = 'manual';
+    cur.ts = Date.now();
+  };
+  var save = async function(){
+    collect();
+    if (!cur.name){ toast('Впиши имя'); return false; }
+    if (rpSameContact({ name:nm.char }, cur.name)){ toast('Это главный персонаж — его анкета это карточка'); return false; }
+    await cxSerial(async function(){ var cs = await cxContacts(), i = -1; cs.forEach(function(x, k){ if (x.id === cur.id) i = k; }); if (i < 0) cs.push(cur); else cs[i] = cur; await cxContactsSave(cs); });
+    if (cur.avatar) cxShareAvatar(cur.name, cur.avatar);
+    return true;
+  };
+  $('#cx_f_ok', bg).addEventListener('click', async function(){ if (await save()){ bg.remove(); toast(isNew ? 'Контакт добавлен' : 'Анкета сохранена'); if (CX.open) cxDrawMsgs(); else cxRender(); } });
+  var ms = $('#cx_f_msg', bg); if (ms) ms.addEventListener('click', async function(){ if (!(await save())) return; bg.remove(); var tid = await cxEnsureDm(cur.id); if (CX.open){ var ov = $('#cx_chat', CX.root); if (ov) ov.remove(); } CX.tab = 'chats'; CX.open = null; await cxRender(); cxOpenChat(tid); });
+  var fb = $('#cx_f_fill', bg);
+  fb.addEventListener('click', async function(){
+    collect(); if (!cur.name){ toast('Сначала впиши имя'); return; }
+    fb.classList.add('busy'); fb.innerHTML = '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>Читаю ролевую…';
+    try{
+      var r = await cxFillContact(cur);
+      [['cx_f_desc', 'desc'], ['cx_f_pers', 'pers'], ['cx_f_ex', 'ex'], ['cx_f_mem', 'mem']].forEach(function(p){ var ta = $('#' + p[0], bg); if (r[p[1]] && ta) ta.__set(r[p[1]]); });
+      toast('Анкета заполнена — проверь и сохрани');
+    }catch(e){ toast('Не получилось: ' + (e && e.message ? e.message : e)); }
+    fb.classList.remove('busy'); fb.innerHTML = cxI('spark') + 'Заполнить по ролевой';
+  });
+  var del = $('#cx_f_del', bg);
+  if (del) del.addEventListener('click', async function(){
+    var ch = await showChoiceModal({ title:'Удалить «' + cur.name + '»?', message:'Контакт пропадёт из Чата и больше не подтянется из Контактов. Переписки останутся.', buttons:[{ label:'Удалить', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return;
+    await cxSerial(async function(){ var cs = (await cxContacts()).filter(function(x){ return x.id !== cur.id; }); await cxContactsSave(cs); var g = await rpGet(CX_KGONE, []); g.push(cur.name); await rpSet(CX_KGONE, g.slice(-200)); });
+    bg.remove(); toast('Контакт удалён'); if (CX.open) cxDrawMsgs(); else cxRender();
+  });
+}
+function cxGroupForm(t){
+  var isNew = !t, cs = CX.cs, nm = CX.names;
+  var cur = t ? { title:t.title || '', avatar:t.avatar || '', who:t.who.slice(), every:(t.auto && t.every) ? t.every : 0 } : { title:'', avatar:'', who:[], every:0 };
+  var memHtml = function(){ return [['char', nm.char, CX.names.charAv]].concat(cs.map(function(c){ return [c.id, c.name, c.avatar]; })).map(function(x){ return '<div class="cx_chip' + (cur.who.indexOf(x[0]) >= 0 ? ' on' : '') + '" data-m="' + x[0] + '">' + cxAv({ name:x[1], av:x[2] }) + escapeHtml(x[1]) + '</div>'; }).join(''); };
+  var bg = cxSheet('<div class="cx_sht">' + (isNew ? 'Новая группа' : 'Настройки группы') + '</div><div class="cx_shs">Участники отвечают по смыслу: иногда один, иногда несколько сразу.</div>' +
+    '<div class="cx_avpick"><div id="cx_g_av">' + cxAv({ name: cur.title || 'Группа', av: cur.avatar }, 'lg grp') + '</div><div style="flex:1;min-width:0;"><div class="cx_fld" style="margin-bottom:8px;"><label><span>Название</span></label><input id="cx_g_t" maxlength="40" value="' + escapeHtml(cur.title) + '" placeholder="Например: Наша банда"></div><div class="cx_btn ghost" id="cx_g_pick" style="padding:8px;">' + cxI('img') + 'Аватарка группы</div></div></div>' +
+    '<div class="cx_fld"><label><span>Участники</span><em id="cx_g_n">' + cur.who.length + '</em></label><div class="cx_chips" id="cx_g_mem">' + memHtml() + '</div></div>' +
+    '<div class="cx_fld"><label><span>Участники пишут сами</span></label><div class="cx_chips" id="cx_g_every">' + [[0, 'Выкл'], [30, '30 мин'], [60, '1 час'], [120, '2 часа'], [240, '4 часа'], [480, '8 часов']].map(function(o){ return '<div class="cx_chip' + (cur.every === o[0] ? ' on' : '') + '" data-e="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div><small class="rp_muted" style="display:block;margin-top:6px;">Каждое сообщение от них — запрос к нейросети. Работает, пока открыта Таверна.</small></div>' +
+    '<div class="cx_btns"><div class="cx_btn" id="cx_g_ok">' + (isNew ? 'Создать' : 'Сохранить') + '</div></div>' +
+    (isNew ? '' : '<div class="cx_act red" id="cx_g_del" style="justify-content:center;margin-top:8px;">' + cxI('trash') + 'Удалить группу</div>'));
+  var redraw = function(){ $('#cx_g_av', bg).innerHTML = cxAv({ name: $('#cx_g_t', bg).value || 'Группа', av: cur.avatar }, 'lg grp'); };
+  var pick = async function(){ var u = await cxPickImage(); if (u){ cur.avatar = u; redraw(); } };
+  $('#cx_g_pick', bg).addEventListener('click', pick); $('#cx_g_av', bg).addEventListener('click', pick);
+  var wireMem = function(){ $('#cx_g_mem', bg).querySelectorAll('[data-m]').forEach(function(ch){ ch.addEventListener('click', function(){ var id = ch.getAttribute('data-m'), i = cur.who.indexOf(id); if (i >= 0) cur.who.splice(i, 1); else cur.who.push(id); ch.classList.toggle('on', i < 0); $('#cx_g_n', bg).textContent = cur.who.length; }); }); };
+  wireMem();
+  $('#cx_g_every', bg).querySelectorAll('[data-e]').forEach(function(ch){ ch.addEventListener('click', function(){ cur.every = +ch.getAttribute('data-e'); $('#cx_g_every', bg).querySelectorAll('[data-e]').forEach(function(x){ x.classList.toggle('on', x === ch); }); }); });
+  $('#cx_g_ok', bg).addEventListener('click', async function(){
+    cur.title = $('#cx_g_t', bg).value.trim().slice(0, 40);
+    if (!cur.title){ toast('Назови группу'); return; }
+    if (cur.who.length < 2){ toast('Добавь хотя бы двоих'); return; }
+    var id = t ? t.id : uid();
+    await cxSerial(async function(){
+      var ts = await cxThreads(), g = ts.filter(function(x){ return x.id === id; })[0];
+      if (!g){ g = { id:id, kind:'group', owner:'me', who:[], title:'', ts:Date.now(), unread:0 }; ts.push(g); }
+      g.title = cur.title; g.avatar = cur.avatar; g.who = cur.who.slice(); g.auto = cur.every > 0; g.every = cur.every;
+      await cxThreadsSave(ts);
+    });
+    bg.remove();
+    if (isNew){ await cxPush(id, [{ from:'me', t:'sys', text:'Группа «' + cur.title + '» создана' }], { silent:true }); CX.tab = 'chats'; await cxRender(); cxOpenChat(id); }
+    else if (CX.open === id) cxOpenChat(id, true); else cxRender();
+  });
+  var del = $('#cx_g_del', bg);
+  if (del) del.addEventListener('click', async function(){ var ch = await showChoiceModal({ title:'Удалить группу «' + (t.title || '') + '»?', message:'Переписка удалится.', buttons:[{ label:'Удалить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; bg.remove(); await cxDelete(t.id); cxAfterEdit(true); });
+}
+async function cxCall(pid, video, tid){
+  var p = cxPerson(pid, CX.cs), t0 = 0, tm = null, live = false;
+  var md = el('div', 'cx_modal');
+  md.innerHTML = '<div class="cx_callc">' + cxAv(p) + '<div><h3>' + escapeHtml(p.name) + '</h3><p class="cx_mono" id="cx_cl_s">' + (video ? 'Видеовызов…' : 'Вызов…') + '</p></div><div class="cx_endc" id="cx_cl_x">' + cxI('phone') + '</div></div>';
+  CX.root.appendChild(md);
+  var st = $('#cx_cl_s', md), card = $('.cx_callc', md);
+  var go = setTimeout(function(){ live = true; t0 = Date.now(); card.classList.add('live'); tm = setInterval(function(){ st.textContent = (video ? 'Видео · ' : 'Защищённое соединение · ') + cxDur((Date.now() - t0) / 1000); }, 500); st.textContent = (video ? 'Видео · ' : 'Защищённое соединение · ') + '0:00'; }, 1600 + Math.random() * 2200);
+  $('#cx_cl_x', md).addEventListener('click', async function(){
+    clearTimeout(go); clearInterval(tm); md.remove();
+    var dur = live ? Math.round((Date.now() - t0) / 1000) : 0;
+    var cl = await cxCalls(); cl.unshift({ id:uid(), who:pid, dir:'out', ts:Date.now(), dur:dur, video:!!video }); await rpSet(CX_KCALL, cl.slice(0, 80));
+    if (tid){ await cxPush(tid, [{ from:'me', t:'sys', text:(video ? 'Видеозвонок' : 'Исходящий звонок') + (dur ? ' · ' + cxDur(dur) : ' · отменён') }], { silent:true }); if (CX.open === tid) cxDrawMsgs(); }
+    if (CX.tab === 'calls' && !CX.open) cxRender();
+  });
+}
+async function cxTabCalls(main){
+  var cl = await cxCalls(), cs = CX.cs;
+  var head = el('div', 'cx_head');
+  head.innerHTML = '<div><h1>Звонки</h1><p class="cx_mono">Шифрованная голосовая связь</p></div><div class="cx_rbtn" id="cx_cnew">' + cxI('plus') + '</div>';
+  main.appendChild(head);
+  var sg = el('div', 'cx_pad'); sg.style.padding = '10px 12px';
+  sg.innerHTML = '<div class="cx_seg"><div data-f="all" class="' + (CX.callTab !== 'missed' ? 'on' : '') + '">Все</div><div data-f="missed" class="' + (CX.callTab === 'missed' ? 'on' : '') + '">Пропущенные</div></div>';
+  main.appendChild(sg);
+  var list = el('div', 'cx_scroll cx_calls'); main.appendChild(list);
+  var shown = CX.callTab === 'missed' ? cl.filter(function(c){ return c.dir === 'missed'; }) : cl;
+  list.innerHTML = shown.map(function(c){
+    var p = cxPerson(c.who, cs), miss = c.dir === 'missed';
+    var when = cxDayKey(c.ts) === cxDayKey(Date.now()) ? 'Сегодня, ' + cxHM(c.ts) : (cxDayKey(c.ts) === cxDayKey(Date.now() - 864e5) ? 'Вчера, ' + cxHM(c.ts) : cxAgo(c.ts));
+    return '<div class="cx_crow">' + cxAv(p) + '<div class="cx_rowm"><b class="' + (miss ? 'miss' : '') + '">' + escapeHtml(p.name) + '</b><div class="cx_cdir cx_mono ' + (miss ? 'miss' : (c.dir === 'in' ? 'in' : 'out')) + '">' + cxI(miss ? 'cmiss' : (c.dir === 'in' ? 'cin' : 'cout')) + escapeHtml(when) + (c.dur ? ' · ' + cxDur(c.dur) : '') + (c.video ? ' · видео' : '') + '</div></div><div class="cx_ib" data-call="' + escapeHtml(c.who) + '">' + cxI('phone') + '</div></div>';
+  }).join('') || '<div class="cx_empty"><b>' + (CX.callTab === 'missed' ? 'Пропущенных нет' : 'Звонков пока нет') + '</b>Позвонить можно из любого чата или кнопкой «+».</div>';
+  sg.querySelectorAll('[data-f]').forEach(function(b){ b.addEventListener('click', function(){ CX.callTab = b.getAttribute('data-f'); cxRender(); }); });
+  list.querySelectorAll('[data-call]').forEach(function(b){ b.addEventListener('click', async function(){ var who = b.getAttribute('data-call'); var tid = who === 'char' ? 'main' : (cxContact(who, cs) ? await cxEnsureDm(who) : null); cxCall(who, false, tid); }); });
+  $('#cx_cnew', head).addEventListener('click', function(){
+    var bg = cxSheet('<div class="cx_sht">Кому позвонить?</div>' + [['char', CX.names.char, CX.names.charAv]].concat(cs.map(function(c){ return [c.id, c.name, c.avatar]; })).map(function(x){ return '<div class="cx_ctc" data-w="' + x[0] + '">' + cxAv({ name:x[1], av:x[2] }) + '<div class="cx_rowm"><b>' + escapeHtml(x[1]) + '</b></div>' + cxI('phone') + '</div>'; }).join(''));
+    bg.querySelectorAll('[data-w]').forEach(function(r){ r.addEventListener('click', async function(){ bg.remove(); var w = r.getAttribute('data-w'); cxCall(w, false, w === 'char' ? 'main' : await cxEnsureDm(w)); }); });
+  });
+}
+function cxBattery(){ var s = String((CX.names && CX.names.char) || '') + cxDayKey(Date.now()) + Math.floor(Date.now() / 3600000), h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 997; return 18 + h % 78; }
+async function cxCharPlace(){
+  try{ var tr = (await rpGet('rp_map_trackers', [])).filter(function(t){ return !t.hidden && rpSameContact({ name: CX.names.char }, t.name); })[0]; if (tr && tr.detail) return cxClip(tr.detail, 30); }catch(e){}
+  return 'скрыто';
+}
+function cxHubBusyUi(){ if (panelOpen && currentScreen === 'messenger' && CX.tab === 'hub' && !CX.open) cxRender(); }
+async function cxTabHub(main, ts, s){
+  var nm = CX.names, cs = CX.cs;
+  if (!CX.hubOk){
+    var lk = el('div', 'cx_lock');
+    lk.innerHTML = '<div class="cx_glass"><div class="cx_fp" id="cx_fp">' + cxI('fp') + '</div><div><h2 class="cx_lockt cx_glow">Хаб партнёра</h2><div class="cx_locks">Подтверди Face ID, чтобы открыть зеркало переписок бота</div></div><div class="cx_dev"><span>Связанное устройство:</span><b class="cx_mono">' + escapeHtml(nm.char) + '</b></div><div class="cx_btn rose" id="cx_fpb" style="width:100%;">' + cxI('smile') + 'Сканировать Face ID</div></div>';
+    main.appendChild(lk);
+    var unlock = function(){ var fp = $('#cx_fp', lk); if (fp.classList.contains('go')) return; fp.classList.add('go'); setTimeout(function(){ fp.classList.remove('go'); fp.classList.add('ok'); fp.innerHTML = cxI('chk'); setTimeout(function(){ CX.hubOk = true; cxRender(); }, 380); }, 950); };
+    $('#cx_fp', lk).addEventListener('click', unlock); $('#cx_fpb', lk).addEventListener('click', unlock);
+    return;
+  }
+  var mine = ts.filter(function(t){ return t.owner === 'char'; }).sort(function(a, b){ return (b.ts || 0) - (a.ts || 0); });
+  var top = el('div', 'cx_hubtop');
+  top.innerHTML = '<div class="cx_hubid"><div><div class="cx_av" style="' + (nm.charAv ? 'background-image:' + rpCssUrl(nm.charAv) : '') + '">' + (nm.charAv ? '' : escapeHtml(cxIni(nm.char))) + '<span class="cx_onl"></span></div><div style="min-width:0;"><h3>' + escapeHtml(nm.char) + ' ' + cxI('heart') + '</h3><p class="cx_mono"><span class="cx_ping"></span>' + (CX.peekBusy ? 'В сети · печатает…' : 'В сети') + '</p></div></div><div class="cx_ib" id="cx_hlock" title="Заблокировать">' + cxI('lock') + '</div></div>' +
+    '<div class="cx_tele cx_mono"><span style="color:#34d399">' + cxI('bat') + cxBattery() + '%</span><span style="color:#9ca3af">' + cxI('pin') + '<b id="cx_hplace" style="font-weight:400">…</b></span><span style="color:#f43f5e">' + cxI('shield') + 'E2EE</span></div>' +
+    '<div class="cx_btn softrose" id="cx_hscr" style="padding:8px;">' + cxI('desk') + 'Запросить трансляцию экрана</div>';
+  main.appendChild(top);
+  cxCharPlace().then(function(pl){ var b = $('#cx_hplace', top); if (b) b.textContent = pl; });
+  var seg = el('div', 'cx_hubseg');
+  seg.innerHTML = '<div class="cx_seg rose"><div data-h="chats" class="' + (CX.hubTab !== 'tl' ? 'on' : '') + '">Чаты (' + mine.length + ')</div><div data-h="tl" class="' + (CX.hubTab === 'tl' ? 'on' : '') + '">Лента активности</div></div>';
+  main.appendChild(seg);
+  var body = el('div', 'cx_scroll'); main.appendChild(body);
+  var act = '<div class="cx_hubact"><div class="cx_btn softrose' + (CX.peekBusy ? ' busy' : '') + '" id="cx_hpeek">' + (CX.peekBusy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>Подсматриваю…' : cxI('eye') + 'Подсмотреть') + '</div><div class="cx_btn ghost' + (CX.scanBusy ? ' busy' : '') + '" id="cx_hscan">' + cxI('radar') + 'Из ролевой</div></div>';
+  if (CX.hubTab === 'tl'){
+    var ev = [];
+    for (var i = 0; i < mine.length && i < 12; i++){
+      var l = await cxMsgs(mine[i].id), ttl = cxTitle(mine[i], cs);
+      l.slice(-8).forEach(function(m){ ev.push({ ts:m.ts || 0, m:m, t:ttl }); });
+    }
+    ev.sort(function(a, b){ return b.ts - a.ts; });
+    body.innerHTML = act + (ev.slice(0, 40).map(function(e){
+      var out = e.m.from === 'char';
+      return '<div class="cx_tl"><span class="cx_mono">' + cxHM(e.ts) + '</span><div>' + (out ? cxI('send') : cxI('inbox')) + '<span><b>' + escapeHtml(out ? nm.char + ' → ' + e.t : cxNameOf(e.m.from, cs) + ' → ' + nm.char) + '</b>: «' + escapeHtml(cxClip(cxPreview(e.m), 90)) + '»' + (e.m.rp ? ' <span class="cx_tag cy">из ролевой</span>' : '') + '</span></div></div>';
+    }).join('') || '<div class="cx_empty"><b>Тишина</b>Нажми «Подсмотреть» — Чат покажет, с кем ' + escapeHtml(nm.char) + ' переписывается, исходя из сюжета.</div>');
+  } else {
+    var rows = '';
+    for (var k = 0; k < mine.length; k++){
+      var t = mine[k], lst = (await cxMsgs(t.id)), lm = lst[lst.length - 1];
+      var tag = !lm ? ['Пусто', 'vi'] : (lm.from === 'char' ? ['Ответил', 'ok'] : ((t.ts || 0) > (CX.prevSeen || 0) ? ['Новое', 'rose'] : ['Чтение', 'vi']));
+      rows += '<div class="cx_peek" data-t="' + t.id + '"><div class="cx_peekh"><div>' + cxThreadAv(t, cs, 'sm') + '<div style="min-width:0;"><b>' + escapeHtml(cxTitle(t, cs)) + '</b><small class="cx_mono">' + escapeHtml(cxAgo(t.ts)) + '</small></div></div><span class="cx_tag ' + tag[1] + ' cx_mono">' + tag[0] + '</span></div>' + (lm ? '<div class="cx_peekq">' + escapeHtml((lm.from === 'char' ? nm.char + ': ' : '') + cxPreview(lm)) + '</div>' : '') + '</div>';
+    }
+    body.innerHTML = act + (rows || '<div class="cx_empty"><b>Чатов пока нет</b>«Подсмотреть» покажет, с кем бот переписывается по сюжету. «Из ролевой» достанет то, что он реально писал в истории.<br><br>Зажми чат, чтобы переименовать, удалить или слить его с другим.</div>');
+    body.querySelectorAll('.cx_peek').forEach(function(r){ var tid = r.getAttribute('data-t'); r.addEventListener('click', function(){ if (cxLp(r)) return; cxOpenChat(tid); }); cxLongPress(r, function(){ cxThreadMenu(tid); }); });
+  }
+  seg.querySelectorAll('[data-h]').forEach(function(b){ b.addEventListener('click', function(){ CX.hubTab = b.getAttribute('data-h'); cxRender(); }); });
+  $('#cx_hlock', top).addEventListener('click', function(){ CX.hubOk = false; cxRender(); });
+  $('#cx_hscr', top).addEventListener('click', function(){ cxScreenShare(mine, cs); });
+  var pk = $('#cx_hpeek', body); if (pk) pk.addEventListener('click', function(){ cxPeek(); });
+  var sc = $('#cx_hscan', body); if (sc) sc.addEventListener('click', cxScanSheet);
+}
+async function cxScreenShare(mine, cs){
+  var nm = CX.names, lines = [];
+  for (var i = 0; i < mine.length && i < 6; i++){ var l = await cxMsgs(mine[i].id); l.slice(-2).forEach(function(m){ lines.push({ ts:m.ts, h:'<b>' + escapeHtml(m.from === 'char' ? nm.char + ' → ' + cxTitle(mine[i], cs) : cxNameOf(m.from, cs)) + '</b>: ' + escapeHtml(cxClip(cxPreview(m), 80)) }); }); }
+  lines.sort(function(a, b){ return a.ts - b.ts; });
+  var md = el('div', 'cx_modal');
+  md.innerHTML = '<div class="cx_scr"><div class="cx_scrh cx_mono"><span><i></i>LIVE · ' + escapeHtml(nm.char) + '</span><div class="cx_ib" id="cx_scx" style="width:26px;height:26px;">' + cxI('cmiss') + '</div></div><div class="cx_scrv" id="cx_scv">' + (lines.length ? '' : '<div style="margin:auto;text-align:center;color:#9ca3af;">' + cxI('desk') + '<br>Экран транслируется<br><span class="cx_mono" style="font-size:9px;">60 FPS · E2EE</span></div>') + '</div><div class="cx_btn rose" id="cx_scx2">Закрыть трансляцию</div></div>';
+  CX.root.appendChild(md);
+  var v = $('#cx_scv', md), k = 0;
+  var tm = setInterval(function(){ if (!md.isConnected || k >= lines.length){ clearInterval(tm); return; } var d = el('div', 'ln', lines[k].h); v.appendChild(d); while (v.children.length > 6) v.removeChild(v.firstChild); k++; }, 700);
+  var close = function(){ clearInterval(tm); md.remove(); };
+  $('#cx_scx', md).addEventListener('click', close); $('#cx_scx2', md).addEventListener('click', close);
+}
+async function cxTabMe(main, s){
+  var nm = CX.names, cs = CX.cs, mp = await rpGet('rp_my_profile', null) || {};
+  var head = el('div', 'cx_head'); head.innerHTML = '<div><h1>Профиль и настройки</h1><p class="cx_mono">Управление приватностью и связкой</p></div>';
+  main.appendChild(head);
+  var body = el('div', 'cx_scroll cx_pad'); main.appendChild(body);
+  var every = CX_EVERY.filter(function(o){ return o[0] === s.every; })[0] || CX_EVERY[0];
+  body.innerHTML =
+    '<div class="cx_card cx_me">' + cxAv({ name:nm.user, av:nm.userAv }) + '<div style="min-width:0;"><b>' + escapeHtml(nm.user) + '</b><small class="cx_mono">@' + escapeHtml(String(mp.user || nm.user).replace(/^@/, '').toLowerCase().replace(/\s+/g, '_')) + '</small><span class="cx_tag ok cx_mono">Устройство верифицировано</span></div></div>' +
+    '<div class="cx_card rose"><div class="cx_cardh"><b style="color:var(--cx-rose)">' + cxI('heart') + 'Связка: ' + escapeHtml(nm.char) + '</b><span class="cx_tag rose cx_mono">Активно</span></div>' +
+      '<div class="cx_tgl" id="cx_p_every"><div>Бот пишет первым<small>' + (s.every ? 'Раз в ' + every[1] + ', если ты молчишь' : 'Выключено') + '</small></div><div class="cx_sw rose' + (s.every ? ' on' : '') + '"></div></div>' +
+      '<div class="cx_tgl" id="cx_p_rp"><div>Ловить переписки из ролевой<small>Если в истории кто-то пишет по телефону, сообщение само попадёт в нужный чат</small></div><div class="cx_sw rose' + (s.rpAuto ? ' on' : '') + '"></div></div>' +
+      '<div class="cx_tgl" id="cx_p_hub"><div>Уведомления о скрытых чатах<small>Точка на вкладке «Партнёр», когда в чатах бота новое</small></div><div class="cx_sw rose' + (s.hubNote !== false ? ' on' : '') + '"></div></div></div>' +
+    '<div class="cx_sec cx_mono">КОНТАКТЫ · ' + cs.length + '</div>' +
+    '<div class="cx_note">У каждого контакта анкета: фото, описание, характер, примеры общения и сводка воспоминаний — до ' + CX_LIM + ' токенов на поле. НПС из «Сети НПС», «Контактов» и Satinder подтягиваются сами. Найти всех НПС в лорбуках можно в «Сети НПС» — анкеты заполнятся и здесь.</div>' +
+    '<div class="cx_btns" style="margin:0 0 10px;"><div class="cx_btn soft" id="cx_p_new">' + cxI('plus') + 'Новый контакт</div><div class="cx_btn ghost" id="cx_p_sync">' + cxI('refresh') + 'Подтянуть</div></div>' +
+    cs.slice().sort(function(a, b){ return a.name.localeCompare(b.name, 'ru'); }).map(function(c){
+      var f = ['desc', 'pers', 'ex', 'mem'].filter(function(k){ return c[k]; }).length;
+      return '<div class="cx_ctc" data-c="' + c.id + '">' + cxAv({ name:c.name, av:c.avatar }) + '<div class="cx_rowm"><b>' + escapeHtml(c.name) + '</b><span>' + escapeHtml(c.desc || 'анкета не заполнена') + '</span></div><div class="cx_fill" title="Анкета заполнена на ' + f + '/4"><i style="width:' + (f * 25) + '%"></i></div></div>';
+    }).join('') +
+    '<div class="cx_sec cx_mono">БЕЗОПАСНОСТЬ И ТЕМА</div>' +
+    '<div class="cx_card" style="padding:4px 14px;"><div class="cx_tgl" id="cx_p_glow"><div>Неоновые эффекты<small>Пульсация, свечение, анимации</small></div><div class="cx_sw' + (s.glow !== false ? ' on' : '') + '"></div></div></div>';
+  $('#cx_p_every', body).addEventListener('click', cxTimerSheet);
+  $('#cx_p_rp', body).addEventListener('click', async function(){ await cxSetSave({ rpAuto: !s.rpAuto }); cxRender(); });
+  $('#cx_p_hub', body).addEventListener('click', async function(){ await cxSetSave({ hubNote: s.hubNote === false }); cxRender(); });
+  $('#cx_p_glow', body).addEventListener('click', async function(){ await cxSetSave({ glow: s.glow === false }); cxRender(); });
+  $('#cx_p_new', body).addEventListener('click', function(){ cxContactForm(null); });
+  $('#cx_p_sync', body).addEventListener('click', async function(){ var n = await cxSyncContacts(true); toast(n ? 'Добавлено и обновлено: ' + n : 'Все уже на месте'); cxRender(); });
+  body.querySelectorAll('[data-c]').forEach(function(r){ r.addEventListener('click', function(){ var c = cxContact(r.getAttribute('data-c'), cs); if (c) cxContactForm(c); }); });
 }
 var MN_KEY = 'rp_mynotes_v1';
 var mnFilter = 'all';
@@ -15530,20 +17399,6 @@ async function galOpenViewer(container, list, i){
   }
   draw();
 }
-async function gatherOocMessenger(threadId, contact){
-  var names = await getNames();
-  var msgs = (await rpGet(msgKey(threadId), [])).filter(function(m){ return !m.hidden; });
-  if (!msgs.length) return [];
-  var otherName = contact ? contact.name : names.charName;
-  return ['Переписка с '+otherName+':\n'+msgs.map(function(m){ return (m.role==='user'?names.userName:otherName)+': '+m.text; }).join('\n')];
-}
-async function gatherOocNpcChat(threadId, contact){
-  var names = await getNames();
-  var msgs = (await rpGet(msgKey(threadId), [])).filter(function(m){ return !m.hidden; });
-  if (!msgs.length) return [];
-  var otherName = contact ? contact.name : 'кто-то ещё';
-  return ['Личная переписка персонажа '+names.charName+' с '+otherName+' (не с пользователем, это его собственный чат):\n'+msgs.map(function(m){ return (m.role==='char'?names.charName:otherName)+': '+m.text; }).join('\n')];
-}
 async function gatherOocLove(raw){
   var parts = [];
   var notes = (await rpGet('rp_notes', [])).filter(function(n){ return !n.hidden; });
@@ -15704,21 +17559,6 @@ async function unhideTinderAll(){
 }
 async function hideEverythingGlobalInner(){
   var changed = false;
-  await mutateMessages('main', function(l){
-    for (var i=0;i<l.length-hk();i++){ if (!l[i].hidden){ l[i].hidden = true; changed = true; } }
-  });
-  var contacts = await rpGet('rp_contacts', []);
-  for (var i=0;i<contacts.length;i++){
-    await mutateMessages(contacts[i].id, function(l){
-      for (var j=0;j<l.length-hk();j++){ if (!l[j].hidden){ l[j].hidden = true; changed = true; } }
-    });
-  }
-  var npcContacts = await rpGet('rp_npc_contacts', []);
-  for (var i=0;i<npcContacts.length;i++){
-    await mutateMessages(npcContacts[i].id, function(l){
-      for (var j=0;j<l.length-hk();j++){ if (!l[j].hidden){ l[j].hidden = true; changed = true; } }
-    });
-  }
   var notes = await rpGet('rp_notes', []);
   var nChanged = false;
   for (var i=0;i<notes.length-hk();i++){ if (!notes[i].hidden){ notes[i].hidden = true; nChanged = true; } }
@@ -15746,13 +17586,7 @@ async function hideEverythingGlobalInner(){
   if (await hidePetFeed()) changed = true;
   if (await hideTwitchOoc()) changed = true;
   if (await hideTinderAll()) changed = true;
-  return changed;
-}
-async function unhideThread(threadId){
-  var changed = false;
-  await mutateMessages(threadId, function(l){
-    l.forEach(function(m){ if (m.hidden){ m.hidden = false; changed = true; } });
-  });
+  if (await cxHideAll(true)) changed = true;
   return changed;
 }
 async function unhideLove(){
@@ -15790,11 +17624,6 @@ async function unhideNpcsList(){
 }
 async function unhideEverythingGlobal(){
   var changed = false;
-  if (await unhideThread('main')) changed = true;
-  var contacts = await rpGet('rp_contacts', []);
-  for (var i=0;i<contacts.length;i++){ if (await unhideThread(contacts[i].id)) changed = true; }
-  var npcContacts = await rpGet('rp_npc_contacts', []);
-  for (var i=0;i<npcContacts.length;i++){ if (await unhideThread(npcContacts[i].id)) changed = true; }
   if (await unhideLove()) changed = true;
   if (await unhideMemories()) changed = true;
   if (await unhideDiaryLists()) changed = true;
@@ -15812,6 +17641,7 @@ async function unhideEverythingGlobal(){
   if (await unhidePetFeed()) changed = true;
   if (await unhideTwitchOoc()) changed = true;
   if (await unhideTinderAll()) changed = true;
+  if (await cxHideAll(false)) changed = true;
   return changed;
 }
 async function generateOocSummary(){
@@ -16036,6 +17866,7 @@ function hlWireHome(){
     await rpSet('rp_home_order', []); await buildGrid(); toast('Порядок сброшен');
   });
 }
+function rpZoom(){ var f = document.getElementById('rp_frame'); var z = f ? parseFloat(getComputedStyle(f).zoom) : 1; return z > 0 ? z : 1; }
 function hlDragStart(st, e, home, grid){
   st.drag = true;
   var r = st.item.getBoundingClientRect();
@@ -16043,16 +17874,18 @@ function hlDragStart(st, e, home, grid){
   st.offX = st.x - r.left; st.offY = st.y - r.top;
   var g = st.item.cloneNode(true);
   g.classList.add('rp_drag_ghost'); g.removeAttribute('id');
-  g.style.width = r.width+'px'; g.style.height = r.height+'px';
-  g.style.left = (r.left - hr.left)+'px'; g.style.top = (r.top - hr.top)+'px';
+  var zz = rpZoom();
+  g.style.width = (r.width / zz)+'px'; g.style.height = (r.height / zz)+'px';
+  g.style.left = ((r.left - hr.left) / zz)+'px'; g.style.top = ((r.top - hr.top) / zz)+'px';
   g.style.gridColumn = 'auto'; g.style.gridRow = 'auto';
   home.appendChild(g); st.ghost = g;
   st.item.classList.add('rp_dragging');
 }
 function hlDragMove(st, e, home, grid){
   var hr = home.getBoundingClientRect();
-  st.ghost.style.left = (e.clientX - st.offX - hr.left)+'px';
-  st.ghost.style.top = (e.clientY - st.offY - hr.top)+'px';
+  var zz = rpZoom();
+  st.ghost.style.left = ((e.clientX - st.offX - hr.left) / zz)+'px';
+  st.ghost.style.top = ((e.clientY - st.offY - hr.top) / zz)+'px';
   var gr = grid.getBoundingClientRect();
   if (e.clientY < gr.top + 28) grid.scrollTop -= 7;
   else if (e.clientY > gr.bottom - 28) grid.scrollTop += 7;
@@ -16073,14 +17906,15 @@ function hlDragMove(st, e, home, grid){
 }
 function hlResizeMove(st, dx, dy){
   var grid = $('#rp_grid');
+  var zz = rpZoom(); dx = dx / zz; dy = dy / zz;
   var l = { cols: +getComputedStyle($('#rp_root')).getPropertyValue('--hcols') || 5 };
   var gs = getComputedStyle(grid);
   var inner = grid.clientWidth - parseFloat(gs.paddingLeft) - parseFloat(gs.paddingRight);
   var gapX = parseFloat(gs.columnGap) || 4, gapY = parseFloat(gs.rowGap) || 8;
   var cellW = (inner - (l.cols - 1) * gapX) / l.cols;
   var rowH = parseFloat(gs.gridAutoRows) || 76;
-  var nc = Math.round((st.w0 + dx + gapX) / (cellW + gapX));
-  var nr = Math.round((st.h0 + dy + gapY) / (rowH + gapY));
+  var nc = Math.round((st.w0 / zz + dx + gapX) / (cellW + gapX));
+  var nr = Math.round((st.h0 / zz + dy + gapY) / (rowH + gapY));
   nc = Math.max(1, Math.min(l.cols, nc)); nr = Math.max(1, Math.min(4, nr));
   st.item.style.gridColumn = 'span '+nc; st.item.style.gridRow = 'span '+nr;
   st.item.setAttribute('data-cols', nc); st.item.setAttribute('data-rows', nr);
@@ -17534,7 +19368,7 @@ function pbAv(c, cls){
   var st = c.img ? 'background-image:'+rpCssUrl(c.img)+';' : 'background:'+pbGrad(c.name)+';';
   return '<div class="pb_av '+(cls||'')+'" style="'+st+'">'+(c.img ? '' : escapeHtml(String(c.name||'?').charAt(0).toUpperCase()))+'</div>';
 }
-var PB_SRC = { me:['Свой','me'], char:['Персонаж','char'], npc:['НПС',''], nc:['Чат НПС',''], ct:['Мессенджер',''], tn:['Tinder','tn'] };
+var PB_SRC = { me:['Свой','me'], char:['Персонаж','char'], npc:['НПС',''], nc:['Контакт',''], ct:['Контакт',''], tn:['Tinder','tn'] };
 async function pbCollect(){
   var out = [], seen = {}, names = await getNames(), over = await rpGet('rp_pb_over', {});
   var push = function(c){
@@ -17743,49 +19577,9 @@ async function gatherOocProfile(){
   (pr.extra||[]).forEach(function(f){ bits.push(f.k+': '+f.v); });
   return bits.length ? ['Профиль '+(pr.name || names.userName)+' на телефоне: '+bits.join('; ')+'.'] : [];
 }
-async function msgScanStory(depth, onDone){
-  var names = await getNames();
-  var count = 0; try{ count = await PM.chat.count(); }catch(e){}
-  if (!count){ toast('В чате пока нет сообщений'); return; }
-  var end = count - 1, start = Math.max(0, end - depth + 1), msgs = [];
-  try{ msgs = await PM.chat.slice([start, end]); }catch(e){}
-  var text = (Array.isArray(msgs) ? msgs : []).map(function(m){
-    var c = stripBrailleNoise(String(m.content||'')).replace(/<[^>]+>/g,' ').replace(/[ \t]+/g,' ').trim();
-    return (m.role==='user' ? '['+names.userName+' — реплика игрока]' : '[рассказчик/'+names.charName+']')+' '+c;
-  }).filter(function(l){ return l.length > 12; }).join('\n\n').slice(-14000);
-  if (!text){ toast('Нечего разбирать'); return; }
-  toast('Ищу сообщения в сюжете…');
-  var raw = '';
-  try{
-    raw = await callModel('Ниже фрагмент ролевой истории. Найди ВСЕ места, где персонажи переписываются по телефону: смс, мессенджер, чат, голосовые, личные сообщения — в кавычках, курсивом, после слов «написал(а)», «пришло сообщение», «ответил(а) в чате» и т.п. Учитывай даже те, что не оформлены тегами.\n'+
-      'Выведи по одной строке на сообщение, СТРОГО в формате:\nЧАТ | ОТПРАВИТЕЛЬ | текст сообщения\n'+
-      'ЧАТ — имя собеседника, с которым идёт переписка (не '+names.userName+' и не '+names.charName+', если переписка между ними двумя — напиши слово MAIN). ОТПРАВИТЕЛЬ — точное имя того, кто написал. Текст — дословно как в сюжете, без кавычек. Порядок — как в истории. Ничего не выдумывай; если сообщений нет — выведи одно слово NONE.\n\nИСТОРИЯ:\n'+text);
-  }catch(e){ console.error(e); toast('Не получилось: ответ модели не пришёл'); return; }
-  var rows = [];
-  String(raw||'').split('\n').forEach(function(l){ var a = l.split('|').map(function(x){ return x.trim(); }); if (a.length >= 3 && a[2]) rows.push({ chat:a[0], from:a[1], text:a.slice(2).join('|').trim().slice(0,600) }); });
-  if (!rows.length){ toast('Сообщений без плашек не нашлось'); return; }
-  var added = 0, threads = {}, uLc = String(names.userName||'').toLowerCase(), cLc = String(names.charName||'').toLowerCase();
-  for (var i = 0; i < rows.length; i++){
-    var r = rows[i], clc = r.chat.toLowerCase(), tid;
-    if (/^(main|мейн|основной|главный)$/i.test(r.chat) || clc === uLc || clc === cLc || !r.chat) tid = 'main';
-    else tid = await findOrCreateContactByName(r.chat);
-    if (!tid) continue;
-    var flc = r.from.toLowerCase(), isChar = flc === cLc || flc === 'я';
-    var norm = function(t){ return String(t||'').toLowerCase().replace(/\s+/g,' ').replace(/^[^:]{1,24}:\s*/,'').slice(0,80); };
-    var did = await mutateMessages(tid, function(list){
-      var ex = {}; list.forEach(function(m){ ex[norm(m.text)] = 1; });
-      if (ex[norm(r.text)]) return false;
-      list.push({ id: uid(), role: isChar ? 'char' : 'user', ts: Date.now() + i, hidden:false, text: r.text });
-      return true;
-    });
-    if (did){ added++; threads[tid] = 1; }
-  }
-  if (added){ await rpSet('rp_msg_last_activity', Date.now()); toast('Нашла и добавила сообщений: '+added); } else toast('Всё найденное уже есть в чатах');
-  if (onDone) onDone(added);
-}
 function msgScanSheet(container, afterFn){
   var dflt = cfg('scanDepth', 20);
-  var bg = thSheet('<div style="font-weight:900;font-size:15px;margin-bottom:6px;">Умный разбор сюжета</div><div class="th_hint">Модель прочитает последние сообщения истории и подтянет в телефон: переписку без плашек, упущенные плашки мессенджера, новых НПС, номера телефонов и дату. Дубликаты не создаются. Глубину по умолчанию и автозапуск можно настроить в настройках плагина.</div>'+
+  var bg = thSheet('<div style="font-weight:900;font-size:15px;margin-bottom:6px;">Умный разбор сюжета</div><div class="th_hint">Модель прочитает последние сообщения истории и подтянет в телефон новых НПС, номера телефонов и дату. Дубликаты не создаются. Глубину по умолчанию и автозапуск можно настроить в настройках плагина.</div>'+
     '<div class="th_btn" data-d="'+dflt+'" style="margin-top:10px;text-align:center;">Разобрать последние '+dflt+'</div>'+
     '<div class="th_row2" style="margin-top:8px;"><div class="th_btn ghost" data-d="10">10</div><div class="th_btn ghost" data-d="30">30</div><div class="th_btn ghost" data-d="60">60</div><div class="th_btn ghost" data-d="100">100</div></div>');
   bg.querySelectorAll('[data-d]').forEach(function(b){ b.addEventListener('click', async function(){ bg.remove(); await smartScan({ depth:+b.getAttribute('data-d') }); if (afterFn) afterFn(); }); });
@@ -17801,16 +19595,11 @@ function scanSameName(a, b){
   if (ta.length === 1 || tb.length === 1) return stem(ta[0]) === stem(tb[0]) && ta[0].length >= 3;
   return stem(ta[0]) === stem(tb[0]) && stem(ta[ta.length-1]) === stem(tb[tb.length-1]);
 }
-async function scanThreadResolve(name, names){
-  var uLc = String(names.userName||'').toLowerCase(), cLc = String(names.charName||'').toLowerCase(), n = String(name||'').trim(), lc = n.toLowerCase();
-  if (!n || /^(main|мейн|основной|главный)$/i.test(n) || lc === uLc || lc === cLc || scanSameName(n, names.charName)) return 'main';
-  return await findOrCreateContactByName(n);
-}
 async function smartScan(opts){
   opts = opts || {};
   if (SCAN_BUSY){ if (!opts.silent) toast('Разбор уже идёт…'); return null; }
   SCAN_BUSY = true;
-  var res = { msgs:0, npcs:0, phones:0, date:false };
+  var res = { npcs:0, phones:0, date:false };
   try{
     var depth = Math.max(3, Math.min(100, opts.depth || cfg('scanDepth', 20)));
     var count = 0; try{ count = await PM.chat.count(); }catch(e){}
@@ -17820,39 +19609,6 @@ async function smartScan(opts){
     msgs = Array.isArray(msgs) ? msgs : [];
     if (!opts.silent) toast('Разбираю последние '+msgs.length+' сообщений…');
     var names = await getNames();
-    var existing = [], tids = ['main'];
-    (await rpGet('rp_npc_contacts', [])).concat(await rpGet('rp_contacts', [])).forEach(function(c){ if (c && c.id && tids.indexOf(c.id) < 0) tids.push(c.id); });
-    for (var ti = 0; ti < tids.length; ti++){ (await rpGet(msgKey(tids[ti]), [])).forEach(function(m){ rpMsgNorms(m).forEach(function(t){ existing.push(t); }); }); }
-    var tombS = await rpTombLoad();
-    var isDup = function(text){ var n = scanNorm(rpMediaStrip(text)); if (!n) return true; if (n.length >= 4 && tombS.some(function(x){ return scanSame(x, n); })) return true; for (var i = 0; i < existing.length; i++){ if (scanSame(existing[i], n)) return true; } return false; };
-    var addMsg = async function(tid, role, text){
-      text = rpRawFix(String(text||'')).trim(); if (!tid || !text || isDup(text)) return false;
-      existing.push(scanNorm(rpMediaStrip(text)));
-      var base = Date.now();
-      await mutateMessages(tid, function(list){ list.push({ id: uid(), role: role, ts: base + res.msgs, hidden:false, text: text.slice(0, 700), scan:true }); });
-      res.msgs++; return true;
-    };
-    var userLc = String(names.userName||'').trim().toLowerCase();
-    for (var mi = 0; mi < msgs.length; mi++){
-      var m = msgs[mi]; if (!m || m.role !== 'assistant' || !m.content) continue;
-      var blocks = []; try{ blocks = parseChatNBlocks(rpTagText(String(m.content))); }catch(e){}
-      for (var bi = 0; bi < blocks.length; bi++){
-        var block = blocks[bi], others = [];
-        block.lines.forEach(function(l){ if (l.sender !== 'Я' && others.indexOf(l.sender) < 0) others.push(l.sender); });
-        var isGroup = others.length > 1, tid;
-        if (!others.length){ var cn = (block.chatName||'').trim(); tid = (cn && cn.toLowerCase() !== userLc) ? await findOrCreateContactByName(cn) : 'main'; }
-        else if (!isGroup && others[0].trim().toLowerCase() === userLc) tid = 'main';
-        else if (!isGroup) tid = await findOrCreateContactByName(others[0]);
-        else tid = await findOrCreateContactByName(block.chatName || others.join(', '));
-        if (!tid) continue;
-        for (var li = 0; li < block.lines.length; li++){
-          var l = block.lines[li], isChar = l.sender === 'Я';
-          if (parseImagePayload(l.payload)) continue;
-          var txt = formatChatPayload(l.payload); if (!isChar && isGroup) txt = l.sender+': '+txt;
-          await addMsg(tid, isChar ? 'char' : 'user', txt);
-        }
-      }
-    }
     var hdr = null; try{ hdr = await scanHdrClock(depth); }catch(e){}
     var clk = await rpGet('rp_rpclock', null);
     if (hdr && (hdr.date || hdr.day) && (!hdr.date || parseFreeTextDateToISO(hdr.date)) && (!clk || clk.date !== hdr.date)){ await rpSet('rp_rpclock', { date:hdr.date||'', day:hdr.day||'', source:'hdr', updatedAt:Date.now() }); res.date = true; }
@@ -17861,14 +19617,10 @@ async function smartScan(opts){
       return (m.role==='user' ? '['+names.userName+' — реплика игрока]' : '[рассказчик/'+names.charName+']')+' '+c;
     }).filter(function(l){ return l.length > 12; }).join('\n\n').slice(-16000);
     if (text){
-      var chatsKnown = (await rpGet('rp_npc_contacts', [])).map(function(c){ return c.name; }).filter(Boolean);
       var npcsKnown = (await rpGet('rp_npcs2', [])).map(function(n){ return n.name; }).concat((await rpGet('rp_npc_contacts', [])).map(function(n){ return n.name; })).concat((await rpGet('rp_contacts', [])).map(function(n){ return n.name; })).concat((await rpGet('rp_pb_contacts', [])).map(function(n){ return n.name; }));
       var raw = '';
       try{
-        raw = await callModel('Ты — внимательный разборщик ролевой истории. Ниже фрагмент между '+names.userName+' (игрок) и '+names.charName+' (персонаж). Найди ВАЖНОЕ для телефона героя и выведи по одной строке на находку, СТРОГО в форматах:\n'+
-          'MSG | ЧАТ | ОТПРАВИТЕЛЬ | текст — любое сообщение в телефоне/смс/мессенджере/чате/голосовом, даже без плашек и тегов, а также реплики, которые выглядят как переписка (в кавычках, курсивом, после «написал(а)», «пришло сообщение»). ЧАТ — с кем идёт переписка (имя собеседника, не '+names.userName+' и не '+names.charName+'; если переписка между этими двумя — слово MAIN). Текст дословно, без кавычек.\n'+
-          'Уведомления приложений, соцсетей, сервисов, ботов, доставок, банков, стримов и игр — НЕ MSG, пропускай их. Один и тот же человек или группа под разными обращениями и подписями (Мама, Мамуля, мамскин; Игорь Борисович, Борисыч Адвокат, Борисыч (Юрист); «Ночной Роблокс | общий-чат» и «Ночной Роблокс — общий-чат») — это ОДИН чат: пиши имя уже существующего чата символ в символ.\n'+
-          (chatsKnown.length ? 'Уже существующие чаты (используй их имена точно): '+chatsKnown.slice(0,40).join(', ')+'.\n' : '')+
+        raw = await callModel('Ты — внимательный разборщик ролевой истории. Ниже фрагмент между '+names.userName+' (игрок) и '+names.charName+' (персонаж). Найди людей, номера телефонов и дату и выведи по одной строке на находку, СТРОГО в форматах:\n'+
           'NPC | ФИО | кто это | отношения с '+names.userName+' или '+names.charName+' — второстепенный персонаж, который упомянут или появился (НЕ '+names.userName+' и НЕ '+names.charName+').\n'+
           'PHONE | имя | номер — если в тексте явно назван номер телефона.\n'+
           'DATE | дата и/или время в мире истории | день недели — одна строка, если из текста понятно какой сейчас день.\n'+
@@ -17879,11 +19631,7 @@ async function smartScan(opts){
       var newNpcs = [], dateRow = null, phones = [];
       for (var ri = 0; ri < rows.length; ri++){
         var a = rows[ri], kind = String(a[0]||'').replace(/[^A-Za-z]/g,'').toUpperCase();
-        if (kind === 'MSG' && a.length >= 4 && a[3]){
-          var tid2 = await scanThreadResolve(a[1], names), f = String(a[2]||'').trim().toLowerCase();
-          var role = (f === String(names.charName||'').toLowerCase() || f === 'я' || scanSameName(a[2], names.charName)) ? 'char' : 'user';
-          await addMsg(tid2, role, a.slice(3).join('|'));
-        } else if (kind === 'NPC' && a[1]) newNpcs.push({ name:a[1].slice(0,60), about:(a[2]||'').slice(0,160), relation:(a[3]||'').slice(0,60) });
+        if (kind === 'NPC' && a[1]) newNpcs.push({ name:a[1].slice(0,60), about:(a[2]||'').slice(0,160), relation:(a[3]||'').slice(0,60) });
         else if (kind === 'PHONE' && a[1] && String(a[2]||'').replace(/\D/g,'').length >= 6) phones.push({ name:a[1], phone:a[2].slice(0,24) });
         else if (kind === 'DATE' && a[1] && !/неизвестно/i.test(a[1])) dateRow = { date:a[1], day:(a[2]||'').replace(/неизвестно/i,'') };
       }
@@ -17911,9 +19659,8 @@ async function smartScan(opts){
     }
     if (res.date){ try{ await renderHomeClockText(); }catch(e){} }
     await rpSet('rp_scan_last', count);
-    if (res.msgs){ await rpSet('rp_msg_last_activity', Date.now()); }
     var bits = [];
-    if (res.msgs) bits.push('сообщений: '+res.msgs); if (res.npcs) bits.push('НПС: '+res.npcs); if (res.phones) bits.push('номеров: '+res.phones); if (res.date) bits.push('дата обновлена');
+    if (res.npcs) bits.push('НПС: '+res.npcs); if (res.phones) bits.push('номеров: '+res.phones); if (res.date) bits.push('дата обновлена');
     if (bits.length) toast('Нашла — '+bits.join(', ')); else if (!opts.silent) toast('Нового не нашлось — всё уже на месте');
     return res;
   }catch(e){ console.error('RP smartScan failed', e); if (!opts.silent) toast('Разбор не удался: '+(e && e.message ? e.message : e)); return null; }
@@ -17926,8 +19673,7 @@ async function maybeAutoScan(){
     if (last === null){ await rpSet('rp_scan_last', count); return; }
     if (count < last){ await rpSet('rp_scan_last', count); return; }
     if (count - last < Math.max(2, cfg('scanEvery', 8))) return;
-    var r = await smartScan({ depth: cfg('scanDepth', 20), silent:true });
-    if (r && r.msgs && panelOpen && currentScreen === 'messenger') openScreen('messenger');
+    await smartScan({ depth: cfg('scanDepth', 20), silent:true });
     await relAutoUpdate();
   }catch(e){}
 }
@@ -18438,7 +20184,8 @@ async function rpChatGuard(){
   if (!id) return false;
   if (RP_CHAT_ID === null || RP_CHAT_ID === id){ RP_CHAT_ID = id; return false; }
   RP_CHAT_ID = id;
-  SAT_ME_AV = null; RP_LOOK_LEGACY = null; RP_LOC_LOADED = false; RP_TOMB = null; RP_PHOTO_MAP = []; RP_DATE_REF = null; RP_TICK_COUNT = -1;
+  SAT_ME_AV = null; RP_LOOK_LEGACY = null; RP_LOC_LOADED = false; RP_DATE_REF = null; RP_TICK_COUNT = -1;
+  CX.open = null; CX.hubOk = false; CX.busy = {}; CX.again = {}; CX.lastCount = null; CX.lastSync = 0; CX_LB.found = null; CX_LB.err = '';
   return true;
 }
 function openPanel(){ $('#rp_phone_wrap').style.display='block'; panelOpen=true; unreadCount=0; updateBadge(); openHome(); rpChatGuard().then(function(ch){ if (ch && panelOpen) openHome(); }); try{ refreshOnOpen(); }catch(e){} try{ maybeAutoPaySalary().then(function(){ return maybeAutoPayBills(); }); }catch(e){} }
@@ -18447,13 +20194,13 @@ async function refreshOnOpen(){
   if (REFRESH_BUSY || !cfg('enabled', true) || !cfg('refreshOnOpen', false)) return;
   REFRESH_BUSY = true;
   try{
-    await Promise.all([maybeImportMessengerTags(), maybeImportTwitchTags(), maybeImportDeliveryTags(), maybeImportBankTags(), maybeImportCalendarTags(), maybeImportChannelTags(), maybeImportHealthTags(), maybeImportMapsTags(), maybeImportSmartHomeTags(), maybeImportRaveTags(), maybeImportSattokTags(), maybeImportSmartphoneTags()].map(function(pr){ return Promise.resolve(pr).catch(function(){}); }));
-    if (!SCAN_BUSY){ var r = await smartScan({ depth: cfg('scanDepth', 20), silent:true }); if (r && r.msgs && panelOpen && currentScreen === 'messenger') openScreen('messenger'); }
+    await Promise.all([maybeImportTwitchTags(), maybeImportDeliveryTags(), maybeImportBankTags(), maybeImportCalendarTags(), maybeImportChannelTags(), maybeImportHealthTags(), maybeImportMapsTags(), maybeImportSmartHomeTags(), maybeImportRaveTags(), maybeImportSattokTags(), maybeImportSmartphoneTags()].map(function(pr){ return Promise.resolve(pr).catch(function(){}); }));
+    if (!SCAN_BUSY) await smartScan({ depth: cfg('scanDepth', 20), silent:true });
     await relAutoUpdate();
   }catch(e){ console.error('RP refreshOnOpen failed', e); }
   finally{ REFRESH_BUSY = false; }
 }
-function closePanel(){ hlExitEdit(); stopMsgPoll(); stopDeliveryCountdown(); stopMarketCountdown(); $('#rp_phone_wrap').style.display='none'; panelOpen=false; }
+function closePanel(){ hlExitEdit(); stopDeliveryCountdown(); stopMarketCountdown(); $('#rp_phone_wrap').style.display='none'; panelOpen=false; rpHintConf().then(function(hc2){ if (hc2.on) rpHintBuild(null); }); }
 function updateBadge(){ var b=$('#rp_badge'); if(!b) return; if (unreadCount>0){ b.style.display='flex'; b.textContent=String(unreadCount); } else b.style.display='none'; }
 
 var notifUnread = 0;
@@ -18758,17 +20505,126 @@ async function generateHomePhoto(card){
   var live = document.querySelector('#rp_hw_photo_box');
   if (live) live.innerHTML = html;
 }
+var RP_HINT_SRC = [['chat','Чат с ним',1],['status','Статус',1],['love','Love',1],['memories','Воспоминания',1],['diary','Дневник',1],['calendar','Календарь',1],['bank','Банк',1],['delivery','Доставка',1],['twitter','Твиттер',1],['channels','Каналы',1],['twitch','Twitch',1],['sattok','Сатток',1],['rave','Rave',1],['pet','Мой малыш',1],['npcs','Сеть НПС',0],['profile','Мой профиль',0],['market','Маркет',0],['flo','Flo',0],['health','Здоровье',0],['maps','Карты',0],['smarthome','Умный дом',0],['tinder','Satinder',0],['casino','Казино',0],['phonebook','Контакты',0]];
+var RP_HINT_SIZE = { s:1500, m:2600, l:4000 };
+var RP_HINT_Q = Promise.resolve();
+var RP_LORE_AUTO_BUSY = false;
+async function rpHintConf(){
+  var v = null; try{ v = await withTimeout(Promise.resolve(PM.store.get('rp_hint_conf', 'global')), 4000, null); }catch(e){ v = null; }
+  var apps = {}; RP_HINT_SRC.forEach(function(s){ apps[s[0]] = !!s[2]; });
+  var c = Object.assign({ on:false, size:'m', lb:0 }, v && typeof v === 'object' ? v : {});
+  c.apps = Object.assign(apps, v && v.apps && typeof v.apps === 'object' ? v.apps : {});
+  return c;
+}
+async function rpHintConfSave(c){ try{ await PM.store.set('rp_hint_conf', c, 'global'); return true; }catch(e){ toast('Не удалось сохранить настройку'); return false; } }
+function rpHintH(s){ var h = 5381; s = String(s || ''); for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return String(h) + ':' + s.length; }
+function rpHintKey(x){ return rpHintH(cxNormP(String(x || '').replace(/\d+(?:[.,]\d+)?\s*%/g, '%')).slice(0, 240)); }
+async function rpHintChat(){
+  await cxWho();
+  var nm = CX.names, ts = await cxThreads(), cs = await cxContacts(), out = [];
+  var name = function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
+  for (var i = 0; i < ts.length; i++){
+    var t = ts[i]; if (t.owner !== 'me') continue;
+    if (!(t.id === 'main' || (t.kind === 'group' && t.who.indexOf('char') >= 0))) continue;
+    var l = (await cxMsgs(t.id)).filter(function(m){ return !m.hidden && m.t !== 'sys'; }).slice(t.id === 'main' ? -10 : -6);
+    l.forEach(function(m){ out.push({ k:'chat:' + m.id, x:(t.id === 'main' ? '' : 'Группа «' + cxTitle(t, cs) + '» — ') + name(m.from) + ': ' + cxClip(cxMsgLine(m), 260) }); });
+  }
+  return out;
+}
+function rpHintGather(id){
+  var f = { chat:rpHintChat, status:gatherOocStatus, love:gatherOocLove, memories:gatherOocMemories, diary:gatherOocDiary, calendar:gatherOocCalendar, bank:gatherOocBank, delivery:gatherOocDelivery, twitter:gatherOocTwitter, channels:gatherOocChannels, twitch:gatherOocTwitch, sattok:gatherOocSattok, rave:gatherOocRave, pet:gatherOocPet, npcs:gatherOocNpcs, profile:gatherOocProfile, market:gatherOocMarket, flo:gatherOocFlo, health:gatherOocHealth, maps:gatherOocMaps, smarthome:gatherOocSmartHome, tinder:gatherOocTinder, casino:gatherOocCasino, phonebook:gatherOocPhonebook }[id];
+  return f ? Promise.resolve().then(function(){ return f(); }).then(function(r){ return Array.isArray(r) ? r : []; }, function(){ return []; }) : Promise.resolve([]);
+}
+function rpHintBuild(req){
+  var run = RP_HINT_Q.then(function(){ return rpHintBuildInner(req); }, function(){ return rpHintBuildInner(req); });
+  RP_HINT_Q = run.then(function(){}, function(){});
+  return run.then(function(p){ return p; }, function(e){ console.error('RP hint build failed', e); return null; });
+}
+async function rpHintBuildInner(req){
+  var c = await rpHintConf(); if (!c.on && !req) return null;
+  var sv = await rpGet('rp_hint_seen', null), first = !sv || sv.v !== 2;
+  var seen = first ? {} : (sv.m || {}), had = first ? {} : (sv.src || {}), src = {};
+  var now = Date.now(), items = [], blocks = [], keep = {};
+  for (var i = 0; i < RP_HINT_SRC.length; i++){
+    var s = RP_HINT_SRC[i]; if (!c.apps[s[0]]) continue;
+    src[s[0]] = 1;
+    var old = first || !had[s[0]];
+    var raw = await rpHintGather(s[0]), lines = [];
+    raw.forEach(function(r){
+      if (r && typeof r === 'object' && r.k){ lines.push(r); return; }
+      String(r || '').split('\n').forEach(function(x){ x = x.trim(); if (x) lines.push({ k: s[0] + ':' + rpHintKey(x), x: x }); });
+    });
+    if (!lines.length) continue;
+    lines.forEach(function(o){ keep[o.k] = 1; if (seen[o.k] == null) seen[o.k] = old ? 0 : now; if (seen[o.k] > 0) items.push({ t: seen[o.k], x: s[1] + ': ' + cxClip(o.x.replace(/^[-•]\s+/, ''), 280) }); });
+    var body = (s[0] === 'chat' ? lines.slice(-6) : lines).map(function(o){ return o.x; }).join('\n');
+    blocks.push('— ' + s[1] + ':\n' + cxClip(body, 450));
+  }
+  Object.keys(seen).forEach(function(k){ if (!keep[k]) delete seen[k]; });
+  await rpSet('rp_hint_seen', { v:2, m:seen, src:src });
+  var cap = RP_HINT_SIZE[c.size] || 2600, state = '';
+  blocks.forEach(function(b){ if (state.length + b.length + 1 <= cap) state += (state ? '\n' : '') + b; });
+  items.sort(function(a, b){ return a.t - b.t; });
+  var pack = { at: now, req: req || null, state: state, items: items.slice(-60), fcap: { s:700, m:1300, l:2200 }[c.size] || 1300 };
+  await rpSet('rp_hint_pack', pack);
+  return pack;
+}
+function rpHintText(p, fresh){
+  return '[ТЕЛЕФОН — фон для рассказчика, не реплика игрока. Не пересказывай и не реагируй на всё сразу: используй только то, что к месту в сцене.]\n' +
+    (fresh.length ? 'Новое с прошлого хода:\n' + fresh.map(function(x){ return '- ' + x; }).join('\n') + '\n' : '') +
+    (p.state ? 'Сейчас в телефоне:\n' + p.state + '\n' : '') +
+    '[/ТЕЛЕФОН]';
+}
+async function rpHintPreview(){
+  var p = await rpHintBuild('preview-' + Date.now());
+  if (!p) return '';
+  var mark = await rpGet('rp_hint_mark', null), since = mark && mark.upTo ? mark.upTo : Date.now();
+  var l = (p.items || []).filter(function(x){ return x.t > since; }), cap = p.fcap || 1300, fresh = [], n = 0;
+  for (var i = l.length - 1; i >= 0 && fresh.length < 25; i--){ n += String(l[i].x).length + 3; if (n > cap && fresh.length) break; fresh.unshift(l[i].x); }
+  return rpHintText(p, fresh);
+}
+async function rpLoreArchive(text, auto){
+  var lb = await ensureLorebook(auto && !panelOpen ? { noCreate:true } : undefined); if (!lb) return false;
+  var block = '— ' + (await getStoryDate()) + ' —\n' + (await localizeForLore(text));
+  var entries = lb.entries || [], e = entries.filter(function(x){ return x.identifier === 'rp-phone-auto'; })[0];
+  var prev = e ? String(e.content || '') : '', all = prev ? prev + '\n\n' + block : block;
+  if (all.length > 7000 && prev){
+    var short = '';
+    try{ short = String(await callModel('Сожми этот архив событий из телефона до 2000 знаков. Сохрани факты, имена, суммы, даты, договорённости и важные фразы из переписок. Без вступлений, только сжатый текст.\n\n' + prev) || '').trim(); }catch(er){ short = ''; }
+    all = short.length > 200 ? '— Раньше —\n' + cxClip(short, 2600) + '\n\n' + block : all.slice(-7000);
+  }
+  if (e) e.content = all;
+  else entries.push({ identifier:'rp-phone-auto', name:'Телефон · архив', content: all, enabled:true, strategy:'constant' });
+  lb.entries = entries;
+  try{ await PM.lore.save(lb); return true; }catch(er){ console.error('RP lore archive failed', er); return false; }
+}
+async function rpLoreAuto(force){
+  var c = await rpHintConf();
+  if (!force && !(c.lb > 0)) return null;
+  var count = 0; try{ count = await PM.chat.count(); }catch(e){ return null; }
+  var mark = await rpGet('rp_lore_auto_mark', null);
+  if (!force){
+    if (mark == null || count < mark){ await rpSet('rp_lore_auto_mark', count); return null; }
+    if (count - mark < c.lb) return null;
+  }
+  if (RP_LORE_AUTO_BUSY) return null;
+  RP_LORE_AUTO_BUSY = true;
+  try{
+    var parts = await gatherAllOocParts();
+    await rpSet('rp_lore_auto_mark', count);
+    if (!parts.length) return 0;
+    var ok = await rpLoreArchive(parts.join('\n\n'), !force);
+    if (!ok){ if (!force) pushHomeNotification('Телефон', 'Не удалось сохранить в лорбук — ничего не скрыто'); return false; }
+    await hideEverythingGlobal();
+    await rpSet('rp_lore_auto_last', { at: Date.now(), count: count });
+    rpHintBuild(null);
+    if (!force && !panelOpen) pushHomeNotification('Телефон', 'Сохранено в лорбук, старое скрыто');
+    return true;
+  }catch(e){ console.error('RP lore auto failed', e); return false; }
+  finally{ RP_LORE_AUTO_BUSY = false; }
+}
 async function gatherAllOocParts(){
   var parts = [];
-  parts = parts.concat(await gatherOocMessenger('main', null));
-  var contacts = await rpGet('rp_contacts', []);
-  for (var i=0;i<contacts.length;i++){
-    parts = parts.concat(await gatherOocMessenger(contacts[i].id, contacts[i]));
-  }
-  var npcContacts = await rpGet('rp_npc_contacts', []);
-  for (var i=0;i<npcContacts.length;i++){
-    parts = parts.concat(await gatherOocNpcChat(npcContacts[i].id, npcContacts[i]));
-  }
+  parts = parts.concat(await gatherOocChat());
   parts = parts.concat(await gatherOocLove());
   parts = parts.concat(await gatherOocFlo());
   parts = parts.concat(await gatherOocDiary());
@@ -18905,6 +20761,7 @@ $('#rp_home_ooc_info').addEventListener('click', function(){
 });
 
 document.addEventListener('rp-phone:open', function(){ if (rpLive() && !panelOpen) openPanel(); });
+document.addEventListener('rp-phone:hint', function(e){ if (!rpLive()) return; var rq = e && e.detail && e.detail.req; if (rq) rpHintBuild(rq); });
 document.addEventListener('focusin', function(e){ var t = e.target; if (rpLive() && t && t.classList && t.classList.contains('rp_secret')) t.type = 'text'; }, true);
 document.addEventListener('focusout', function(e){ var t = e.target; if (rpLive() && t && t.classList && t.classList.contains('rp_secret')) t.type = 'password'; }, true);
 var lastOpenCmdAt = Date.now();
@@ -18920,8 +20777,10 @@ setInterval(async function(){
   if (!cfg('enabled', true)) return;
   try{ await rpChatGuard(); }catch(e){}
   var tc = -2; try{ tc = await PM.chat.count(); }catch(e){}
-  if (tc !== RP_TICK_COUNT){ RP_TICK_COUNT = tc; mbMaybeAuto(); maybeImportMessengerTags(); maybeImportTwitchTags(); maybeImportDeliveryTags(); maybeImportBankTags(); maybeImportCalendarTags(); maybeImportChannelTags(); maybeImportHealthTags(); maybeImportMapsTags(); maybeImportSmartHomeTags(); maybeImportRaveTags(); maybeImportSmartphoneTags(); maybeImportSattokTags(); }
-  maybeAutonomousMessage(); maybeAutonomousReminder(); maybeAutonomousTweet(); maybeAutonomousMarketGift(); maybeAutonomousPet();
+  if (tc !== RP_TICK_COUNT){ RP_TICK_COUNT = tc; maybeImportTwitchTags(); maybeImportDeliveryTags(); maybeImportBankTags(); maybeImportCalendarTags(); maybeImportChannelTags(); maybeImportHealthTags(); maybeImportMapsTags(); maybeImportSmartHomeTags(); maybeImportRaveTags(); maybeImportSmartphoneTags(); maybeImportSattokTags(); }
+  maybeAutonomousReminder(); maybeAutonomousTweet(); maybeAutonomousMarketGift(); maybeAutonomousPet(); cxTick();
+  if (tc !== -2) rpLoreAuto();
+  rpHintConf().then(function(hc2){ if (hc2.on) rpHintBuild(null); });
 }, 60000);
 
 (async function init(){
@@ -18936,7 +20795,6 @@ setInterval(async function(){
   var savedTogglePos = await rpGet('rp_toggle_pos', null);
   applyToggleSaved(savedTogglePos);
   openHome();
-  maybeImportMessengerTags();
   maybeImportTwitchTags();
   maybeImportDeliveryTags();
   maybeImportBankTags();
