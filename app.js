@@ -1,3 +1,4 @@
+
 (function(){
 var RP_GEN = window.__rpPhoneGen = (window.__rpPhoneGen || 0) + 1;
 function rpLive(){ return RP_GEN === window.__rpPhoneGen; }
@@ -437,7 +438,7 @@ async function analyzeStoryDateByHdr(){
     var hdr = await scanHdrClock(40);
     if (!hdr || !(hdr.date || hdr.day)){ toast('Тег [HDR] не найден в недавних сообщениях'); return false; }
     if (hdr.date && !parseFreeTextDateToISO(hdr.date)){ toast('Нашла тег [HDR], но не смогла разобрать в нём дату'); return false; }
-    await rpSet('rp_rpclock', { date: hdr.date||'', day: hdr.day||'', source:'hdr', updatedAt: Date.now() });
+    await rpSet('rp_rpclock', { date: hdr.date||'', day: hdr.day||'', time: hdr.time||'', source:'hdr', updatedAt: Date.now() });
     await renderHomeClockText();
     toast('Дата обновлена по тегу [HDR]');
     return true;
@@ -449,7 +450,19 @@ function toast(text){ try{ PM.toast(text); }catch(e){ console.log('RP toast:', t
 
 var RP_GLOBAL_KEYS = { rp_theme:1, rp_theme_edit:1, rp_wall:1, rp_app_icon_colors:1, rp_app_names:1, rp_home_layout:1, rp_home_order:1, rp_app_removed:1, rp_home_wgts:1, rp_home_widgets:1, rp_my_profile:1 };
 var RP_LOOK_LEGACY = null;
-async function rpLookLegacy(){ return false; }
+async function rpLookLegacy(){
+  if (RP_LOOK_LEGACY !== null) return RP_LOOK_LEGACY;
+  var mode = null;
+  try{ mode = await withTimeout(Promise.resolve(PM.store.get('rp_look_mode', 'chat')), 5000, null); }catch(e){ mode = null; }
+  if (mode !== 'legacy' && mode !== 'own'){
+    var wm = null;
+    try{ wm = await withTimeout(Promise.resolve(PM.store.get('rp_msg_tag_watermark', 'chat')), 5000, null); }catch(e){ wm = null; }
+    mode = (wm !== null && wm !== undefined) ? 'legacy' : 'own';
+    try{ await PM.store.set('rp_look_mode', mode, 'chat'); }catch(e){}
+  }
+  RP_LOOK_LEGACY = mode === 'legacy';
+  return RP_LOOK_LEGACY;
+}
 async function rpGet(key, fallback){
   try{
     if (RP_GLOBAL_KEYS[key]){
@@ -465,9 +478,17 @@ async function rpGet(key, fallback){
   }
   catch(e){ return fallback; }
 }
+var RP_HOME_KEYS = { rp_home_order:1, rp_home_layout:1, rp_home_wgts:1, rp_app_removed:1, rp_home_widgets:1, rp_app_icon_colors:1, rp_app_names:1 }, TH_APPLYING = 0, TH_SYNC_TM = null;
+async function thSyncCur(){
+  if (TH_APPLYING || !rpLive()) return;
+  var cur = await rpGet('rp_theme', null); if (!cur || !cur.id) return;
+  var list = await thCustomList(), t = list.filter(function(x){ return x.id === cur.id; })[0]; if (!t) return;
+  Object.assign(t, await thSnapshotExtras()); await thCustomSave(list);
+}
 async function rpSet(key, val){
   try{
     await PM.store.set(key, val, 'chat');
+    if (RP_HOME_KEYS[key]){ clearTimeout(TH_SYNC_TM); TH_SYNC_TM = setTimeout(function(){ thSyncCur().catch(function(){}); }, 2000); }
   }catch(e){ console.error('RP save failed', key, e); toast('Не удалось сохранить: '+key); }
 }
 async function rpImport(opts){
@@ -483,6 +504,200 @@ async function rpImport(opts){
   return out;
 }
 
+var RP_API_PICK = {}, RP_API_FMT = {};
+function rpIsNetErr(e){ return !!e && (e.name === 'TypeError' || /failed to fetch|networkerror|load failed|network request failed/i.test(String(e.message || e))); }
+function rpApiBase(url, fmt){
+  var u = String(url || '').replace(/\s+/g, '');
+  if (!u) return '';
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(u)) u = 'https://' + u;
+  u = u.replace(/[?#].*$/, '').replace(/\/+$/, '');
+  u = u.replace(/\/(chat\/completions|completions|responses|models(\/[^\/]*)?)$/i, '').replace(/\/+$/, '');
+  if (fmt === 'gemini'){
+    u = u.replace(/\/models\/[^\/]+$/i, '');
+    if (!/\/v\d+[a-z]*\d*$/i.test(u)) u += '/v1beta';
+  }
+  return u;
+}
+function rpOpenAICands(url){
+  var u = rpApiBase(url, 'openai'); if (!u) return [];
+  var c = (/\/v\d+[a-z]*\d*$/i.test(u) || /\/openai$/i.test(u)) ? [u] : [u + '/v1', u];
+  var p = RP_API_PICK[u];
+  if (p && c.indexOf(p) >= 0) c = [p].concat(c.filter(function(x){ return x !== p; }));
+  return c;
+}
+async function rpOpenAIPost(url, apiKey, body, ms){
+  var cands = rpOpenAICands(url), root = rpApiBase(url, 'openai'), resp = null, netErr = null;
+  if (!cands.length) throw new Error('Не указан адрес API');
+  for (var i = 0; i < cands.length; i++){
+    var r;
+    try{ r = await imgFetchT(cands[i] + '/chat/completions', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + apiKey }, body: JSON.stringify(body) }, ms); }
+    catch(e){ netErr = e; continue; }
+    if ((r.status === 404 || r.status === 405) && i < cands.length - 1){ resp = r; continue; }
+    RP_API_PICK[root] = cands[i];
+    return r;
+  }
+  if (resp) return resp;
+  throw netErr || new Error('Не удалось подключиться');
+}
+function rpTextFromOpenAI(d){
+  var ch = d && d.choices && d.choices[0], msg = ch && ch.message, c = msg && msg.content;
+  if (Array.isArray(c)) c = c.map(function(p){ return typeof p === 'string' ? p : ((p && p.text) || ''); }).join('');
+  c = String(c == null ? '' : c);
+  if (!c.trim() && ch && typeof ch.text === 'string') c = ch.text;
+  return { text: c, finish: ch && ch.finish_reason };
+}
+function rpApiErrText(t){ return String(t || '').replace(/(AIza|sk-)[A-Za-z0-9_\-]{8,}/g, '$1***').slice(0, 200); }
+async function rpOpenAIText(conf, prompt, temp, ms){
+  var res = await rpOpenAIPost(conf.baseUrl, conf.apiKey, { model: conf.model, messages:[{ role:'user', content: prompt }], temperature: temp }, ms);
+  if (!res.ok){ var et = await res.text().catch(function(){ return ''; }); throw new Error('API ' + res.status + ': ' + rpApiErrText(et)); }
+  var d = await res.json();
+  var o = rpTextFromOpenAI(d);
+  if (o.finish === 'content_filter') return { text: o.text, blocked:'ответ заблокирован фильтром провайдера' };
+  if (o.finish === 'length' && o.text) return { text: o.text, blocked:'ответ оборвался по лимиту длины' };
+  if (!o.text.trim()) return { text:'', why:'finish_reason=' + (o.finish || '?') + ' ' + JSON.stringify(d).slice(0, 160) };
+  return { text: o.text };
+}
+async function rpGeminiText(conf, prompt, temp, ms){
+  var base = rpApiBase(conf.baseUrl, 'gemini') || 'https://generativelanguage.googleapis.com/v1beta';
+  var url = base + '/models/' + encodeURIComponent(conf.model) + ':generateContent?key=' + encodeURIComponent(conf.apiKey);
+  var safety = ['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT','HARM_CATEGORY_CIVIC_INTEGRITY'].map(function(c){ return { category:c, threshold:'BLOCK_NONE' }; });
+  var res = await imgFetchT(url, { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ contents:[{ role:'user', parts:[{ text: prompt }] }], safetySettings: safety, generationConfig:{ temperature: temp } }) }, ms);
+  if (!res.ok){ var et = await res.text().catch(function(){ return ''; }); throw new Error('API ' + res.status + ': ' + rpApiErrText(et)); }
+  var d = await res.json();
+  var pf = d.promptFeedback || {};
+  if (pf.blockReason) return { text:'', blocked:'запрос заблокирован цензурой (' + pf.blockReason + ')' };
+  var c0 = d.candidates && d.candidates[0], fr = c0 && c0.finishReason;
+  var parts = c0 && c0.content && c0.content.parts ? c0.content.parts : [];
+  var txt = parts.filter(function(p){ return !p.thought; }).map(function(p){ return p.text || ''; }).join('');
+  if (!txt.trim()) txt = parts.map(function(p){ return p.text || ''; }).join('');
+  if (!txt.trim() && d.choices) txt = rpTextFromOpenAI(d).text;
+  if (/SAFETY|PROHIBITED|BLOCKLIST|SPII|RECITATION/i.test(fr || '')) return { text: txt, blocked:'ответ обрезан цензурой (' + fr + ')' };
+  if (/MAX_TOKENS/i.test(fr || '') && txt.trim()) return { text: txt, blocked:'ответ оборвался по лимиту длины' };
+  if (!txt.trim()) return { text:'', why:'finishReason=' + (fr || '?') + ' ' + JSON.stringify(d).slice(0, 160) };
+  return { text: txt };
+}
+async function rpTextCall(conf, prompt, temp, ms){
+  temp = temp == null ? 0.9 : temp; ms = ms || 120000;
+  if (conf.format === 'gemini') return await rpGeminiText(conf, prompt, temp, ms);
+  var root = rpApiBase(conf.baseUrl, 'openai');
+  if (RP_API_FMT[root] === 'gemini'){
+    try{ return await rpGeminiText(conf, prompt, temp, ms); }catch(e0){ if (!rpIsNetErr(e0)) throw e0; }
+  }
+  try{ return await rpOpenAIText(conf, prompt, temp, ms); }
+  catch(e){
+    if (!rpIsNetErr(e)) throw e;
+    try{ var g = await rpGeminiText(conf, prompt, temp, ms); RP_API_FMT[root] = 'gemini'; return g; }
+    catch(e2){ throw new Error('Не удалось подключиться к ' + (root || 'API') + ' (' + (e && e.message ? e.message : e) + '). Проверь адрес и ключ. Если провайдер не пускает запросы из приложения, выбери формат Gemini с тем же адресом.'); }
+  }
+}
+async function rpAutoGen(){ try{ return (await getImgConfig()).autoGen !== false; }catch(e){ return true; } }
+var RPX_HANDLERS = {}, RPX_LP_AT = 0;
+function rpxSheet(spec){
+  var host = document.getElementById('rp_screen') || document.body;
+  var old = host.querySelector('.rpx_bg'); if (old) old.remove();
+  var bg = el('div', 'rpx_bg');
+  bg.innerHTML = '<div class="rpx_sheet"><div class="rpx_t">' + escapeHtml(spec.title || 'Картинка') + '</div><div class="rpx_s">' + escapeHtml(spec.sub || 'Измени текст и нажми «Перегенерировать». Пустое поле — старый промпт.') + '</div>' +
+    (spec.prompt != null ? '<div class="rpx_lbl">' + escapeHtml(spec.label || 'Промпт (на английском работает лучше)') + '</div><textarea id="rpx_p" rows="6" maxlength="2400"></textarea>' : '') +
+    (spec.extra || '') +
+    '<div class="rpx_row"><div class="rpx_btn ghost" data-x="0">Закрыть</div><div class="rpx_btn" data-x="1">Перегенерировать</div></div></div>';
+  host.appendChild(bg);
+  var ta = bg.querySelector('#rpx_p'); if (ta) ta.value = spec.prompt || '';
+  bg.addEventListener('click', function(e){ if (e.target === bg) bg.remove(); });
+  bg.querySelector('[data-x="0"]').addEventListener('click', function(){ bg.remove(); });
+  var go = bg.querySelector('[data-x="1"]');
+  go.addEventListener('click', async function(){
+    if (go.classList.contains('busy')) return;
+    var on = false; try{ on = await imagesEnabled(); }catch(e){}
+    if (!on){ toast('Включи режим с картинками и заполни ключ в настройках картинок'); return; }
+    go.classList.add('busy'); go.textContent = 'Генерирую…';
+    try{ await spec.regen(ta ? ta.value.trim() : '', bg); bg.remove(); toast('Картинка обновлена'); }
+    catch(e){ console.error('RP regen failed', e); go.classList.remove('busy'); go.textContent = 'Перегенерировать'; toast('Не вышло: ' + (e && e.message ? e.message : e)); }
+  });
+  return bg;
+}
+function rpxOpen(spec){
+  var p = String(spec || '').split('|'), h = RPX_HANDLERS[p[0]];
+  if (h){ try{ h(p.slice(1)); }catch(e){ console.error('RP rpx open failed', e); } }
+}
+(function(){
+  var tm = null, sx = 0, sy = 0;
+  var stop = function(){ clearTimeout(tm); tm = null; };
+  document.addEventListener('pointerdown', function(e){
+    if (!rpLive()) return;
+    var n = e.target && e.target.closest ? e.target.closest('[data-rpimg]') : null;
+    if (!n || e.target.closest('button,a,input,textarea,[data-rpimgtap],.stk_ra')) return;
+    sx = e.clientX; sy = e.clientY; clearTimeout(tm);
+    tm = setTimeout(function(){ tm = null; RPX_LP_AT = Date.now(); try{ navigator.vibrate && navigator.vibrate(15); }catch(er){} rpxOpen(n.getAttribute('data-rpimg')); }, 600);
+  }, true);
+  document.addEventListener('pointermove', function(e){ if (tm && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) stop(); }, true);
+  document.addEventListener('pointerup', stop, true);
+  document.addEventListener('pointercancel', stop, true);
+  document.addEventListener('click', function(e){
+    if (!rpLive() || !e.target || !e.target.closest) return;
+    if (Date.now() - RPX_LP_AT < 700 && e.target.closest('[data-rpimg]')){ e.stopPropagation(); e.preventDefault(); return; }
+    var t = e.target.closest('[data-rpimgtap]');
+    if (t){ e.stopPropagation(); e.preventDefault(); rpxOpen(t.getAttribute('data-rpimgtap')); }
+  }, true);
+})();
+RPX_HANDLERS.ch = async function(a){
+  var id = a[0], posts = await rpGet('rp_tg_posts', []), post = posts.filter(function(x){ return x.id === id; })[0]; if (!post) return;
+  var channels = await rpGet('rp_tg_channels', []), channel = channels.filter(function(c){ return c.id === post.channelId; })[0];
+  var base = post.imgPrompt || buildChannelPhotoPrompt(post.text, channel);
+  rpxSheet({ title:'Картинка поста', prompt: base, regen: async function(pr){
+    var use = pr || base;
+    var cfgC = Object.assign({}, await getImgConfig(), { aspectRatio:'4:5', galleryTag:'Каналы' });
+    var url = await rpGenerateImage(use, cfgC);
+    var list = await rpGet('rp_tg_posts', []), it = list.filter(function(x){ return x.id === id; })[0];
+    if (it){ it.imgUrl = url; it.imgPrompt = use; await rpSet('rp_tg_posts', list); }
+    document.querySelectorAll('.rp_ch_post[data-id="' + id + '"]').forEach(function(card){
+      var im = card.querySelector('.rp_ch_post_img');
+      if (!im){ im = document.createElement('img'); im.className = 'rp_ch_post_img'; im.setAttribute('data-rpimg', 'ch|' + id); var tx = card.querySelector('.rp_ch_post_text'); if (tx) tx.parentNode.insertBefore(im, tx); }
+      im.src = url;
+    });
+  } });
+};
+function stkFindPost(id){
+  return stkMine().then(function(m){ var p = m.filter(function(x){ return x.id === id; })[0]; if (p) return p; return stkFeed().then(function(f){ return f.filter(function(x){ return x.id === id; })[0] || null; }); });
+}
+RPX_HANDLERS.stk = async function(a){
+  var id = a[0], post = await stkFindPost(id); if (!post){ toast('Пост не найден'); return; }
+  var fl = STK_FILTERS.filter(function(f){ return f[0] === post.filter; })[0], nmS = post.by === 'me' ? await getNames() : null;
+  var base = post.imgPrompt || ((nmS ? stkMeLead(post, nmS) : '') + post.scene + ', vertical social media short video frame, candid, natural' + (fl && fl[3] ? ', ' + fl[3] : ''));
+  rpxSheet({ title:'Кадр видео', prompt: base, regen: async function(pr){
+    var live = STK_ROOT && STK_ROOT.querySelector('.stk_post[data-id="' + id + '"]');
+    await stkEnsureImg(post, live, true, pr || base);
+    if (post.failed) throw new Error('генератор не вернул картинку');
+  } });
+};
+RPX_HANDLERS.dlv = async function(a){
+  var menuKey = a[0], id = a[1], lv = DLV_LIVE[menuKey], menu = await rpGet(menuKey, null);
+  if (!Array.isArray(menu)) return;
+  var it = menu.filter(function(x){ return x.id === id; })[0]; if (!it) return;
+  var place = lv && lv.place; if (!place){ toast('Открой заведение и повтори'); return; }
+  var base = it.imgPrompt || buildDeliveryItemPrompt(it, place);
+  rpxSheet({ title: it.name, prompt: base, regen: async function(pr){
+    await generateDeliveryItemPhoto(menuKey, menu, it, place, pr || base);
+    var imEl = document.querySelector('.dlv_modal .im'); if (imEl) imEl.innerHTML = '<img src="' + escapeHtml(it.img) + '" alt="" data-rpimg="dlv|' + menuKey + '|' + it.id + '">';
+    await dlvRefreshLive(menuKey);
+  } });
+};
+RPX_HANDLERS.td = async function(a){
+  var id = a[0], deck = await rpGet('rp_tinder_deck', []), prof = deck.filter(function(x){ return x.id === id; })[0];
+  if (!prof){ toast('Анкеты уже нет в колоде'); return; }
+  rpxSheet({ title: prof.name, label:'Внешность (на английском)', prompt: prof.look || '', regen: async function(pr){
+    var use = pr || prof.look;
+    var url = await tdGeneratePhoto(use, 'dating app profile photo, moody dramatic lighting, flattering natural pose, looking at camera', '4:5');
+    await tdDeckUpdate(function(d){ var r = d.filter(function(x){ return x.id === id; })[0]; if (r){ r.img = url; r.imgFailed = false; r.look = use; } });
+    prof.img = url; prof.look = use;
+    var live = document.querySelector('.sat_card[data-pid="' + id + '"]'); if (live) satFillCard(live, prof);
+  } });
+};
+RPX_HANDLERS.tw = async function(){
+  var session = await rpGet('rp_stream_session', null); if (!session){ toast('Стрим не идёт'); return; }
+  rpxSheet({ title:'Кадр стрима', prompt: session.lastDesc || '', regen: async function(pr){
+    await refreshStreamFrame(document.querySelector('.rp_tw_video_box'), pr || session.lastDesc || '');
+  } });
+};
 var API_CONF_KEY = 'rp_api_conf';
 async function getApiConfig(){
   try{ var v = await PM.store.get(API_CONF_KEY, 'global'); if (v) return v; }catch(e){}
@@ -497,31 +712,9 @@ async function setApiConfig(conf){
   }
 }
 async function callCustomApi(conf, prompt){
-  if (conf.format === 'gemini'){
-    var base = (conf.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/,'');
-    var url = base + '/models/' + encodeURIComponent(conf.model) + ':generateContent?key=' + encodeURIComponent(conf.apiKey);
-    var res = await fetch(url, {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] })
-    });
-    if (!res.ok) throw new Error('API вернул ошибку '+res.status);
-    var data = await res.json();
-    var text = data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text;
-    if (!text) throw new Error('Пустой ответ от API');
-    return text;
-  }
-  var url2 = conf.baseUrl.replace(/\/+$/,'') + '/chat/completions';
-  var res2 = await fetch(url2, {
-    method:'POST',
-    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+conf.apiKey },
-    body: JSON.stringify({ model: conf.model, messages:[{ role:'user', content: prompt }], temperature:0.9 })
-  });
-  if (!res2.ok) throw new Error('API вернул ошибку '+res2.status);
-  var data2 = await res2.json();
-  var text2 = data2 && data2.choices && data2.choices[0] && data2.choices[0].message && data2.choices[0].message.content;
-  if (!text2) throw new Error('Пустой ответ от API');
-  return text2;
+  var r = await rpTextCall(conf, prompt, 0.9, 120000);
+  if (r.text && String(r.text).trim()) return r.text;
+  throw new Error(r.blocked || ('Пустой ответ от API' + (r.why ? ' (' + r.why + ')' : '')));
 }
 var RP_LOC_KEY = 'rp_locale_v1';
 var RP_LOC = { mode:'ru', country:'', cur:'', names:'' };
@@ -582,27 +775,57 @@ async function callModel(prompt){
 }
 
 var IMG_CONF_KEY = 'rp_img_conf';
-var IMG_DEFAULTS = { mode:'off', apiStyle:'gemini_native', endpoint:'', apiKey:'', model:'', aspectRatio:'1:1', naisteraModel:'grok', naisteraRefKey:'reference_images', styleId:'' };
+var IMG_DEFAULTS = { mode:'off', apiStyle:'gemini_native', endpoint:'', apiKey:'', model:'', aspectRatio:'1:1', naisteraModel:'grok', naisteraRefKey:'reference_images', styleId:'', autoGen:true };
 var IMG_GEN_TIMEOUT = 120000;
+var RP_IMG_CONF_CACHE = null, RP_IMG_STYLES_CACHE = null;
+async function rpReadStrict(key){
+  var tm = {};
+  for (var a = 0; a < 3; a++){
+    var okAny = false;
+    for (var si = 0; si < 2; si++){
+      try{
+        var v = await withTimeout(Promise.resolve(PM.store.get(key, si ? 'chat' : 'global')), 6000, tm);
+        if (v !== tm){ okAny = true; if (v !== null && v !== undefined) return { ok:true, v:v }; }
+      }catch(e){}
+    }
+    if (okAny) return { ok:true, v:null };
+    await new Promise(function(z){ setTimeout(z, 350 * (a + 1)); });
+  }
+  return { ok:false, v:null };
+}
 async function getImgConfig(){
-  try{ var v = await PM.store.get(IMG_CONF_KEY, 'global'); if (v) return Object.assign({}, IMG_DEFAULTS, v); }catch(e){}
-  try{ var v2 = await PM.store.get(IMG_CONF_KEY, 'chat'); if (v2) return Object.assign({}, IMG_DEFAULTS, v2); }catch(e){}
+  var r = await rpReadStrict(IMG_CONF_KEY);
+  if (r.ok && r.v && typeof r.v === 'object'){ RP_IMG_CONF_CACHE = r.v; return Object.assign({}, IMG_DEFAULTS, r.v); }
+  if (!r.ok && RP_IMG_CONF_CACHE) return Object.assign({}, IMG_DEFAULTS, RP_IMG_CONF_CACHE);
   return Object.assign({}, IMG_DEFAULTS);
 }
 async function setImgConfig(conf){
-  try{ await PM.store.set(IMG_CONF_KEY, conf, 'global'); return true; }
+  try{ await PM.store.set(IMG_CONF_KEY, conf, 'global'); RP_IMG_CONF_CACHE = conf; return true; }
   catch(e){
-    try{ await PM.store.set(IMG_CONF_KEY, conf, 'chat'); toast('Сохранено только для этого чата — общее хранилище недоступно'); return true; }
+    try{ await PM.store.set(IMG_CONF_KEY, conf, 'chat'); RP_IMG_CONF_CACHE = conf; toast('Сохранено только для этого чата — общее хранилище недоступно'); return true; }
     catch(e2){ console.error('RP img conf save failed', e2); toast('Не удалось сохранить настройки картинок'); return false; }
   }
 }
+async function rpImgConfPatch(patch){
+  var r = await rpReadStrict(IMG_CONF_KEY);
+  if (!r.ok && !RP_IMG_CONF_CACHE){ toast('Не удалось прочитать настройки — попробуй ещё раз'); return false; }
+  var cur = r.ok && r.v ? r.v : (RP_IMG_CONF_CACHE || {});
+  return await setImgConfig(Object.assign({}, IMG_DEFAULTS, cur, patch));
+}
 var IMG_STYLES_KEY = 'rp_img_styles';
 async function getImgStyles(){
-  try{ var v = await PM.store.get(IMG_STYLES_KEY, 'global'); if (Array.isArray(v)) return v; }catch(e){}
+  var r = await rpReadStrict(IMG_STYLES_KEY);
+  if (r.ok && Array.isArray(r.v)){ RP_IMG_STYLES_CACHE = r.v; return r.v; }
+  if (!r.ok && RP_IMG_STYLES_CACHE) return RP_IMG_STYLES_CACHE.slice();
   return [];
 }
+async function getImgStylesStrict(){
+  var r = await rpReadStrict(IMG_STYLES_KEY);
+  if (r.ok){ var l = Array.isArray(r.v) ? r.v : []; RP_IMG_STYLES_CACHE = l; return l; }
+  return RP_IMG_STYLES_CACHE ? RP_IMG_STYLES_CACHE.slice() : null;
+}
 async function setImgStyles(list){
-  try{ await PM.store.set(IMG_STYLES_KEY, list, 'global'); return true; }
+  try{ await PM.store.set(IMG_STYLES_KEY, list, 'global'); RP_IMG_STYLES_CACHE = list; return true; }
   catch(e){ console.error('RP img styles save failed', e); toast('Не удалось сохранить стиль'); return false; }
 }
 var IMG_REFS_KEY = 'rp_img_refs';
@@ -683,7 +906,9 @@ async function urlToInline(url){
   if (/^data:/i.test(url)) return dataUrlToInline(url);
   try{
     var resp = await fetch(url);
+    if (!resp.ok) throw new Error('http ' + resp.status);
     var blob = await resp.blob();
+    if (blob.type && !/^image\//i.test(blob.type)) throw new Error('not an image');
     var dataUrl = await new Promise(function(resolve, reject){
       var r = new FileReader();
       r.onload = function(){ resolve(r.result); };
@@ -691,7 +916,10 @@ async function urlToInline(url){
       r.readAsDataURL(blob);
     });
     return dataUrlToInline(dataUrl);
-  }catch(e){ console.error('RP avatar fetch for reference failed', e); return null; }
+  }catch(e){
+    console.error('RP avatar fetch for reference failed', e);
+    try{ var sh = await galShrink(url, 1024, 0.9); return sh && sh.data ? dataUrlToInline(sh.data) : null; }catch(e2){ return null; }
+  }
 }
 async function imagesEnabled(){
   var c = await getImgConfig();
@@ -762,8 +990,8 @@ async function imgApiErr(resp, url){
 }
 async function genImgGeminiNative(promptText, cfg, refInlines, refLabels){
   var model = cfg.model;
-  var base = imgRstripSlash(String(cfg.endpoint||'').trim() || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/v1beta$/i,'');
-  var url = base + '/v1beta/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(cfg.apiKey);
+  var base = rpApiBase(cfg.endpoint, 'gemini') || 'https://generativelanguage.googleapis.com/v1beta';
+  var url = base + '/models/' + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(cfg.apiKey);
   var ar = cfg.aspectRatio || '1:1';
   var safety = ['HARM_CATEGORY_HARASSMENT','HARM_CATEGORY_HATE_SPEECH','HARM_CATEGORY_SEXUALLY_EXPLICIT','HARM_CATEGORY_DANGEROUS_CONTENT','HARM_CATEGORY_CIVIC_INTEGRITY'].map(function(c){ return { category:c, threshold:'BLOCK_NONE' }; });
   var parts = [];
@@ -879,7 +1107,8 @@ async function genImgOpenAIChat(promptText, cfg, refInlines, refLabels){
     refParts.push({ type:'image_url', image_url:{ url:'data:'+r.mimeType+';base64,'+r.data } });
   });
   var body = { model: cfg.model, messages:[{ role:'user', content: refParts.length ? refParts.concat([{ type:'text', text:'Generate an image: '+promptText }]) : 'Generate an image: '+promptText }], modalities:['image','text'] };
-  var send = function(b){ return imgFetchT(url, { method:'POST', headers:{ 'Authorization':'Bearer '+cfg.apiKey, 'Content-Type':'application/json' }, body: JSON.stringify(b) }); };
+  var url = rpApiBase(cfg.endpoint, 'openai') + '/chat/completions';
+  var send = function(b){ return rpOpenAIPost(cfg.endpoint, cfg.apiKey, b, IMG_GEN_TIMEOUT); };
   var resp = await send(body);
   if (!resp.ok && resp.status === 400){
     var t0 = await resp.text().catch(function(){ return ''; });
@@ -1049,6 +1278,7 @@ async function rpGenerateImageInner(promptText, cfgOverride, extraRefs, req){
         }catch(e){ console.error('RP img extra ref failed', e); }
       }
     }
+    if (refInlines.length) labelParts.push('Every person who has a reference image must keep that reference face, hairstyle, hair colour and skin tone exactly; ignore any conflicting description of their face, hair, skin or ethnicity in the scene text');
     if (labelParts.length) finalPrompt = labelParts.map(function(x){ return String(x).replace(/[.\s]+$/, ''); }).join('. ') + '. ' + finalPrompt;
   }catch(e){ console.error('RP img refs read failed', e); }
   if (cfg.styleId){
@@ -1167,10 +1397,11 @@ async function scanHdrClock(n){
       var m = content.match(/\[HDR\]([\s\S]*?)\[\/HDR\]/i);
       if (!m) continue;
       var block = m[1];
-      var dateM = block.match(/(?:date|дата)\s*:\s*([^\n]+?)(?=\s*(?:day|день)\s*:|$)/i);
-      var dayM = block.match(/(?:day|день)\s*:\s*([^\n]+?)(?=\s*(?:date|дата)\s*:|$)/i);
+      var dateM = block.match(/(?:date|дата)\s*:\s*([^\n]+?)(?=\s*(?:day|день|time|время)\s*:|$)/i);
+      var dayM = block.match(/(?:day|день)\s*:\s*([^\n]+?)(?=\s*(?:date|дата|time|время)\s*:|$)/i);
+      var timeM = block.match(/(?:time|время)\s*:\s*([^\n]+?)(?=\s*(?:date|дата|day|день)\s*:|$)/i);
       if (dateM || dayM){
-        return { date: dateM ? dateM[1].trim() : '', day: dayM ? dayM[1].trim() : '' };
+        return { date: dateM ? dateM[1].trim() : '', day: dayM ? dayM[1].trim() : '', time: timeM ? timeM[1].trim() : '' };
       }
     }
     return null;
@@ -1199,66 +1430,6 @@ async function currentRpLabel(){
 
 
 
-function rpEditFields(title, fields){
-  return new Promise(function(resolve){
-    var root = document.getElementById('rp_screen') || document.getElementById('rp_frame') || document.body;
-    var ov = document.createElement('div'); ov.className = 'rp_confirm_overlay'; ov.style.zIndex = 99999;
-    var card = document.createElement('div'); card.className = 'rp_confirm_card rp_edit_card';
-    var h = '<div class="rp_confirm_title">' + escapeHtml(title || 'Редактировать') + '</div>';
-    fields.forEach(function(f, i){
-      h += '<div class="rp_edit_lbl">' + escapeHtml(f.label || '') + '</div>';
-      if (f.line) h += '<input class="rp_input rp_edit_in" data-i="' + i + '" value="' + escapeHtml(f.value || '') + '">';
-      else h += '<textarea class="rp_input rp_edit_in" data-i="' + i + '" rows="' + (f.rows || 5) + '">' + escapeHtml(f.value || '') + '</textarea>';
-    });
-    h += '<div class="rp_edit_row"><button class="rp_btn rp_edit_no">Отмена</button><button class="rp_btn rp_btn_primary rp_edit_ok">Сохранить</button></div>';
-    card.innerHTML = h; ov.appendChild(card); root.appendChild(ov);
-    function done(v){ if (ov.parentNode) ov.parentNode.removeChild(ov); resolve(v); }
-    ov.addEventListener('click', function(e){ if (e.target === ov) done(null); });
-    ['mousedown','touchstart'].forEach(function(ev){ card.addEventListener(ev, function(e){ e.stopPropagation(); }); });
-    card.querySelector('.rp_edit_no').addEventListener('click', function(){ done(null); });
-    card.querySelector('.rp_edit_ok').addEventListener('click', function(){
-      var out = {}; fields.forEach(function(f, i){ out[f.k] = card.querySelector('[data-i="' + i + '"]').value; }); done(out);
-    });
-    var first = card.querySelector('.rp_edit_in'); if (first) setTimeout(function(){ try{ first.focus(); }catch(e){} }, 30);
-  });
-}
-function rpWireEdit(wrap, selector, key, fields, rerender, title){
-  if (!wrap) return;
-  Array.prototype.forEach.call(wrap.querySelectorAll(selector), function(card){
-    if (card.querySelector(':scope > .rp_edit_btn')) return;
-    var b = document.createElement('div'); b.className = 'rp_edit_btn'; b.textContent = '✎'; b.title = 'Редактировать';
-    if (card.querySelector(':scope > .rp_del_tr')) b.classList.add('rp_edit_tr');
-    card.appendChild(b);
-    ['mousedown','touchstart','mouseup'].forEach(function(ev){ b.addEventListener(ev, function(e){ e.stopPropagation(); }); });
-    b.addEventListener('click', async function(e){
-      e.preventDefault(); e.stopPropagation();
-      card.classList.remove('rp_del_armed');
-      var list = await rpGet(key, []), id = card.getAttribute('data-id');
-      var it = list.find(function(x){ return x.id === id; }); if (!it) return;
-      var res = await rpEditFields(title, fields.map(function(f){ return { k:f.k, label:f.label, line:f.line, rows:f.rows, value: it[f.k] == null ? '' : String(it[f.k]) }; }));
-      if (!res) return;
-      fields.forEach(function(f){ if (f.k in res) it[f.k] = res[f.k]; });
-      await rpSet(key, list);
-      await rerender();
-    });
-  });
-}
-document.addEventListener('click', async function(e){
-  var sp = e.target && e.target.closest ? e.target.closest('.rp_cm_edit') : null;
-  if (!sp) return;
-  e.preventDefault(); e.stopPropagation();
-  var ci = +sp.getAttribute('data-ci');
-  var tw = sp.closest('.rp_tw_tweet'), ch = sp.closest('.rp_ch_post');
-  var row = tw || ch; if (!row) return;
-  var id = row.getAttribute('data-id'), key = tw ? 'rp_tweets' : 'rp_tg_posts';
-  var list = await rpGet(key, []), it = list.find(function(x){ return x.id === id; });
-  var c = it && it.comments && it.comments[ci]; if (!c) return;
-  var res = await rpEditFields('Комментарий', [{ k:'text', label: c.author || 'Комментарий', rows:4, value: c.text || '' }]);
-  if (!res) return;
-  c.text = res.text; await rpSet(key, list);
-  if (tw) await twOpenComments(row, id, true);
-  else { var slot = row.querySelector('.rp_ch_comments_slot'); if (slot) renderChCommentsInto(slot, id, row.querySelector('[data-act="comments"]')); }
-}, true);
 function showChoiceModal(opts){
   return new Promise(function(resolve){
     var root = $('#rp_screen') || $('#rp_frame');
@@ -1357,14 +1528,15 @@ async function upsertLorebookEntry(identifier, name, content, opts){
 var BG_VARS = ['bg1','bg2','text','textdim','tile','tileborder','border','glass1','glass2'];
 var ICON_VARS = ['accent','accent2'];
 async function applyBgPreset(id, persist){
-  var preset = BG_PRESETS.find(function(p){ return p.id===id; }) || BG_PRESETS[0];
+  var preset = (id === 'custom' ? rpBgFromColors(await rpGet('rp_bg_custom', null)) : null) || BG_PRESETS.find(function(p){ return p.id===id; }) || BG_PRESETS[0];
   var root = $('#rp_root');
   BG_VARS.forEach(function(k){ root.style.setProperty('--'+k, preset[k]); });
   if (persist !== false) await rpSet('rp_bg_preset', preset.id);
   return preset;
 }
 async function applyIconPreset(id, persist){
-  var preset = ICON_PRESETS.find(function(p){ return p.id===id; }) || ICON_PRESETS[0];
+  var cu = id === 'custom' ? await rpGet('rp_icon_custom', null) : null;
+  var preset = (cu && rpHex6(cu.accent) ? { id:'custom', label:'Свой', accent: cu.accent, accent2: cu.accent2 || cu.accent } : null) || ICON_PRESETS.find(function(p){ return p.id===id; }) || ICON_PRESETS[0];
   var root = $('#rp_root');
   ICON_VARS.forEach(function(k){ root.style.setProperty('--'+k, preset[k]); });
   if (persist !== false) await rpSet('rp_icon_preset', preset.id);
@@ -2010,9 +2182,8 @@ async function renderNotesJar(wrap){
     if (!notes.length){ wrap.innerHTML = '<div class="rp_empty">Записок пока нет.</div>'; return; }
     var shown = notes.slice(-150);
     wrap.innerHTML = shown.map(function(n){
-      return '<div class="rp_note_bubble'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn">'+RP_DEL_ICON+'</div><span>'+escapeHtml(n.text)+'</span></div>';
+      return '<div class="rp_note_bubble'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn">'+RP_DEL_ICON+'</div><span'+rpEdA('rp_notes',[n.id,'text'])+'>'+escapeHtml(n.text)+'</span></div>';
     }).join('');
-    rpWireEdit(wrap, '.rp_note_bubble', 'rp_notes', [{k:'text',label:'Записка'}], function(){ return renderNotesJar(wrap); }, 'Записка');
     rpWireLongPressDelete(wrap, '.rp_note_bubble', async function(id){
       var list = await rpGet('rp_notes', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2027,9 +2198,8 @@ async function renderRemindersJar(wrap){
     if (!reminders.length){ wrap.innerHTML = '<div class="rp_empty">Напоминаний пока нет.</div>'; return; }
     var shown = reminders.slice(-150);
     wrap.innerHTML = shown.map(function(n){
-      return '<div class="rp_reminder_chip'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg class="rp_reminder_bell"><use href="#rpi-bell"/></svg><span>'+escapeHtml(n.text)+'</span></div>';
+      return '<div class="rp_reminder_chip'+(n.hidden?' rp_note_hidden':'')+'" data-id="'+n.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg class="rp_reminder_bell"><use href="#rpi-bell"/></svg><span'+rpEdA('rp_reminders',[n.id,'text'])+'>'+escapeHtml(n.text)+'</span></div>';
     }).join('');
-    rpWireEdit(wrap, '.rp_reminder_chip', 'rp_reminders', [{k:'text',label:'Напоминание'}], function(){ return renderRemindersJar(wrap); }, 'Напоминание');
     rpWireLongPressDelete(wrap, '.rp_reminder_chip', async function(id){
       var list = await rpGet('rp_reminders', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2529,9 +2699,8 @@ async function renderDiaryList(wrap){
     wrap.innerHTML = shown.map(function(e){
       var d = new Date(e.ts);
       var dateLabel = pad2(d.getDate())+'.'+pad2(d.getMonth()+1)+'.'+d.getFullYear();
-      return '<div class="rp_diary_entry'+(e.hidden?' rp_note_hidden':'')+'" data-id="'+e.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><div class="rp_diary_date">☕ '+dateLabel+'</div>'+escapeHtml(e.text)+'</div>';
+      return '<div class="rp_diary_entry'+(e.hidden?' rp_note_hidden':'')+'" data-id="'+e.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><div class="rp_diary_date">☕ '+dateLabel+'</div><span'+rpEdA('rp_diary',[e.id,'text'])+'>'+escapeHtml(e.text)+'</span></div>';
     }).join('');
-    rpWireEdit(wrap, '.rp_diary_entry', 'rp_diary', [{k:'text',label:'Запись',rows:8}], function(){ return renderDiaryList(wrap); }, 'Запись дневника');
     rpWireLongPressDelete(wrap, '.rp_diary_entry', async function(id){
       var list = await rpGet('rp_diary', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2573,14 +2742,13 @@ async function renderSecretsList(wrap){
     wrap.innerHTML = shown.map(function(s){
       return '<div class="rp_secret_seal_card'+(s.hidden?' rp_note_hidden':'')+'" data-id="'+s.id+'">'+
         '<div class="rp_del_btn">'+RP_DEL_ICON+'</div>'+
-        '<div class="rp_secret_seal_text">'+escapeHtml(s.text)+'</div>'+
+        '<div class="rp_secret_seal_text"'+rpEdA('rp_secrets',[s.id,'text'])+'>'+escapeHtml(s.text)+'</div>'+
         '<div class="rp_secret_seal_btn" data-act="reveal">☕</div>'+
       '</div>';
     }).join('');
     wrap.querySelectorAll('.rp_secret_seal_card').forEach(function(card){
       card.querySelector('[data-act=reveal]').addEventListener('click', function(){ card.classList.toggle('rp_revealed'); });
     });
-    rpWireEdit(wrap, '.rp_secret_seal_card', 'rp_secrets', [{k:'text',label:'Секрет',rows:6}], function(){ return renderSecretsList(wrap); }, 'Секрет');
     rpWireLongPressDelete(wrap, '.rp_secret_seal_card', async function(id){
       var list = await rpGet('rp_secrets', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2734,7 +2902,6 @@ async function renderTweetFeed(wrap){
       row.querySelector('[data-act=reply]').addEventListener('click', openC);
       var cl = row.querySelector('.rp_tw_clink'); if (cl) cl.addEventListener('click', openC);
     });
-    rpWireEdit(wrap, '.rp_tw_tweet', 'rp_tweets', [{k:'author',label:'Автор',line:true},{k:'text',label:'Твит',rows:6}], function(){ return renderTweetFeed(wrap); }, 'Твит');
     rpWireLongPressDelete(wrap, '.rp_tw_tweet', async function(id){
       var list = await rpGet('rp_tweets', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -2743,9 +2910,9 @@ async function renderTweetFeed(wrap){
     });
   }catch(e){ console.error(e); wrap.innerHTML = '<div class="rp_empty">Не удалось загрузить ленту.</div>'; }
 }
-function renderTwComments(comments){
+function renderTwComments(comments, tid){
   var rows = (comments || []).map(function(c, i){
-    return '<div class="rp_tw_comment' + (c.me ? ' me' : '') + (c.replyTo ? ' sub' : '') + '"><b>' + escapeHtml(c.author) + (c.replyTo ? ' <span class="rp_tw_rto">→ ' + escapeHtml(c.replyTo) + '</span>' : '') + ':</b> ' + twHighlight(c.text) + ' <span class="rp_cm_edit" data-ci="' + i + '">✎</span>' + (c.me ? '' : ' <span class="rp_tw_creply" data-ci="' + i + '">Ответить</span>') + '</div>';
+    return '<div class="rp_tw_comment' + (c.me ? ' me' : '') + (c.replyTo ? ' sub' : '') + '"><b>' + escapeHtml(c.author) + (c.replyTo ? ' <span class="rp_tw_rto">→ ' + escapeHtml(c.replyTo) + '</span>' : '') + ':</b> <span data-edf="tw"' + rpEdA('rp_tweets', [tid, 'comments', '#' + i, 'text']) + '>' + twHighlight(c.text) + '</span>' + (c.me ? '' : ' <span class="rp_tw_creply" data-ci="' + i + '">Ответить</span>') + '</div>';
   }).join('');
   return '<div class="rp_tw_comments">' + (rows || '<div class="rp_muted" style="padding:2px 0;">Пока без комментариев.</div>') +
     '<div class="rp_tw_cbox"><input class="rp_input rp_tw_cin" placeholder="Твой комментарий…" maxlength="280"><div class="rp_tw_csend"><svg><use href="#rpi-send"/></svg></div></div></div>';
@@ -2764,7 +2931,7 @@ async function twOpenComments(row, id, keepOpen){
     list = await rpGet('rp_tweets', []); t = list.find(function(x){ return x.id === id; }); if (!t) return;
     t.comments = gen; await rpSet('rp_tweets', list);
   }
-  slot.innerHTML = renderTwComments(t.comments);
+  slot.innerHTML = renderTwComments(t.comments, id);
   var cntEl = row.querySelector('[data-act=reply] span'); if (cntEl) cntEl.textContent = t.comments.length;
   var inp = slot.querySelector('.rp_tw_cin');
   slot.querySelectorAll('.rp_tw_creply').forEach(function(b){
@@ -2822,7 +2989,7 @@ function tweetRowHtml(t){
     '<div class="rp_tw_avatar" style="background:'+avColor+'">'+escapeHtml(initials)+'</div>'+
     '<div class="rp_tw_body">'+
       '<div class="rp_tw_head"><span class="rp_tw_name">'+escapeHtml(t.author)+'</span>'+(t.kind==='char'?'<svg class="rp_tw_verified"><use href="#rpi-check"/></svg>':'')+'<span class="rp_tw_handle">@'+escapeHtml(t.handle||'')+'</span><span class="rp_tw_dot">·</span><span class="rp_tw_time">'+fmtTwTime(t.ts)+'</span></div>'+
-      '<div class="rp_tw_text">'+twHighlight(t.text)+'</div>'+
+      '<div class="rp_tw_text" data-edf="tw"'+rpEdA('rp_tweets',[t.id,'text'])+'>'+twHighlight(t.text)+'</div>'+
       '<div class="rp_tw_actions">'+
         '<div class="rp_tw_act" data-act="reply"><svg><use href="#rpi-reply"/></svg><span>'+(t.comments?t.comments.length:(t.commentCount||''))+'</span></div>'+
         '<div class="rp_tw_act'+(t.retweeted?' retweeted':'')+'" data-act="retweet"><svg><use href="#rpi-retweet"/></svg><span>'+(t.retweets||0)+'</span></div>'+
@@ -2975,10 +3142,9 @@ async function renderMemoriesList(wrap){
       return '<div class="rp_mem_row'+(m.hidden?' rp_mem_hidden':'')+'" data-id="'+m.id+'">'+
         '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
         '<div class="rp_mem_icon"><svg><use href="#rpi-star"/></svg></div>'+
-        '<div class="rp_mem_body"><div class="rp_mem_date">'+escapeHtml(m.dateLabel||'')+'</div><div class="rp_mem_text">'+escapeHtml(m.text)+'</div></div>'+
+        '<div class="rp_mem_body"><div class="rp_mem_date">'+escapeHtml(m.dateLabel||'')+'</div><div class="rp_mem_text"'+rpEdA('rp_memories',[m.id,'text'])+'>'+escapeHtml(m.text)+'</div></div>'+
       '</div>';
     }).join('')+'</div>';
-    rpWireEdit(wrap, '.rp_mem_row', 'rp_memories', [{k:'text',label:'Воспоминание',rows:6}], function(){ return renderMemoriesList(wrap); }, 'Воспоминание');
     rpWireLongPressDelete(wrap, '.rp_mem_row', async function(id){
       var list = await rpGet('rp_memories', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -3131,7 +3297,7 @@ async function renderNpcsList(wrap){
           '</div>'+
           '<div><div class="rp_npc_name">'+escapeHtml(n.name)+'</div>'+(n.relation?('<div class="rp_npc_relation">'+escapeHtml(n.relation)+'</div>'):'')+'</div>'+
         '</div>'+
-        (n.about ? ('<div class="rp_npc_about">'+escapeHtml(n.about)+'</div>') : '')+
+        (n.about ? ('<div class="rp_npc_about"'+rpEdIf('rp_npcs2',[],n,['about'])+'>'+escapeHtml(n.about)+'</div>') : '')+
       '</div>';
     }).join('');
     if (rpNativeOk()) Array.prototype.forEach.call(wrap.querySelectorAll('.rp_npc_avatar_wrap'), function(aw){
@@ -3184,10 +3350,10 @@ function resizeImageToDataUrl(file, size){
         canvas.getContext('2d').drawImage(img, sx, sy, side, side, 0, 0, size, size);
         PM.media.saveDataUrl(canvas.toDataURL('image/jpeg', 0.85), { prefix:'sq' }).then(resolve, reject);
       };
-      img.onerror = function(){ reject(new Error('файл не открылся как картинка')); };
+      img.onerror = function(){ reject(new Error('img load failed')); };
       img.src = e.target.result;
     };
-    reader.onerror = function(){ reject(new Error('не удалось прочитать файл')); };
+    reader.onerror = function(){ reject(new Error('file read failed')); };
     reader.readAsDataURL(file);
   });
 }
@@ -3492,7 +3658,7 @@ function dlvPlaceCard(p, fav){
       '<span class="fee'+(fee===0?' free':'')+'">'+(fee===0 ? 'Доставка 0' : 'Доставка '+escapeHtml(fmtMoney(fee)))+'</span>'+
       '<div class="heart'+(fav?' on':'')+'"><svg><use href="#'+(fav?'rpi-heart-fill':'rpi-heart')+'"/></svg></div>'+
       '<span class="cu">'+escapeHtml(p.cuisine||(p.type==='store'?'Магазин':'Ресторан'))+'</span>'+(p.rating?'<span class="rt">★ '+escapeHtml(String(p.rating))+'</span>':'')+'</div>'+
-    '<div class="dlv_pbody"><div><div class="n">'+escapeHtml(p.name)+'</div><div class="m"><svg><use href="#rpi-calendar"/></svg>'+escapeHtml(p.eta||'—')+'</div></div><div class="dlv_chev"><svg style="transform:rotate(180deg);"><use href="#rpi-back"/></svg></div></div></div>';
+    '<div class="dlv_pbody"><div><div class="n"'+rpEdIf('rp_delivery_places',[],p,['name'])+'>'+escapeHtml(p.name)+'</div><div class="m"><svg><use href="#rpi-calendar"/></svg>'+escapeHtml(p.eta||'—')+'</div></div><div class="dlv_chev"><svg style="transform:rotate(180deg);"><use href="#rpi-back"/></svg></div></div></div>';
 }
 async function dlvToggleFav(id){
   var f = await rpGet('rp_delivery_favs', []); var i = f.indexOf(id);
@@ -3569,9 +3735,9 @@ async function dlvMenuList(wrap, place, menu, scope, ov){
   var keep = wrap.scrollTop;
   wrap.innerHTML = top + menu.map(function(it){
     var ph = !imgOn ? '<div class="ph">'+deliveryPlaceIcon(place.id)+'</div>' :
-      (it.img ? '<div class="ph"><img src="'+escapeHtml(it.img)+'" alt=""></div>' :
+      (it.img ? '<div class="ph"><img src="'+escapeHtml(it.img)+'" alt="" data-rpimg="dlv|'+menuKey+'|'+it.id+'"></div>' :
         (dlvSt.ids[it.id] ? '<div class="ph loading" data-genid="'+it.id+'">⏳</div>' : '<div class="ph gen" data-genid="'+it.id+'" title="Сгенерировать фото">🍽️</div>'));
-    return '<div class="dlv_item" data-id="'+it.id+'">'+ph+'<div style="flex:1;min-width:0;"><div class="nm">'+escapeHtml(it.name)+'</div>'+(it.desc?'<div class="ds">'+escapeHtml(it.desc)+'</div>':'')+
+    return '<div class="dlv_item" data-id="'+it.id+'">'+ph+'<div style="flex:1;min-width:0;"><div class="nm"'+rpEdIf('rp_delivery_menu_'+place.id,[],it,['name'])+'>'+escapeHtml(it.name)+'</div>'+(it.desc?'<div class="ds"'+rpEdIf('rp_delivery_menu_'+place.id,[],it,['desc'])+'>'+escapeHtml(it.desc)+'</div>':'')+
       '<div class="rw"><span class="pr">'+escapeHtml(String(it.price))+'</span><span class="go">Выбрать</span></div></div></div>';
   }).join('');
   wrap.scrollTop = keep;
@@ -3632,8 +3798,9 @@ function dlvDishModal(scope, place, it, ov){
   var size = 0, qty = 1, unit = dlvNum(it.price);
   var unitStr = extractCurrencyUnit(it.price);
   var m = dlvModal(scope, '<div class="h"><b>'+escapeHtml(it.name)+'</b><div class="x" data-close>×</div></div>'+
-    '<div class="im">'+(it.img ? '<img src="'+escapeHtml(it.img)+'" alt="">' : deliveryPlaceIcon(place.id))+'</div>'+
+    '<div class="im">'+(it.img ? '<img src="'+escapeHtml(it.img)+'" alt="" data-rpimg="dlv|rp_delivery_menu_'+place.id+'|'+it.id+'">' : deliveryPlaceIcon(place.id))+'</div>'+
     (it.desc ? '<p>'+escapeHtml(it.desc)+'</p>' : '')+
+    '<div class="dlv_cta rpx_mini" style="background:transparent;border:1px solid rgba(128,128,128,.45);color:inherit;font-size:11px;padding:8px;margin:6px 0;" data-rpimgtap="dlv|rp_delivery_menu_'+place.id+'|'+it.id+'">🖼 '+(it.img ? 'Перегенерировать фото / изменить промпт' : 'Сгенерировать фото')+'</div>'+
     (isRest ? '<div><div style="font-size:11px;font-weight:800;margin-bottom:5px;">Размер порции</div><div class="dlv_seg" id="dlv_sz">'+DLV_SIZES.map(function(s,i){ return '<div data-s="'+i+'" class="'+(i===0?'on':'')+'">'+s[0]+(s[1]?' +'+Math.round(s[1]*100)+'%':'')+'</div>'; }).join('')+'</div></div>' : '')+
     '<div class="dlv_row"><div class="dlv_stepper"><div class="s" id="dlv_qm">−</div><b id="dlv_qv">1</b><div class="s" id="dlv_qp">+</div></div><div class="dlv_cta" id="dlv_add" style="flex:1;">Добавить за <span id="dlv_addp"></span></div></div>');
   function upd(){ $('#dlv_qv', m).textContent = qty; $('#dlv_addp', m).textContent = dlvR2(unit*(1+DLV_SIZES[size][1])*qty)+' '+unitStr; }
@@ -3785,7 +3952,8 @@ async function dlvCourierChat(scope, orderId){
   var m = dlvModal(scope, '<div class="h"><b>Чат с курьером</b><div class="x" data-close>×</div></div><div class="dlv_chat" id="dlv_msgs"></div><div class="dlv_row"><input class="dlv_input" id="dlv_chat_in" placeholder="Написать курьеру…" style="flex:1;"><div class="dlv_cta" id="dlv_chat_send">→</div></div>');
   function draw(){
     var box = $('#dlv_msgs', m);
-    box.innerHTML = order.chat.length ? order.chat.map(function(x){ return '<div class="'+(x.from==='me'?'m':'c')+'">'+escapeHtml(x.text)+'</div>'; }).join('') : '<div class="c">Здравствуйте! Я '+escapeHtml(order.courier.name)+', везу ваш заказ. Пишите, если что-то нужно.</div>';
+    var tagOk = order.chat.length <= 40;
+    box.innerHTML = order.chat.length ? order.chat.map(function(x, xi){ return '<div class="'+(x.from==='me'?'m':'c')+'"'+(tagOk?rpEdA('rp_delivery_orders',[orderId,'chat','#'+xi,'text']):'')+'>'+escapeHtml(x.text)+'</div>'; }).join('') : '<div class="c">Здравствуйте! Я '+escapeHtml(order.courier.name)+', везу ваш заказ. Пишите, если что-то нужно.</div>';
     box.scrollTop = box.scrollHeight;
   }
   draw();
@@ -3793,6 +3961,7 @@ async function dlvCourierChat(scope, orderId){
   async function send(){
     var inp = $('#dlv_chat_in', m); var text = inp.value.trim(); if (!text || busy) return;
     busy = true; inp.value = '';
+    var fr = (await rpGet('rp_delivery_orders', [])).filter(function(o){ return o.id === orderId; })[0]; if (fr && fr.chat) order.chat = fr.chat;
     order.chat.push({ from:'me', text:text.slice(0,300) }); draw();
     var reply = '';
     try{
@@ -3937,14 +4106,15 @@ function buildDeliveryItemPrompt(item, place){
   }
   return 'Professional product photography of "'+item.name+'"'+(where?(' sold at '+where):'')+', clean studio background, realistic photo, no text, no logo, no watermark, no hands, no people.';
 }
-async function generateDeliveryItemPhoto(menuKey, menu, it, place){
+async function generateDeliveryItemPhoto(menuKey, menu, it, place, promptOv){
   var cfg = Object.assign({}, await getImgConfig(), { aspectRatio:'1:1', noPassports:true, galleryTag:'Еда и товары' });
-  var url = await rpGenerateImage(buildDeliveryItemPrompt(it, place), cfg);
-  it.img = url;
+  var dlvPr = promptOv || buildDeliveryItemPrompt(it, place);
+  var url = await rpGenerateImage(dlvPr, cfg);
+  it.img = url; it.imgPrompt = dlvPr;
   var stored = await rpGet(menuKey, null);
   if (Array.isArray(stored)){
     var si = stored.find(function(m){ return m.id === it.id; });
-    if (si) si.img = url;
+    if (si){ si.img = url; si.imgPrompt = dlvPr; }
     await rpSet(menuKey, stored);
   } else { await rpSet(menuKey, menu); }
   return url;
@@ -4717,7 +4887,7 @@ function bkReceipt(f){
       '<div><span>Счёт</span><b>' + (f.acct === 'bot' ? 'Карта: ' + escapeHtml(nm.char) : 'Основной счёт') + '</b></div>' +
       '<div><span>Категория</span><b class="bk_cta" id="bk_rc_cat">' + escapeHtml(cm.n) + '</b></div>' +
       (t.cb > 0 ? '<div><span>Кэшбэк</span><b class="pos">+' + fmtMoney(t.cb) + (t.cbPaid ? ', начислен' : ', придёт 1-го') + '</b></div>' : '') +
-      (t.note ? '<div><span>Комментарий</span><b>' + escapeHtml(t.note) + '</b></div>' : '') +
+      (t.note ? '<div><span>Комментарий</span><b' + rpEdIf(f.acct === 'bot' ? 'rp_bot_tx' : 'rp_bank_tx', [], t, ['note']) + '>' + escapeHtml(t.note) + '</b></div>' : '') +
       '<div><span>Источник</span><b>' + src + '</b></div>' +
     '</div><div class="bk_btns"><div class="bk_btn ghost red" id="bk_rc_del">' + bkI('trash') + 'Удалить</div><div class="bk_btn ghost" id="bk_rc_x">Закрыть</div></div>');
   $('#bk_rc_x', bg).addEventListener('click', function(){ bg.remove(); });
@@ -4862,7 +5032,7 @@ async function bkBills(body){
   var lockLeft = c.lastIncomeSetAt && c.src !== 'context' ? Math.max(0, 3600000 - (Date.now() - c.lastIncomeSetAt)) : 0;
   var h = '<div class="bk_glass bk_sal"><div class="bk_salh"><span class="bk_txi em">' + bkI('coin') + '</span><div><small>Зарплата' + (c.job ? ' · ' + escapeHtml(c.job) : '') + '</small><b>' + (c.income > 0 ? fmtMoney(c.income) : 'не указана') + '</b></div><div class="bk_ib sm" id="bk_sal_ed">' + bkI('sliders') + '</div></div>' +
     (c.income > 0 ? '<div class="bk_salr"><span>' + bkI('clock') + (c.payday || 1) + '-го числа · через ' + bkDays(mo.dPay) + '</span>' + (c.src === 'context' ? '<em>по истории</em>' : '') + '</div>' : '') +
-    (c.why ? '<p class="bk_why">' + escapeHtml(c.why) + '</p>' : '') + '</div>';
+    (c.why ? '<p class="bk_why"' + rpEdA('rp_bank_config', ['why']) + '>' + escapeHtml(c.why) + '</p>' : '') + '</div>';
   h += '<div class="bk_row2"><div class="bk_btn" data-prof="1">' + bkI('spark') + 'Найти по истории</div><div class="bk_btn ghost" id="bk_bill_add">' + bkI('plus') + 'Платёж</div></div>';
   if (all.length){
     var act = all.filter(function(b){ return b.active; }), tot = act.reduce(function(s, b){ return s + (b.amount || 0); }, 0), byc = {};
@@ -4994,8 +5164,8 @@ function bkTaskHtml(k, mini){
   var goal = k.type === 'save' ? 'Отложить ' + fmtMoney(k.amount) : (k.type === 'transfer' ? 'Перевести ' + fmtMoney(k.amount) + ': ' + nmc : (k.type === 'nospend' ? bkDays(k.days) + ' без трат: ' + bkCatMeta(k.cat).n.toLowerCase() : (k.type === 'cap' ? 'Не больше ' + fmtMoney(k.amount) + ' на ' + bkCatMeta(k.cat).n.toLowerCase() + ' за ' + bkDays(k.days) : 'Не меньше ' + fmtMoney(k.amount) + ' на счету ' + bkDays(k.days))));
   var pv = Math.round((k.prog || 0) * 100), st = k.status;
   var right = st === 'done' ? '<div class="bk_btn sm gold" data-claim="' + escapeHtml(k.id) + '">' + bkI('trophy') + '+' + fmtMoney(k.reward) + '</div>' : (st === 'claimed' ? '<em class="bk_tk ok">' + bkI('check') + 'Получено</em>' : (st === 'failed' ? '<em class="bk_tk no">Не вышло</em>' : '<em class="bk_tk">+' + fmtMoney(k.reward) + '</em>'));
-  return '<div class="bk_task ' + st + '" data-tid="' + escapeHtml(k.id) + '"><div class="bk_taskh"><span class="bk_txi am">' + bkI(st === 'done' || st === 'claimed' ? 'trophy' : 'flag') + '</span><div class="bk_txm"><b><span>' + escapeHtml(k.title) + '</span></b><small>' + escapeHtml(goal) + '</small></div>' + right + '</div>' +
-    (!mini && k.desc ? '<p class="bk_why">' + escapeHtml(k.desc) + '</p>' : '') +
+  return '<div class="bk_task ' + st + '" data-tid="' + escapeHtml(k.id) + '"><div class="bk_taskh"><span class="bk_txi am">' + bkI(st === 'done' || st === 'claimed' ? 'trophy' : 'flag') + '</span><div class="bk_txm"><b><span' + rpEdIf('rp_bank_tasks', ['list'], k, ['title']) + '>' + escapeHtml(k.title) + '</span></b><small>' + escapeHtml(goal) + '</small></div>' + right + '</div>' +
+    (!mini && k.desc ? '<p class="bk_why"' + rpEdIf('rp_bank_tasks', ['list'], k, ['desc']) + '>' + escapeHtml(k.desc) + '</p>' : '') +
     (st === 'active' ? '<div class="bk_limbar t"><i style="width:' + Math.max(3, pv) + '%"></i></div><div class="bk_limf"><span>' + (k.type === 'save' || k.type === 'transfer' ? fmtMoney(k.val || 0) + ' из ' + fmtMoney(k.amount) : (k.type === 'cap' ? 'Потрачено ' + fmtMoney(k.val || 0) : 'Прошло ' + Math.round((k.prog || 0) * k.days) + ' из ' + bkDays(k.days))) + '</span><span>' + pv + '%</span></div>' : '') + '</div>';
 }
 async function bkTasksView(gb){
@@ -5475,7 +5645,7 @@ async function renderMarketProductList(wrap, catId, scope, cartBarWrap){
         '<div class="rp_mkt_product_icon">'+marketCatMeta(catId).emoji+
           (qty===0 ? '<button type="button" class="rp_mkt_add_fab" data-act="plus" data-id="'+p.id+'">+</button>' : '')+
         '</div>'+
-        '<div class="rp_mkt_product_body"><div class="rp_mkt_product_name">'+escapeHtml(p.name)+'</div>'+
+        '<div class="rp_mkt_product_body"><div class="rp_mkt_product_name"'+rpEdIf(key,[],p,['name'])+'>'+escapeHtml(p.name)+'</div>'+
           '<div class="rp_mkt_product_meta">★ '+escapeHtml(String(p.rating||'4.5'))+'</div>'+
           '<div class="rp_mkt_product_price">'+escapeHtml(p.price)+'</div>'+
         '</div>'+
@@ -5582,14 +5752,14 @@ async function renderMarketProductDetail(scope){
   var avgRating = reviews.length ? (reviews.reduce(function(s,r){ return s+r.rating; }, 0)/reviews.length).toFixed(1) : String(product.rating||'4.5');
   var info = el('div','rp_mkt_detail_info');
   info.innerHTML =
-    '<div class="rp_mkt_detail_name">'+escapeHtml(product.name)+'</div>'+
+    '<div class="rp_mkt_detail_name"'+rpEdIf(key,[],product,['name'])+'>'+escapeHtml(product.name)+'</div>'+
     '<div class="rp_mkt_detail_rating">★ '+escapeHtml(avgRating)+' <span class="rp_muted">· '+reviews.length+' отзыв'+(reviews.length===1?'':(reviews.length>=2&&reviews.length<=4?'а':'ов'))+'</span></div>'+
     '<div class="rp_mkt_detail_price">'+escapeHtml(product.price)+'</div>';
   scope.appendChild(info);
 
   if (product.detail.description){
     var descBlock = el('div','rp_mkt_detail_section');
-    descBlock.innerHTML = '<div class="rp_mkt_detail_section_title">Описание</div><div class="rp_mkt_detail_desc">'+escapeHtml(product.detail.description)+'</div>';
+    descBlock.innerHTML = '<div class="rp_mkt_detail_section_title">Описание</div><div class="rp_mkt_detail_desc"'+rpEdIf(key,[],product,['detail','description'])+'>'+escapeHtml(product.detail.description)+'</div>';
     scope.appendChild(descBlock);
   }
   if (product.detail.specs && product.detail.specs.length){
@@ -5600,8 +5770,8 @@ async function renderMarketProductDetail(scope){
   }
   var reviewsBlock = el('div','rp_mkt_detail_section');
   reviewsBlock.innerHTML = '<div class="rp_mkt_detail_section_title">Отзывы</div>'+
-    (reviews.length ? reviews.map(function(r){
-      return '<div class="rp_mkt_review"><div class="rp_mkt_review_head"><span class="rp_mkt_review_author">'+escapeHtml(r.author)+'</span><span class="rp_mkt_review_stars">'+'★'.repeat(r.rating)+'<span style="opacity:.3;">'+'★'.repeat(5-r.rating)+'</span></span></div><div class="rp_mkt_review_text">'+escapeHtml(r.text)+'</div></div>';
+    (reviews.length ? reviews.map(function(r, ri){
+      return '<div class="rp_mkt_review"><div class="rp_mkt_review_head"><span class="rp_mkt_review_author">'+escapeHtml(r.author)+'</span><span class="rp_mkt_review_stars">'+'★'.repeat(r.rating)+'<span style="opacity:.3;">'+'★'.repeat(5-r.rating)+'</span></span></div><div class="rp_mkt_review_text"'+rpEdIf(key,[],product,['detail','reviews','#'+ri,'text'])+'>'+escapeHtml(r.text)+'</div></div>';
     }).join('') : '<div class="rp_muted">Пока без отзывов</div>');
   scope.appendChild(reviewsBlock);
 
@@ -5957,8 +6127,8 @@ async function renderCalendarBody(scope){
   var meta = await rpGet('rp_calendar_meta', null);
   if (meta && (meta.title || meta.note)){
     var banner = el('div','rp_cal_banner');
-    banner.innerHTML = (meta.title ? '<div class="rp_cal_banner_title">'+escapeHtml(meta.title)+'</div>' : '')+
-      (meta.note ? '<div class="rp_cal_banner_note">'+escapeHtml(meta.note)+'</div>' : '');
+    banner.innerHTML = (meta.title ? '<div class="rp_cal_banner_title"'+rpEdA('rp_calendar_meta',['title'])+'>'+escapeHtml(meta.title)+'</div>' : '')+
+      (meta.note ? '<div class="rp_cal_banner_note"'+rpEdA('rp_calendar_meta',['note'])+'>'+escapeHtml(meta.note)+'</div>' : '');
     scope.appendChild(banner);
   }
   var headerRow = el('div','rp_cal_header');
@@ -6052,7 +6222,7 @@ async function renderCalendarDayPanel(wrap, scope, iso){
     (dayEvents.length ? dayEvents.map(function(e){
       return '<div class="rp_cal_event_row'+(e.hidden?' rp_note_hidden':'')+'" data-id="'+e.id+'">'+
         '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
-        '<span class="rp_cal_event_icon">'+escapeHtml(e.icon||'📌')+'</span><span class="rp_cal_event_text">'+escapeHtml(e.text)+'</span>'+
+        '<span class="rp_cal_event_icon">'+escapeHtml(e.icon||'📌')+'</span><span class="rp_cal_event_text"'+rpEdIf('rp_calendar_events',[],e)+'>'+escapeHtml(e.text)+'</span>'+
       '</div>';
     }).join('') : '<div class="rp_muted" style="margin:6px 0;">Событий нет</div>')+
     '<div class="rp_cal_icon_picker">'+CAL_ICON_SET.map(function(ic,idx){ return '<div class="rp_cal_icon_opt'+(idx===0?' on':'')+'" data-icon="'+ic+'">'+ic+'</div>'; }).join('')+'</div>'+
@@ -6078,7 +6248,6 @@ async function renderCalendarDayPanel(wrap, scope, iso){
     toast('Событие добавлено');
     await renderCalendarBody(scope);
   });
-  rpWireEdit(wrap, '.rp_cal_event_row', 'rp_calendar_events', [{k:'text',label:'Событие',line:true}], function(){ return renderCalendarBody(scope); }, 'Событие');
   rpWireLongPressDelete(wrap, '.rp_cal_event_row', async function(id){
     var list = await rpGet('rp_calendar_events', []);
     var next = list.filter(function(x){ return x.id !== id; });
@@ -6093,7 +6262,7 @@ async function renderCalendarUpcoming(wrap, scope, events, todayIso){
   wrap.innerHTML = upcoming.map(function(e){
     var d = new Date(e.iso+'T00:00:00');
     var label = d.getDate()+' '+CAL_MONTH_SHORT[d.getMonth()];
-    return '<div class="rp_cal_upcoming_row" data-iso="'+e.iso+'"><span class="rp_cal_upcoming_bullet"></span><span class="rp_cal_upcoming_date">'+label+'</span><span class="rp_cal_upcoming_icon">'+escapeHtml(e.icon||'📌')+'</span><span class="rp_cal_upcoming_text">'+escapeHtml(e.text)+'</span></div>';
+    return '<div class="rp_cal_upcoming_row" data-iso="'+e.iso+'"><span class="rp_cal_upcoming_bullet"></span><span class="rp_cal_upcoming_date">'+label+'</span><span class="rp_cal_upcoming_icon">'+escapeHtml(e.icon||'📌')+'</span><span class="rp_cal_upcoming_text"'+rpEdIf('rp_calendar_events',[],e)+'>'+escapeHtml(e.text)+'</span></div>';
   }).join('');
   wrap.querySelectorAll('[data-iso]').forEach(function(row){
     row.addEventListener('click', async function(){
@@ -6349,12 +6518,13 @@ async function makeChannelPost(channelId, text, dateLabel, source, authorName){
   };
   if (source !== 'user'){
     try{
-      if (await imagesEnabled() && Math.random() < 0.08){
+      if (await imagesEnabled() && (await rpAutoGen()) && Math.random() < 0.08){
         var channels = await rpGet('rp_tg_channels', []);
         var channel = channels.find(function(c){ return c.id === channelId; });
         var cfg = Object.assign({}, await getImgConfig(), { aspectRatio:'4:5', galleryTag:'Каналы' });
-        var url = await rpGenerateImage(buildChannelPhotoPrompt(post.text, channel), cfg);
-        post.imgUrl = url;
+        var chPr = buildChannelPhotoPrompt(post.text, channel);
+        var url = await rpGenerateImage(chPr, cfg);
+        post.imgUrl = url; post.imgPrompt = chPr;
         if (Math.random() < 0.5) post.text = '';
       }
     }catch(e){ console.error('RP channel photo post failed', e); }
@@ -6399,17 +6569,18 @@ function chPostRowHtml(p, channel){
       '<div><div class="rp_ch_post_channel">'+escapeHtml(channel?channel.name:'Канал удалён')+(isVerified?'<svg class="rp_ch_verified"><use href="#rpi-check"/></svg>':'')+'</div>'+
       (p.authorName ? '<div class="rp_muted" style="font-size:10px;">от '+escapeHtml(p.authorName)+'</div>' : '')+'</div>'+
     '</div>'+
-    (p.imgUrl ? '<img class="rp_ch_post_img" src="'+escapeHtml(p.imgUrl)+'" alt="">' : '')+
-    '<div class="rp_ch_post_text">'+escapeHtml(p.text||'')+'<span class="rp_ch_post_meta">'+(p.views?('👁 '+fmtCompactNum(p.views)+' · '):'')+fmtTwTime(p.ts)+'</span></div>'+
+    (p.imgUrl ? '<img class="rp_ch_post_img" data-rpimg="ch|'+p.id+'" src="'+escapeHtml(p.imgUrl)+'" alt="">' : '')+
+    '<div class="rp_ch_post_text">'+(p.text ? '<span'+rpEdA('rp_tg_posts',[p.id,'text'])+'>'+escapeHtml(p.text)+'</span>' : '')+'<span class="rp_ch_post_meta">'+(p.views?('👁 '+fmtCompactNum(p.views)+' · '):'')+fmtTwTime(p.ts)+'</span></div>'+
     '<div class="rp_ch_reactions_row">'+reactionsHtml+
+      '<div class="rp_ch_comments_pill rpx_mini" data-rpimgtap="ch|'+p.id+'" title="Картинка поста"><span>🖼</span></div>'+
       '<div class="rp_ch_comments_pill" data-act="comments"><svg><use href="#rpi-reply"/></svg><span>'+(p.comments?p.comments.length:(p.commentCount||0))+'</span></div>'+
     '</div>'+
     '<div class="rp_ch_comments_slot"></div>'+
   '</div>';
 }
-function chCommentsHtml(comments){
-  var list = comments && comments.length ? comments.map(function(c, i){
-    return '<div class="rp_ch_comment'+(c.isChar?' char':'')+'"><b>'+escapeHtml(c.author)+(c.isChar?'<svg class="rp_ch_verified"><use href="#rpi-check"/></svg>':'')+':</b> '+escapeHtml(c.text)+'<span class="rp_cm_edit" data-ci="'+i+'">✎</span></div>';
+function chCommentsHtml(comments, postId){
+  var list = comments && comments.length ? comments.map(function(c, ci){
+    return '<div class="rp_ch_comment'+(c.isChar?' char':'')+'"><b>'+escapeHtml(c.author)+(c.isChar?'<svg class="rp_ch_verified"><use href="#rpi-check"/></svg>':'')+':</b> <span'+rpEdA('rp_tg_posts',[postId,'comments','#'+ci,'text'])+'>'+escapeHtml(c.text)+'</span></div>';
   }).join('') : '<div class="rp_muted" style="padding:4px 0;">Пока без комментариев.</div>';
   return '<div class="rp_ch_comments">'+list+'</div>'+
     '<div class="rp_ch_comment_form"><input type="text" placeholder="Комментировать..."><div class="rp_ch_comment_send" data-act="send-comment">➤</div></div>';
@@ -6418,7 +6589,7 @@ function renderChCommentsInto(slot, postId, commentsBtn){
   rpGet('rp_tg_posts', []).then(function(posts){
     var p = posts.find(function(x){ return x.id===postId; });
     var comments = (p && p.comments) || [];
-    slot.innerHTML = chCommentsHtml(comments);
+    slot.innerHTML = chCommentsHtml(comments, postId);
     var input = slot.querySelector('input');
     var sendBtn = slot.querySelector('[data-act="send-comment"]');
     sendBtn.addEventListener('click', async function(){
@@ -6488,7 +6659,6 @@ function wireChPostRows(wrap, scope, refreshFn){
       });
     }
   });
-  rpWireEdit(wrap, '.rp_ch_post', 'rp_tg_posts', [{k:'text',label:'Текст поста',rows:8}], function(){ return refreshFn(); }, 'Пост');
   rpWireLongPressDelete(wrap, '.rp_ch_post', async function(id){
     var posts = await rpGet('rp_tg_posts', []);
     var next = posts.filter(function(x){ return x.id !== id; });
@@ -6627,7 +6797,6 @@ async function renderChChannelRows(wrap, scope){
       await renderChChannelRows(wrap, scope);
     });
   });
-  rpWireEdit(wrap, '.rp_ch_channel_row', 'rp_tg_channels', [{k:'name',label:'Название',line:true},{k:'description',label:'Описание',rows:3}], function(){ return renderChChannelRows(wrap, scope); }, 'Канал');
   rpWireLongPressDelete(wrap, '.rp_ch_channel_row', async function(id){
     var list = await rpGet('rp_tg_channels', []);
     var next = list.filter(function(x){ return x.id !== id; });
@@ -6644,7 +6813,7 @@ function chChannelRowHtml(c){
     '<div class="rp_ch_avatar" style="background:'+avColor+'">'+chAvatarInner(c)+'<div class="rp_ch_avatar_badge"><svg><use href="#rpi-megaphone"/></svg></div></div>'+
     '<div class="rp_ch_channel_body">'+
       '<div class="rp_ch_channel_name">'+escapeHtml(c.name)+'<span class="rp_ch_kind_badge">'+chKindLabel(c.kind)+'</span></div>'+
-      '<div class="rp_ch_channel_meta">'+fmtCompactNum(c.subscriberCount||0)+' подписчиков'+(c.description?(' · '+escapeHtml(c.description)):'')+'</div>'+
+      '<div class="rp_ch_channel_meta">'+fmtCompactNum(c.subscriberCount||0)+' подписчиков'+(c.description?(' · <span'+rpEdA('rp_tg_channels',[c.id,'description'])+'>'+escapeHtml(c.description)+'</span>'):'')+'</div>'+
     '</div>'+
     '<div class="rp_ch_btn'+(c.subscribed?' ghost':'')+'" data-act="sub-toggle"><span>'+(c.subscribed?'Отписаться':'Подписаться')+'</span></div>'+
   '</div>';
@@ -7267,8 +7436,8 @@ async function renderHealthStatusTab(wrap, scope, status){
     '<div class="rp_hp_ring_row">'+
       '<div class="rp_hp_ring" style="background:conic-gradient('+ringColor+' '+(hp*3.6)+'deg, rgba(255,255,255,.08) 0deg);"><div class="rp_hp_ring_inner"><div class="rp_hp_ring_val">'+Math.round(hp)+'%</div><div class="rp_hp_ring_lbl">HP</div></div></div>'+
       '<div style="flex:1;min-width:0;">'+
-        '<div class="rp_hp_dx">'+(status.dx ? escapeHtml(status.dx) : 'Диагноз не установлен')+'</div>'+
-        (status.log ? '<div class="rp_hp_dx_note">'+escapeHtml(status.log)+'</div>' : '')+
+        '<div class="rp_hp_dx">'+(status.dx ? '<span'+rpEdA('rp_health_status',['dx'])+'>'+escapeHtml(status.dx)+'</span>' : 'Диагноз не установлен')+'</div>'+
+        (status.log ? '<div class="rp_hp_dx_note"'+rpEdA('rp_health_status',['log'])+'>'+escapeHtml(status.log)+'</div>' : '')+
       '</div>'+
     '</div>'+
     '<div class="rp_hp_badge_row">'+
@@ -7287,7 +7456,7 @@ async function renderHealthStatusTab(wrap, scope, status){
     var activeSub = healthStatusSubTab || 0;
     var sub = status.tabs[activeSub] || status.tabs[0];
     tabsCard.innerHTML = '<div class="rp_hp_subtab_row">'+status.tabs.map(function(t,i){ return t && t.label ? '<div class="rp_hp_subtab'+(i===activeSub?' on':'')+'" data-sub="'+i+'">'+escapeHtml(t.label)+'</div>' : ''; }).join('')+'</div>'+
-      '<div class="rp_hp_entry_line">'+(sub && sub.text ? escapeHtml(sub.text) : '—')+'</div>';
+      '<div class="rp_hp_entry_line"'+(sub && sub.text ? rpEdA('rp_health_status',['tabs','#'+(status.tabs[activeSub] ? activeSub : 0),'text']) : '')+'>'+(sub && sub.text ? escapeHtml(sub.text) : '—')+'</div>';
     wrap.appendChild(tabsCard);
     tabsCard.querySelectorAll('[data-sub]').forEach(function(s){
       s.addEventListener('click', function(){ healthStatusSubTab = parseInt(s.getAttribute('data-sub'),10); renderHealthBody(scope); });
@@ -7303,10 +7472,10 @@ async function renderHealthLabsTab(wrap, scope){
       return '<div class="rp_hp_entry_row" data-id="'+l.id+'">'+
         '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
         '<div class="rp_hp_entry_date">'+escapeHtml(l.dateLabel||'')+'</div>'+
-        (l.blood ? '<div class="rp_hp_entry_line"><b>Кровь:</b> '+escapeHtml(l.blood)+'</div>' : '')+
-        (l.urine ? '<div class="rp_hp_entry_line"><b>Моча:</b> '+escapeHtml(l.urine)+'</div>' : '')+
-        (l.saliva ? '<div class="rp_hp_entry_line"><b>Слюна:</b> '+escapeHtml(l.saliva)+'</div>' : '')+
-        (l.log ? '<div class="rp_hp_entry_line">'+escapeHtml(l.log)+'</div>' : '')+
+        (l.blood ? '<div class="rp_hp_entry_line"><b>Кровь:</b> <span'+rpEdIf('rp_health_labs',[],l,['blood'])+'>'+escapeHtml(l.blood)+'</span></div>' : '')+
+        (l.urine ? '<div class="rp_hp_entry_line"><b>Моча:</b> <span'+rpEdIf('rp_health_labs',[],l,['urine'])+'>'+escapeHtml(l.urine)+'</span></div>' : '')+
+        (l.saliva ? '<div class="rp_hp_entry_line"><b>Слюна:</b> <span'+rpEdIf('rp_health_labs',[],l,['saliva'])+'>'+escapeHtml(l.saliva)+'</span></div>' : '')+
+        (l.log ? '<div class="rp_hp_entry_line"><span'+rpEdIf('rp_health_labs',[],l,['log'])+'>'+escapeHtml(l.log)+'</span></div>' : '')+
       '</div>';
     }).join('') : '<div class="rp_hp_empty">Анализов пока нет</div>');
   wrap.appendChild(card);
@@ -7325,9 +7494,9 @@ async function renderHealthScansTab(wrap, scope){
       return '<div class="rp_hp_entry_row" data-id="'+s.id+'">'+
         '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
         '<div class="rp_hp_entry_date">'+escapeHtml(s.dateLabel||'')+'</div>'+
-        [s.m1,s.m2,s.m3].filter(Boolean).map(function(m){ return '<div class="rp_hp_entry_line">'+escapeHtml(m)+'</div>'; }).join('')+
-        (s.verdict ? '<div class="rp_hp_entry_line"><b>Заключение:</b> '+escapeHtml(s.verdict)+'</div>' : '')+
-        (s.log ? '<div class="rp_hp_entry_line">'+escapeHtml(s.log)+'</div>' : '')+
+        ['m1','m2','m3'].filter(function(f){ return s[f]; }).map(function(f){ return '<div class="rp_hp_entry_line"><span'+rpEdIf('rp_health_scans',[],s,[f])+'>'+escapeHtml(s[f])+'</span></div>'; }).join('')+
+        (s.verdict ? '<div class="rp_hp_entry_line"><b>Заключение:</b> <span'+rpEdIf('rp_health_scans',[],s,['verdict'])+'>'+escapeHtml(s.verdict)+'</span></div>' : '')+
+        (s.log ? '<div class="rp_hp_entry_line"><span'+rpEdIf('rp_health_scans',[],s,['log'])+'>'+escapeHtml(s.log)+'</span></div>' : '')+
       '</div>';
     }).join('') : '<div class="rp_hp_empty">Снимков пока нет</div>');
   wrap.appendChild(card);
@@ -7354,10 +7523,10 @@ async function renderHealthOmsTab(wrap, scope){
       return '<div class="rp_hp_entry_row" data-id="'+l.id+'">'+
         '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
         '<div class="rp_hp_entry_date">'+escapeHtml(l.dateLabel||'')+'</div>'+
-        (l.rx ? '<div class="rp_hp_entry_line"><b>Рецепт:</b> '+escapeHtml(l.rx)+'</div>' : '')+
+        (l.rx ? '<div class="rp_hp_entry_line"><b>Рецепт:</b> <span'+rpEdIf('rp_health_oms_log',[],l,['rx'])+'>'+escapeHtml(l.rx)+'</span></div>' : '')+
         (l.cost ? '<div class="rp_hp_entry_line"><b>Стоимость:</b> '+escapeHtml(l.cost)+'</div>' : '')+
-        (l.exam ? '<div class="rp_hp_entry_line"><b>Осмотр:</b> '+escapeHtml(l.exam)+'</div>' : '')+
-        (l.log ? '<div class="rp_hp_entry_line">'+escapeHtml(l.log)+'</div>' : '')+
+        (l.exam ? '<div class="rp_hp_entry_line"><b>Осмотр:</b> <span'+rpEdIf('rp_health_oms_log',[],l,['exam'])+'>'+escapeHtml(l.exam)+'</span></div>' : '')+
+        (l.log ? '<div class="rp_hp_entry_line"><span'+rpEdIf('rp_health_oms_log',[],l,['log'])+'>'+escapeHtml(l.log)+'</span></div>' : '')+
       '</div>';
     }).join('') : '<div class="rp_hp_empty">Записей пока нет</div>');
   wrap.appendChild(logCard);
@@ -7929,7 +8098,7 @@ async function renderMapTrackerCard(scope){
     trackers.map(function(t){
       return '<div class="rp_map_tracker_row">'+
         '<div class="rp_map_tracker_icon">'+escapeHtml(t.icon||'📍')+'</div>'+
-        '<div class="rp_map_tracker_body"><div class="rp_map_tracker_name">'+escapeHtml(t.name)+(t.people&&t.people!==t.name?' · '+escapeHtml(t.people):'')+'</div>'+(t.detail?'<div class="rp_map_tracker_detail">'+escapeHtml(t.detail)+'</div>':'')+'</div>'+
+        '<div class="rp_map_tracker_body"><div class="rp_map_tracker_name">'+escapeHtml(t.name)+(t.people&&t.people!==t.name?' · '+escapeHtml(t.people):'')+'</div>'+(t.detail?'<div class="rp_map_tracker_detail"'+rpEdIf('rp_map_trackers',[],t,['detail'])+'>'+escapeHtml(t.detail)+'</div>':'')+'</div>'+
         '<div class="rp_map_tracker_badge'+(t.paused?' paused':'')+'">'+(t.paused?'Пауза':'Онлайн')+'</div>'+
       '</div>';
     }).join('');
@@ -7945,7 +8114,7 @@ function renderMapsList(scope, pins){
     return '<div class="rp_map_list_row" data-id="'+p.id+'">'+
       '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>'+
       '<span class="rp_map_list_emoji">'+mapCatMeta(p.cat).emoji+(p.fav?' ⭐':'')+'</span>'+
-      '<div class="rp_map_list_body"><div class="rp_map_list_name">'+escapeHtml(p.name)+(p.rating?' · ★'+escapeHtml(p.rating):'')+'</div>'+(p.note?'<div class="rp_map_list_note">'+escapeHtml(p.note)+'</div>':(p.address?'<div class="rp_map_list_note">'+escapeHtml(p.address)+'</div>':''))+'</div>'+
+      '<div class="rp_map_list_body"><div class="rp_map_list_name">'+escapeHtml(p.name)+(p.rating?' · ★'+escapeHtml(p.rating):'')+'</div>'+(p.note?'<div class="rp_map_list_note"'+rpEdIf('rp_map_pins',[],p,['note'])+'>'+escapeHtml(p.note)+'</div>':(p.address?'<div class="rp_map_list_note">'+escapeHtml(p.address)+'</div>':''))+'</div>'+
     '</div>';
   }).join('');
   listWrap.querySelectorAll('.rp_map_list_row').forEach(function(row){
@@ -7999,7 +8168,7 @@ async function openPinDetailSheet(scope, pinId){
   if (p.hours) detailRows += '<div class="rp_map_detail_row"><svg><use href="#rpi-note"/></svg><span>'+escapeHtml(p.hours)+'</span></div>';
   if (p.phone) detailRows += '<div class="rp_map_detail_row"><svg><use href="#rpi-house"/></svg><span>'+escapeHtml(p.phone)+'</span></div>';
   if (p.rating) detailRows += '<div class="rp_map_detail_row"><svg><use href="#rpi-sparkle"/></svg><span>Рейтинг: '+escapeHtml(p.rating)+'</span></div>';
-  if (p.desc) detailRows += '<div class="rp_map_route_desc" style="margin-bottom:10px;">'+escapeHtml(p.desc)+'</div>';
+  if (p.desc) detailRows += '<div class="rp_map_route_desc" style="margin-bottom:10px;"'+rpEdIf('rp_map_pins',[],p,['desc'])+'>'+escapeHtml(p.desc)+'</div>';
   backdrop.innerHTML = '<div class="rp_map_sheet">'+
     '<div class="rp_map_fav_star'+(p.fav?' on':'')+'" id="rp_map_detail_fav"><svg width="15" height="15"><use href="#rpi-sparkle"/></svg></div>'+
     '<div class="rp_map_sheet_title">'+mapCatMeta(p.cat).emoji+' '+escapeHtml(p.name)+'</div>'+
@@ -8598,7 +8767,7 @@ async function renderSmartHomeBody(scope){
   var camRoom = rooms.find(function(r){ return r.id===security.activeCam; });
   secSection.innerHTML = '<div class="rp_sh_section_title"><svg width="17" height="17"><use href="#rpi-shield"/></svg>Видеонаблюдение и датчики</div>'+
     '<div class="rp_sh_cam_box"><div class="rp_sh_cam_tag"><svg width="11" height="11"><use href="#rpi-camera"/></svg> '+escapeHtml(camRoom?camRoom.name:'Камера')+'</div></div>'+
-    (security.camDesc ? '<div class="rp_sh_genline" style="margin-top:-4px;margin-bottom:10px;">'+escapeHtml(security.camDesc)+'</div>' : '')+
+    (security.camDesc ? '<div class="rp_sh_genline" style="margin-top:-4px;margin-bottom:10px;"'+rpEdA('rp_smarthome_security',['camDesc'])+'>'+escapeHtml(security.camDesc)+'</div>' : '')+
     (rooms.length ? '<div class="rp_sh_cam_row">'+rooms.map(function(r){ return '<div class="rp_sh_cam_btn'+(security.activeCam===r.id?' on':'')+'" data-cam="'+r.id+'">'+escapeHtml(r.name)+'</div>'; }).join('')+'</div>' : '')+
     '<div class="rp_sh_subtitle">Датчики безопасности</div>'+
     '<div class="rp_sh_sensor_row"><span>Движение</span><span>'+(security.motion?escapeHtml(security.motion):'—')+'</span></div>'+
@@ -8632,7 +8801,7 @@ async function renderSmartHomeBody(scope){
   enSection.innerHTML = '<div class="rp_sh_section_title"><svg width="17" height="17"><use href="#rpi-therm"/></svg>Энергетика</div>'+
     '<div class="rp_sh_chart_row">'+weekly.map(function(v){ return '<div class="rp_sh_chart_bar" style="height:'+Math.max(6,Math.round(v/maxW*100))+'%;"></div>'; }).join('')+'</div>'+
     '<div class="rp_sh_chart_labels">'+dow.map(function(d){ return '<span>'+d+'</span>'; }).join('')+'</div>'+
-    (energy.forecast ? '<div class="rp_sh_genline">'+escapeHtml(energy.forecast)+'</div>' : '')+
+    (energy.forecast ? '<div class="rp_sh_genline"'+rpEdA('rp_smarthome_energy',['forecast'])+'>'+escapeHtml(energy.forecast)+'</div>' : '')+
     '<div class="rp_sh_gen_btn" id="rp_sh_energy_gen">✨ Сгенерировать прогноз</div>';
   scope.appendChild(enSection);
   wireBusyButton($('#rp_sh_energy_gen', enSection), 'sh-energy-gen', async function(){
@@ -8989,9 +9158,8 @@ function bbMoveGhost(e){
   if (!bbGhostEl) return;
   var rpScreen = $('#rp_screen');
   var srect = rpScreen.getBoundingClientRect();
-  var zz = rpZoom();
-  bbGhostEl.style.left = ((e.clientX - srect.left) / zz) + 'px';
-  bbGhostEl.style.top = ((e.clientY - srect.top) / zz - 40) + 'px';
+  bbGhostEl.style.left = (e.clientX - srect.left) + 'px';
+  bbGhostEl.style.top = (e.clientY - 40 - srect.top) + 'px';
   bbClearHighlights();
   var boardEl = $('#rp_bb_board');
   if (!boardEl) return;
@@ -9243,7 +9411,7 @@ async function renderRaveMoviePicker(scope, state){
     var row = el('div','rp_rv_glass rp_rv_movie_row');
     row.setAttribute('data-id', m.id);
     row.innerHTML = '<div class="rp_rv_movie_swatch" style="background:'+m.color+';">'+m.emoji+'</div>'+
-      '<div class="rp_rv_movie_body"><div class="rp_rv_movie_name">'+escapeHtml(m.title)+'</div><div class="rp_rv_movie_meta">'+raveFmtTime(m.durationMin)+'</div></div>'+
+      '<div class="rp_rv_movie_body"><div class="rp_rv_movie_name"'+rpEdIf('rp_rave_movies',[],m,['title'])+'>'+escapeHtml(m.title)+'</div><div class="rp_rv_movie_meta">'+raveFmtTime(m.durationMin)+'</div></div>'+
       '<div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>';
     scope.appendChild(row);
     row.addEventListener('click', async function(e){
@@ -9291,7 +9459,7 @@ async function renderRaveViewing(scope, movie, state){
       '</div>'+
       '<div class="rp_rv_glass rp_rv_scene_card mini">'+
         '<div class="rp_rv_scene_accent"></div>'+
-        (last ? '<div class="rp_rv_scene_title">'+escapeHtml(last.title)+'</div><div class="rp_rv_scene_desc">'+escapeHtml(last.desc)+'</div>'
+        (last ? '<div class="rp_rv_scene_title"'+rpEdIf('rp_rave_scenes',[],last,['title'])+'>'+escapeHtml(last.title)+'</div><div class="rp_rv_scene_desc"'+rpEdIf('rp_rave_scenes',[],last,['desc'])+'>'+escapeHtml(last.desc)+'</div>'
               : '<div class="rp_rv_scene_title">Фильм только начинается</div><div class="rp_rv_scene_desc">Пиши в чат — экран оживёт, а фильм пойдёт вперёд.</div>')+
       '</div>';
     var pl = $('#rp_rv_player', top);
@@ -9309,6 +9477,7 @@ async function renderRaveViewing(scope, movie, state){
       var row = el('div','rp_bubble_row'+(m.role==='user'?' me':''));
       var b = el('div','rp_bubble '+(m.role==='user'?'me':'them'));
       b.textContent = m.text;
+      if (m.id) b.setAttribute('data-ed', rpEdV('rp_rave_chat', [m.id, 'text']));
       row.appendChild(b); listWrap.appendChild(row);
     });
     listWrap.scrollTop = listWrap.scrollHeight;
@@ -9321,7 +9490,7 @@ async function renderRaveViewing(scope, movie, state){
       if (!scenes.length){ sc.innerHTML = '<div class="rp_rv_glass rp_rv_log_row"><div class="rp_rv_log_desc">Пока пусто — сцены появятся по ходу просмотра.</div></div>'; }
       scenes.forEach(function(s){
         var row = el('div','rp_rv_glass rp_rv_log_row'); row.setAttribute('data-id', s.id);
-        row.innerHTML = '<div class="rp_rv_log_head"><span class="rp_rv_log_title">'+escapeHtml(s.title)+'</span><span class="rp_rv_log_time">'+raveFmtTime(s.atMin)+'</span></div><div class="rp_rv_log_desc">'+escapeHtml(s.desc)+'</div><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>';
+        row.innerHTML = '<div class="rp_rv_log_head"><span class="rp_rv_log_title"'+rpEdIf('rp_rave_scenes',[],s,['title'])+'>'+escapeHtml(s.title)+'</span><span class="rp_rv_log_time">'+raveFmtTime(s.atMin)+'</span></div><div class="rp_rv_log_desc"'+rpEdIf('rp_rave_scenes',[],s,['desc'])+'>'+escapeHtml(s.desc)+'</div><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div>';
         sc.appendChild(row);
       });
       area.appendChild(sc);
@@ -9345,6 +9514,7 @@ async function renderRaveViewing(scope, movie, state){
       if (!text) return;
       ta.value = '';
       sendBtn.style.opacity = '.5'; sendBtn.style.pointerEvents = 'none';
+      chat = await rpGet('rp_rave_chat', []);
       chat.push({ id: uid(), role:'user', text:text, ts: Date.now() });
       await rpSet('rp_rave_chat', chat);
       paintChat();
@@ -9356,6 +9526,7 @@ async function renderRaveViewing(scope, movie, state){
       try{
         var reply = await generateRaveChatReply(movie, state, chat);
         pending.remove();
+        chat = await rpGet('rp_rave_chat', []);
         chat.push({ id: uid(), role:'char', text:reply, ts: Date.now() });
         await rpSet('rp_rave_chat', chat);
         paintChat();
@@ -11707,7 +11878,7 @@ async function renderPetPartner(container, state, scope){
   var log = (await rpGet('rp_pet_feed', [])).filter(function(l){ return !l.hidden; });
   journalCard.innerHTML = '<div class="rp_h" style="margin-bottom:6px;">📋 Журнал заботы</div>'+
     (log.length ? log.slice(0,20).map(function(l){
-      return '<div class="rp_pet_feed_row"><div><span class="rp_pet_feed_who">'+(l.who==='char'?escapeHtml(names.charName):escapeHtml(names.userName))+':</span> '+escapeHtml(l.action)+'</div><span class="rp_pet_feed_time">'+new Date(l.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</span></div>';
+      return '<div class="rp_pet_feed_row"><div><span class="rp_pet_feed_who">'+(l.who==='char'?escapeHtml(names.charName):escapeHtml(names.userName))+':</span> <span'+rpEdIf('rp_pet_feed',[],l,['action'])+'>'+escapeHtml(l.action)+'</span></div><span class="rp_pet_feed_time">'+new Date(l.ts).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'</span></div>';
     }).join('') : '<div class="rp_muted">Пока пусто.</div>');
   container.appendChild(journalCard);
 }
@@ -12175,7 +12346,7 @@ function renderStatusLog(wrap, rec){
       '<div class="rp_status_daybadge" style="background:'+grad+'">'+badgeInner+'</div>'+
       '<div class="rp_status_entry_body"><span class="rp_status_entry_delta '+(pos?'pos':'neg')+'">'+(pos?'+':'')+l.delta+'</span>'+
       (l.rpLabel ? '<div class="rp_status_entry_rplabel">'+escapeHtml(l.rpLabel)+'</div>' : '')+
-      '<div class="rp_status_entry_reason">'+escapeHtml(l.reason)+'</div></div></div>';
+      '<div class="rp_status_entry_reason"'+rpEdA('rp_relstatus',['log','~ts='+l.ts,'reason'])+'>'+escapeHtml(l.reason)+'</div></div></div>';
   }).join('');
 }
 var REL_AUTO_BUSY = false;
@@ -12245,7 +12416,7 @@ async function renderPromisesList(wrap){
     var proms = await rpGet('rp_promises', []);
     if (!proms.length){ wrap.innerHTML = '<div class="rp_empty">Обещаний пока нет.</div>'; return; }
     wrap.innerHTML = proms.slice().reverse().map(function(p){
-      return '<div class="rp_promise_row'+(p.hidden?' hidden':'')+'" data-id="'+p.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><div class="rp_promise_status '+p.status+'" data-act="cycle">'+({pending:'ждём',kept:'сдержано',broken:'нарушено'})[p.status]+'</div><div style="flex:1;min-width:0;"><div class="rp_promise_text">'+escapeHtml(p.text)+'</div>'+(p.rpLabel?('<div class="rp_item_rplabel">'+escapeHtml(p.rpLabel)+'</div>'):'')+'</div></div>';
+      return '<div class="rp_promise_row'+(p.hidden?' hidden':'')+'" data-id="'+p.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><div class="rp_promise_status '+p.status+'" data-act="cycle">'+({pending:'ждём',kept:'сдержано',broken:'нарушено'})[p.status]+'</div><div style="flex:1;min-width:0;"><div class="rp_promise_text"'+rpEdA('rp_promises',[p.id,'text'])+'>'+escapeHtml(p.text)+'</div>'+(p.rpLabel?('<div class="rp_item_rplabel">'+escapeHtml(p.rpLabel)+'</div>'):'')+'</div></div>';
     }).join('');
     wrap.querySelectorAll('[data-act=cycle]').forEach(function(el2){
       el2.addEventListener('click', async function(){
@@ -12258,7 +12429,6 @@ async function renderPromisesList(wrap){
         await renderPromisesList(wrap);
       });
     });
-    rpWireEdit(wrap, '.rp_promise_row', 'rp_promises', [{k:'text',label:'Обещание',rows:4}], function(){ return renderPromisesList(wrap); }, 'Обещание');
     rpWireLongPressDelete(wrap, '.rp_promise_row', async function(id){
       var list = await rpGet('rp_promises', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -12293,9 +12463,8 @@ async function renderBoundariesList(wrap){
     var bounds = await rpGet('rp_boundaries', []);
     if (!bounds.length){ wrap.innerHTML = '<div class="rp_empty">Границ пока нет.</div>'; return; }
     wrap.innerHTML = bounds.slice().reverse().map(function(b){
-      return '<div class="rp_boundary_row'+(b.hidden?' hidden':'')+'" data-id="'+b.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg style="width:14px;height:14px;flex-shrink:0;color:var(--accent);"><use href="#rpi-knot"/></svg><div style="flex:1;min-width:0;"><div class="rp_boundary_text">'+escapeHtml(b.text)+'</div>'+(b.rpLabel?('<div class="rp_item_rplabel">'+escapeHtml(b.rpLabel)+'</div>'):'')+'</div></div>';
+      return '<div class="rp_boundary_row'+(b.hidden?' hidden':'')+'" data-id="'+b.id+'"><div class="rp_del_btn rp_del_tr">'+RP_DEL_ICON+'</div><svg style="width:14px;height:14px;flex-shrink:0;color:var(--accent);"><use href="#rpi-knot"/></svg><div style="flex:1;min-width:0;"><div class="rp_boundary_text"'+rpEdA('rp_boundaries',[b.id,'text'])+'>'+escapeHtml(b.text)+'</div>'+(b.rpLabel?('<div class="rp_item_rplabel">'+escapeHtml(b.rpLabel)+'</div>'):'')+'</div></div>';
     }).join('');
-    rpWireEdit(wrap, '.rp_boundary_row', 'rp_boundaries', [{k:'text',label:'Граница',rows:4}], function(){ return renderBoundariesList(wrap); }, 'Граница');
     rpWireLongPressDelete(wrap, '.rp_boundary_row', async function(id){
       var list = await rpGet('rp_boundaries', []);
       var next = list.filter(function(x){ return x.id !== id; });
@@ -12539,7 +12708,7 @@ async function renderRegularsBox(wrap){
       html += '<div class="rp_tw_regular_row"><div style="flex:1;min-width:0;"><div style="font-weight:800;font-size:12.5px;color:var(--text);">'+escapeHtml(r.name)+
         (r.moderator?' <svg class="rp_tw_modbadge"><use href="#rpi-shield"/></svg>':'')+
         (r.banned?' <span class="rp_muted" style="color:#ff3b5c;">(бан)</span>':'')+'</div>'+
-        '<div class="rp_muted" style="font-size:11px;">'+escapeHtml(r.character||'без описания характера')+'</div></div>'+
+        '<div class="rp_muted" style="font-size:11px;"'+(r.character?rpEdA('rp_twitch_regulars',['~name='+r.name,'character']):'')+'>'+escapeHtml(r.character||'без описания характера')+'</div></div>'+
         '<div class="rp_tw_modbtn mod" data-act="mod" data-id="'+r.id+'"><svg><use href="#rpi-shield"/></svg></div>'+
         '<div class="rp_tw_modbtn ban" data-act="ban" data-id="'+r.id+'"><svg><use href="#rpi-ban"/></svg></div>'+
         '</div>';
@@ -12580,7 +12749,7 @@ async function renderStreamFeed(wrap){
   try{
     var feed = await rpGet('rp_stream_feed', []);
     if (!feed.length){ wrap.innerHTML = '<div class="rp_empty" style="padding:10px;">Пока тишина в эфире.</div>'; return; }
-    wrap.innerHTML = feed.slice(-30).map(function(f){ return '<div class="rp_stream_feed_line"><b>'+escapeHtml(f.author)+':</b> '+escapeHtml(f.text)+'</div>'; }).join('');
+    wrap.innerHTML = feed.slice(-30).map(function(f){ return '<div class="rp_stream_feed_line"><b>'+escapeHtml(f.author)+':</b> <span'+rpEdIf('rp_stream_feed',[],f)+'>'+escapeHtml(f.text)+'</span></div>'; }).join('');
     wrap.scrollTop = wrap.scrollHeight;
   }catch(e){ console.error(e); }
 }
@@ -12593,7 +12762,7 @@ async function renderStreamChat(wrap, scope){
     if (!chat.length){ wrap.innerHTML = '<div class="rp_empty" style="padding:10px;">Чат пуст.</div>'; return; }
     wrap.innerHTML = chat.slice(-60).map(function(c){
       if (c.type === 'donation'){
-        return '<div class="rp_tw_donation"><svg><use href="#rpi-gift"/></svg><span>'+escapeHtml(c.author)+' задонатил '+escapeHtml(c.amount||'')+': '+escapeHtml(c.text)+'</span></div>';
+        return '<div class="rp_tw_donation"><svg><use href="#rpi-gift"/></svg><span>'+escapeHtml(c.author)+' задонатил '+escapeHtml(c.amount||'')+': <span'+rpEdIf('rp_stream_chat',[],c)+'>'+escapeHtml(c.text)+'</span></span></div>';
       }
       if (c.removed){
         return '<div class="rp_tw_chatline removed">Сообщение '+escapeHtml(c.author)+' удалено модератором</div>';
@@ -12602,7 +12771,7 @@ async function renderStreamChat(wrap, scope){
       var modBadge = reg && reg.moderator ? '<svg class="rp_tw_modbadge"><use href="#rpi-shield"/></svg>' : '';
       var nickStyle = c.colour ? (' style="color:'+escapeHtml(c.colour)+'"') : '';
       return '<div class="rp_tw_chatline" data-id="'+c.id+'" data-author="'+escapeHtml(c.author)+'">'+
-        '<b'+nickStyle+'>'+escapeHtml(c.author)+'</b>'+modBadge+': '+escapeHtml(c.text)+
+        '<b'+nickStyle+'>'+escapeHtml(c.author)+'</b>'+modBadge+': <span'+rpEdIf('rp_stream_chat',[],c)+'>'+escapeHtml(c.text)+'</span>'+
         ' <span class="rp_tw_more" data-act="menu"><svg><use href="#rpi-more"/></svg></span>'+
         '<div class="rp_tw_modmenu" id="rp_tw_menu_'+c.id+'">'+
           '<div class="rp_tw_modbtn mod" data-act="mkmod" data-id="'+c.id+'"><svg><use href="#rpi-shield"/></svg><span>Модератор</span></div>'+
@@ -12657,7 +12826,7 @@ async function renderArchiveList(wrap){
     if (!archive.length){ wrap.innerHTML = '<div class="rp_empty">Архив пуст.</div>'; return; }
     wrap.innerHTML = archive.slice().reverse().map(function(a){
       return '<div class="rp_tw_archive_row"><div class="rp_btn rp_ghost rp_xs" data-id="'+a.id+'" data-act="toggle"><span>Стрим №'+a.n+'</span></div>'+
-        '<div class="rp_tw_archive_body" id="rp_arch_'+a.id+'"><div class="rp_p" style="font-size:12px;padding:8px 0;">'+escapeHtml(a.summary)+'</div></div></div>';
+        '<div class="rp_tw_archive_body" id="rp_arch_'+a.id+'"><div class="rp_p" style="font-size:12px;padding:8px 0;"'+rpEdA('rp_stream_archive',[a.id,'summary'])+'>'+escapeHtml(a.summary)+'</div></div></div>';
     }).join('');
     wrap.querySelectorAll('[data-act=toggle]').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -12717,7 +12886,7 @@ function renderStreamVideoBox(videoBox, session, loading){
     (session ? '<div class="rp_tw_video_live"><span class="rp_tw_live_dot"></span>LIVE</div>' : '')+
     (session && !loading ? '<div class="rp_tw_video_refresh_btn" id="rp_tw_video_refresh" title="Обновить кадр"><svg><use href="#rpi-sparkle"/></svg></div>' : '')+
     (loading ? '<div class="rp_tw_video_frame_loading">обновляю кадр…</div>' : '')+
-    (session && session.frameUrl ? '<img class="rp_tw_video_frame" src="'+escapeHtml(session.frameUrl)+'" alt="">' : '<svg><use href="#rpi-video"/></svg>');
+    (session && session.frameUrl ? '<img class="rp_tw_video_frame" data-rpimg="tw|0" src="'+escapeHtml(session.frameUrl)+'" alt="">' : '<svg><use href="#rpi-video"/></svg>');
 }
 function wireStreamVideoRefresh(videoBox){
   var btn = videoBox ? $('#rp_tw_video_refresh', videoBox) : null;
@@ -12907,7 +13076,7 @@ SCREENS.settings = {
       '<div class="rp_about_av"><img alt="" src="data:image/webp;base64,UklGRmgfAABXRUJQVlA4IFwfAAAQbwCdASqwALAAPm0skUYkIqGhLpdLwIANiUAX5gVqC5O/JfgDv1wglo+cK/F6Xv77u4edt9PW9O71P/gLTR41YoOd/5Vn14v+zz/e9Bv53+T/6n+M9rP9j4A/L7UOeH2iPgjwV9X3ID/XX/l+vviGUEf1h/2fZ//2PKd9d/+/3DP19/7PZE9IRokf0uerAfqABu6s7150BV/7QKU/5Hv2ha0QJZEToozqci1HeXd86pVBTPRxNNlh+Ol8J4vxIybPIXJO8NZ4EJ3dg5LU3Hl8FTI7Rz+4QeJL+vyQ/xMyvYzkn3OzidQs6JjJcn1xGPuHm0/r1epMcUqDkrB5laIdjeOek6OhPnH3Qv1USLDevD5O8fz10zGBBwJzZ/sl7nNAggAwg3pKgFgWgT58F+PhuKDx4PL4GXrMcn2y2Q8ydtm6WsObH1ywroZO0Ipc7RRPmkI19iXfQJjYATRHyzrjcHusxg/YB7KrxjtStp7iiY4ptBKXTkXx7zrDY+LkhqH+qG8Z52CFA6ukLjGLHVeLkKznVfWDHcaCDUikvOqcPPXPZcaHcGdtCZaMOrI5ae8kdkNzKQyvvNd0QkI0+0EFcFnhr7CvMtI9RR83m1zZVK+lN+R841Oy1Llg8wzEHPHFcbNmc+5WsDlj5/fbDheskRVn5Wvsz3HUNC4AgDa7ic26ctCybTdrF+zl2tNQFe5V/hES0+3+S5Srw9KwT9tdLDARrzc+2c1iAZ4fvGenGNU772Mcpr1z1ssv59D5unrsJWpKvTlQWoFUontvOgjjBsIVTfTCkWbyGz41lRfJlw3sBINr5v3JSj0fkzw4/XYqCfZyeDH1/6/gi0WJG9twuSmp3AyPNSqUAF1Mqm/eoG3FTWfccGxmDqHEFiyPU5pCkxCQc1C2f00ndaPEN+Hec0VFQ/Wx6JIl1rLC0Uj2lpP8db69KZCAlNT6Bm/3rMajquDu//Qhv28xgTjmqDMLO2EbPkDb+KvGtuZ7oqZSaHcOik79Gih1A+pwMgO7krJWYEPVYcRuboai+2wLXC/KxdfPtxfi+l2naHIoGlteO44wkwoZGvTyeH3xbjHzCW3jh0mbZtsdnlKsvPYzZQzXPlWQpl5o6AISVYE63LN9HkEO+3nW12HC9u4qu2S7MgLjJHOj41Pnv5+VTgR2hA0ZmMezTFt68BnyV++EpTUu1gAA/v87qUHwQ0qnanaD0G7D39RScYZ6k7nHaIczZf+/w2fbAm8s0iWVXb4o4Jkl8XjU9G8ESrx4Bg/CvYYgj6mGUeT9E7EnL8LtbWHkRCcsQFeXDlXg804CmdfXLqzTvZqUmHBb+4NGFGZXt+aB4yWKR/HemfGzozBA0GZPiI/YHLOkTOzob3Xu6YWFEdteh47Syrwe8Nk0MoKLBLofFC1krlbccOLgEuW7Bfg9y7TBPtu8vl5EfdMA6OHxSVlScJeaOxvXl/O2SW15AmN3mdRXD7LtzyhBSTHkVZ3bP2aa58e75vISgjNbNLDSPXHNoqPvudWAUjRyrh2mbKNHzE51jJhqm5Q4ReZm233JpIwvA8J7jN+iQDr9ZaAc1v6rJpdvJesK/ARrcTofAdhdOG+rZ3AKwRvQVY1diPhp4rZvDIneaSVyNoZFRqWrE4VatlI2D1EVh+BnQQzOSEJCMX8zeHnRPI5AGS5+QI07heNaAD/ZhsEKyhSSmsWJZo5IKGgClZdJslD4TuPEGVaN9p3DMDlf3oVWQqRZefpk4ahXX9/fNu0FxofkdYTPJPBVSfDc/pDJvV6ujPz+zMqGOusobTD8XsWA9Hgp9qdPMCseQPjIT1juuoJgdO4qomVSnkEs2k9h7EOx7aKZgv+xihYoRbHTTOxBtcoQPQvYE69R6mPpLQYhEBpOMt421rTMkkW1qiIAWITnfFRFqLr4xcTI2u3ShQmi7N/riLRVaFzmgpAWAAdDBFbncv3GECaqsE4cOlEybH25KKNUvETMYZgBxrVnltFrVqiQ0/9q8SsaqUeDC3rSHnH2Rb5E6a6/p6p6OVZJbt6qZZOljE8bPRnBDqpyDSGrfHNCihUPptGxzNeaisJdxvR+EXTb8pWM9WiLyTuOsQ3AHLLPi1UONq2MdEt+uwLuAPIxsGzxwZ9ewPdB2jFO7w0nPZvmxFTpgd+wOld+6GkOf9qKNH1OOwO45LNJ0Q8UWTtR8QgoVQhSBglm+GEmrQ41w5/uMnF6MWRjOGckMOAi3IjHT1J83gzDVCd2i0f5fG+PCwYhfMNmUt9U3FFYaw0E0/+VjGdpFTFMTw7UxC9j4QDUtgWnSbJ2TYMC7MSqKr1pm4uR8y/0c/nAoqSMNJOuUb0J6koZTY/iyEMWpNn2IuU1WXzFpbcs/Azh8vnhZs7qaVSLYiGUFF0IvwtmbCqgSjKAeA3zVp6Rp0V9wrZsesNFmlwXRIVu0ZLPCws20gc5qM2AdMlSMe7kRI+N8kALzm6ssbew4iR4TwLaTp5/ssNJzcGHw2LFvDFkPkeL7SGf+Nk161OWR2O6psiTLpvjEEkxVQyrxslgh0eNBiKuFB+mc8Hu6S2Vfo/cxp2kROBYCcbDaQMEQKOG26/JsKXld3Wr3P0+8A6NI7g/7JXNpOw6z+yzvslYEvy4WspV+NP/pTg+xuzRalVWeODDSQTcvmRa2LAiRJn2+gkpKRdeB7WBVMHpDUSPd54bnYTCmdvM90t5oHFpk9Iaj5UyYOJiH0CJ1hjpPLlIXvN4SXDpwCdaLg8WnO9yBv7To0lXpCMM07A6TLkI9o+lmGfYZ4m90OqoSuIrGzBaiCLoj1o3EMZuqqoP58xZ3wzL5qNciYS/uJOtZLHrIrbZl3qRZUjaelnVRveHRZZiqOdBJD96oLVXtqXyMwcVKlKawwfXZWOj75cfrNUW1Shu4Mp5/fmPt5ga+ICUTKOviBqtU4IKlIFgIBuCN/+q35ST77ZJubFi0SjPG8t3k9WsO3gwOcEP1FRWt2RkgJhMSRNb7F3yhGMZeo8uuM2sCQA+y1WtUqAP3HLwT3tL8TdyLiPiYPGXv+hTG4qqNa4Teb4S3DCQuY/B9PTn4wZJNhVto7xO5OUAnj34CYGU3kKacy6EC9YrSgDlc/TQClILrzTWJ5r4Ye5RG0+oBEYWTePrrDR7ZfPYrH3znwyS0naSfzMReYxPe3/xuwukwC6CuIlNeY8P8fjwKvErrQsN8E70DbwaneARsc8hm1mWICwA0GCFT271rcusGz6koT1v9a64cwkhovRax56q2Rc+78Yj9q4qTbS26NQl5/d+eu4nfSZO7QywvddlEhA+6k7aH00xPr7seWwAkpmhqU2EUbuKIsTshZF7rCWgnK69363MBsWXmEZ991ieDtMJOGTFe4DB6PRTUbMmxfE5xT2rhEnW9kUrBKohizw9LbSD9qyjn0h5o97VzLvq9LpF37sP2acTwv31WTg8ZacCKdT3PvB0+beJLR33+iBOl81+whqdr+8WaLycM6wrrs/M//LJnvwIQaN0bOCbQqwWs9kSwm9unI7gEAtTQ7wpYdyun+TFR7lj+9SFT3CuI4kWPGEZEWbcemk+fRHZemgdEgd71rSFgDC35MecArCLaJnL3tXDy69UtTlAUMFucpV3H978pN9UPf5fIO4Gx1VqILpfznDQFiPLFT6cGtabaLIocncI2oReWMOgg3/kQLkWRMQdmvaqMBvSfICtEUAacTm6J0P2R9PsS5Ld758ftlItcSTtkbltlFa1sHBoU+iQqOAYm0KwllfQ/VqJsRQdWO5h1oey6f8bhYdbT4GvucCEP6/VKJLLwHRqWVuqH6r9lDDsoPn1GCR0P7Ix8Sdl7VszxNA+EUaPZgyOCu0CSJdbwKJEpvyJ+ijTmzJv8T21DIOUO17/Xfw5FrvdgF3VvZP/+PBHMgxrhWNaUdm6G5wEeUVQ4I7iwhI3YYnXg0LfzUrXEEn5kI6eu7kN+2NXgQEfEkg9KFOGbmoUMjcT7I3LOdY1EwBm0ddZeuinDN6mLP10A1Up51vCwNE++Lx3R1xUzc4oO4Cgd8JT6gwI7m9ecZcqdt5Hln8CNVxpHpcjOzI5S3uJlUXIx/IOMHSTTWVERM0QeaOpBZLwOPUKov+Kq/2ONq9G8UVJPGnh/IFoVwuoCJuO/FuoRwkfSpta2kfks+3DwIwtvUR1XnxkgiDkLCdYB3GE+ifMZF/gJAMRPCnMR7yyjmQUzV24CnRgJugAyIobyYBcK0uTLyZF4z+eh+1eKE7ydNgjQ/htVuVU5611njR+qddRBxu1f16ATxcUjCzZDfqk+t/Y+9SdScpUcOMMwBZg7uQrBsORHnUTE+f0i2648W6HRGw4Mwu6TKqHS7WBiUFQNKbgc7VHgtAWtV36c1n+tM1xORmVQpaVAkvJJVcAYnCE+46M0h0QloWCBkAkW/qouhwdiDHHpDyp87wB9WkDbHd8ipn8sUxCAa1ndc8WQPFCCoHxfA15sK6i21+aCof8bx0ZwtH3YNnBZNNQFCTM3xtDrbyQER3tK7badwrtPyQtREzwdaYKuxYAmx0Zpu7aaxZjBgkZOSgCqlzz5G/OCUpaKCOfDhAQScsRVMNtJcvdamjQm7EYsRoHIatPHl+YaC1DXCdr44jMQy86nvTbSizJNG6zQMhdVrQZ5iuQ+C7xlJ9uf9v2aQKYRK/Xaa6EUBoWFbOKHg9S7WprCBB5u+/dHtS8H4gysysKY2wtWcZ6R/xP6/vcdHvT34cz1Dn7SK2moaHy01Q2Mtsm0eQFUZiWnijxL6IBIc1FsNLYmxRCZYsf+PJmJ2FTm2ROV7MeTTxur3ArS1xdt/05IgEVGh3T3207txugWxMELDuRZ815spbMMLwVUDTox+7xlZlQVRjxd94wHSEyokd2O1xfjL5gPv6MhM4VxsnZap8+YtztVgjk/koMKNTdTHTSfIQ/n4mOdacNTNynaXfBW93xOruW2mvwZc3MXdrVwkfunnT92WhsjU+a9OZcUTCmYWaqp6vF1KZ8tK4DikBmnKnI8MLZChElUa235l0wgwf1B9kypLqQKpPXaTG49YlI5K8YsJPNxOoayKSctvm67GgvUBmL/AEIkRC7FX6LBJC7CP6p1Uu2Tcpp3swB1Ek40YQ/VXnMxylcCVl59wJegopqKOmKaSG0XogjLvI4VMdyzq3twNuzZr3fr4PA9pd7aMTCOgqXAbG6CblIAzBV4hQJt9D7ssohU0UaLkY4KeNIRPEhbIYxiTQDQ6UgiM4/c4pXWOXjR+AdkCa1wDI7mN8uzaR0EDHyntUq5TiUe0+pfP0+TO3skaiG5ZfpVdseaI0FSSmLFMcW+vYYLxYPfUK5JSbXt5Ga+wz0bG7od0+j/S8qLfzPuywIvsGrwPnA7nroZdS7CrPUPMX9VGoZxb+/z9lvnE9cwYM6e0s9acK64deyclTQpwMoWsBTg3GZFqGtaki3Clt+eBN5LiKFqz4R9D6eMNN0HeLOXkftYPutSv6RMuY6GUXY/90fWa3brzaMpPu+szazeS4WDJU+jpreXETvFZxU2f953xt65WpNCNalJ/QPqoLA/ig+YlTlJcdzml5s00UXq6J2ZBO/foj26kPHdoDJwjOSDF/mmknkXPJ5k1+pJu6+kXqhpb4F9p+aCq+1dWuFVWInU832DRZV7u6dDUp73dNvRGB0KeZ98ywzAfJ7/Se14K+tgNwIaxT6Jgs2hsaEnD9CR0nch6I+NezmQKqo9Zd0FTDZzZAYtDFWvzXDl7MWhahPaJCnw8JF7ncgn01w0+kGAN1kxvGYYkJSTH3slU0GCk5KazGSPt1n8BPL4QqKV5t8SCLYh4JbWP8L1fD1fjx37ds1Jk2jZqWUS/yKOFMBrsRlYvQR3X9cSl31S8kspJ65O8bhya2sl7ppQMu9WUlDS+WLpdx8n5GMNpzRPMGvK0f+LOH96ffMTd/jqs8pOCNgDPdTQMAPnA0GOYAf9Z6Y3HbrfGf4st6PA4+gIwuhgJfxN2oiTj4gjrzy8KhcOP9e0qtypVy5FgEhSBFS+u5mxNw8cmk3yAfEIQs8uDfuBKwGXwO4trME32GsLrTbzE+MHeI6uMf8DYBLm7OZPcBotaPnO9/i12qheqKHtToF1V54DAxhJrV/V5R2JawGJ+RqUMOCF4/XA9Dg6q+cNJRt7pQURDBf8AalUfxccfMNmkgs2dDed2Km9LX+MIyk1jeV4IdpUad58pkGX+G5t5/NhfabJh9jDEjGLtX+aVO8s8v26vmB16R7WUGqjz2gwu5TOMn1kuuZjmLpDFJKKvqWgdoHwFgzBGgKpzRE487sfthpsCB00SJl0nam+ttIHS0i9KPT0XpOPXNjyIRvO+rJVE8NOM4g9yM2J7oTWC2sSIn8aWBQR5TJFGpM/M8vWnqeEyAjd4RoKaD1c4ruIQu82q9smL5wpKtzIlNKHMgJvTtIed8kGbiaCfC24FA5l+HHil15fF83/nxuEty4znawTJcRUDspmmgSzHAcKp44qjKrLflk7D+RtzqbfOsLgZCxI9JbvHkybhclipRJjbN7W7g5DkRHTBP0sIYZIzC4sgsy+my/JbUmpZ/WYXzEhPd4sxDDwUGZGlOciwee2ZQoiihjL8iqbMiORCQTyyHgo85T+Z3vQZcx2RKraljyRJCuxbhuiSTaIS7Nk1yuAvlFrDT2EHaRJDK81X/3+3scNmQEUYMXmkfK2TGvMCEP03EoV6eeMgFoqfpi+UR1IyZaTVfgWFeh8eTP/JjbnV12APR8UrI9KTdyvnsV4E1otmpR1YRZgfTMVbpxCoOMOZweBAeImtXCV9euw4nuBst9xg138PEVkIi5CSLheaTg5j04+LbHe5hggEtq4r0EtUrUpTVIeDij0kQRrwgJudFVIbvOs42HkHxKQd2KJDc4RKF5hqT+R7mtz0rnnAgAqBh6J9N42EhtZ7UuRG8sa2+loCvRwGqtEcfmjdKP6FH7enFiZRX9MH8GThLaMq1x55dtOrQmh6VT0EB76AmD1GIU9xtoJs4PR3LCoOquItcmV1uy9yUP3WQCQQriNZseIqsEe1qJqPzu0xhxIC+mqjKhFKUVw5nc6OeweZgVAUmOM+drkCs+qhnq98nToo2CEBT8FpMlgRvgCuRhPWUKk7x6s2z4hVAtfHUX0H0RodqorTjzYeeg762wDbVniFBEr0q3sPPh128wHnhK1vOyKcrh4I8dQDrcPeEtK6cEvtT8l1wsqOjWz5FIZqHJXNNWwl24fxBoyy7xFfXnSKDZSnVFvJc7nKwNCCJZpJ0uGIflqeTMVdwO/kSqH8uEI0z6fViW/5dL5KakCZExdQ2oz4l5KR7Ry7ytnbJmCL1A0elCd7ByND/8AnqjestNTCkWkVIizUeC8H/7fPCmdJu4fUeBpWDPoFvI0WSLADDOHSiYiun8sGj+b/+TJ4Q9WGNkPukvdm1MKi7cTeOY3FN72ZD2hkBdMHAuQjrW/jwB0UyvaPGaH7vvH3W4TXm2QztorTMLnYfpx1u7bsXdwoOstI8IRq7A0D9tJ28LyF7+bubhuK6HH/5urKzNf90Rw29UHnt2LR2S6vNZnHU3vcyFO1+f7THQGYIeeLZdvjwf0CK/9T/K5e+E5V32mnFixuqTBe9sTthpUXoU0+NGAohShgqiFDeR5EMpGKKSuq3D4bo7f6pRw2gq/tO9c62nWclkf3awKNQcdldFlKH28KI0STRC2mZcR7onmXIuMxlJ+VWzdh8ZpqEYXRRx7rqJuEVNpMpIVkX25EoBJGryuiylQ2zkY+J1eb8a5K2xwZoBDFykvU/Og5dJ0ECY4W4fxlqM0uibi9xZr+PLeu69Rjh338p8QSV7YeWtqxPimLIV+q9bV7D6sShkh4ANpb7AVFCdByDoN9gcqASZTQW6+Ipl7mChNg8a/hulx+NrXeDeHhv+mHPf7/gyr99KhlhLe8+HuKnB/WYq1ewnoGDiIqSIwrv8y/rnFjSlKg4UvDohoBE7vkC/GkElNeg8Ivz63HtUwpsZf7SHtvlv9+hFG8yeN00W+3WzH5/6vKGEFpffsp23htlaBRUFXjLkcr3pg9v4iICsVxe6E1Se36uRJ9LZJ77CTJ87I85GSE2ai01vHfekH2RQBTzG1f8p9tD8Jko/vprH9VrJWv1FwuuUq0T1dS78i9YNulOvxCpRddvcFKxJL6f2U4fKENGBjE2MHUcQjxbeXLL3uFZssZn1HVER7BtLm9UnOvpAvGAzjZOtbRc+5ksvPSvLKbovamsw5Q5wr4BIpAushX0SMVsXnogS2c4j1aiwjoGFxR9+s1ln3cUgvui/9hlcin/ftMSmfD3HeTrb1MP07m587L37OSt2mExYKxMo01ugjMVwIvnn5TAbmXMV9UP/SIjsT4vXl4JqJpcqq7JlZg6+7RIxcbp5zI8TkoTlm1mUhbXXcnlL6S6qdlEWfA8JTK5iBvxM7vA0HoKjoomZzAf9iPdylj4VmjW+48AGHHHJpJ9rCQRQnIZu9Tgw4Rwiz9fZo6bQc7CPErrpKGJ0dexMJV1HbAxhbU5oHuo4vEvFM5Bbzd56NDCiXlG0xOKIZks5nPgtM80hg2jizffgjI0aNSOPhIwvOxi0ZUXYkC+M3N4HUt5clc/dHl0KLG6TiRrPJPzlgD+T8+zkVRhFOVrYN2hw/1oG8NJsHmLqVjbilLtl0dFGr/m1MpNbm/UlVJz4ryUHdyQl05CDMijp0Ikv0SnbtiVaj6L58YDTrs8eTr7PQVEDpJ5IfjqhfwHvm/hw5pUK79goa14N2lacfManNjtlQI5Y4USyTFAgc1zgGDO7NcoCY2Zj47QCcyR3sR/ptCY/LkxYWGtHkIUVGYBkDl6xsKGaM8QQWgjnGB1jKzXwpw5D4VY/BFSQiMeQa1/VEMIdk+8KGr8tcUhLt/noK8HXfZZWAv9m7rw2H75/W+2lzjbbo4Er36aGtjZIuFb3zEp6N3UQhocjhpi897AHy2Vy0uPBVdFKsXeXKoII7H391tIXhafNb0k1cjdEr7xSwGEkCy+f7xHDQsgvcEB90/C1QOz/nq+LRhlrX9Uf0/7Gb93H18K/T8dVk3scsw5CF2gRU7J9pgO56pvDx8wotaLylRGhTX311RYR+Wo8Zvxi+9cbgNpSZeWv4x6i/HzRc4an/O/mYP8sPB7dV/Yw/loplVv8iOV2E0Axtt1d90qiEq/vKXzSeC0kcamHfm7HcXqrUN/mEyQ1f6pAi5M6O38HwsF11hrnvBnvdi1lYTrW11fllBwe4HpfDxXfsx3ZV6b2jnV4xztjLT9hxLjc10OJntGgVm+19aUQfqWbT9hAr0g16rvzwrYKvS8nTBtxFzWPCNapOn1p+tC5/P8/1lHlU617uWE/eq/VCvI4Fj+0lvwqHJ9Vy6XngUmqCmIdK/UIn0nywQGx5dJD4Vrh6tql+oqpfnDUl1TTPMNKlHXOs8a0RFJqsoj/x13bG6boWHCz46/Ad65udp2j9Hs9ryR/tMuXoxqC8hpmAS78kJ8v3c+peDcJ8/O/4epObyeMxa3VCRUD/rAPbTxPGr889FG2ocRyd12Iei9b1cdIs58Qq6ZdbKuYhMvN6aolH4BHB+sSkfA3aHrDfnGhrYkKLdR/uj/txdbfufzN+WFcDCJK5FRUdcC34T5lPgT/n6oLza+9yhsKZOtP/gfrRkNcCQ3lHy9rlZtDRSkfmsRtOUR1vSdG73PBtWCvk0T1yMJy3gSAY3Y0ZRAb6ayA7tiQ5Amkw64FBtBSABuDSDmgSM5G28caj5AgSeNT5YX4Fl8KQooptMMYD5/L9N/z4CvArdpZLp0nZu5EyshgiWJsN11C2bbx4brYkGs5Ul2hqYtOO0wJYaD8ghsSO6F7XwFrzblYs5MxqcJqOuhNZuI3E/FkzZF6nnuTbjVN2VwamVCRFIAwECwmDVyrBOcmSrSG9gOG3PZziVABdC5GTJbR0hUlvUsWsccY0yj/FJ1EhCzE154brM5TzhsmsyXFYM3RwfN7hvXddXmkg+x7nXbD3L9+z2ROr4wz31ncUjinhwCxZNaI+OSGvBqHH7//eWvubNtBoCXVcKGWiHj+vAsicvmyS+ENEH/o7Yc2eQb6HOhgTa7/+9hwaSXv745YdLPoceajaOW2rt2NzgGDR1/9SnE0QLcI5P3XmaaMLFV6OWv6pQB4duZfCVP/ya0b6VmgHXF0w1pb6rKDMCrcrrrkw/PkaJTFu9GDS24G3VmzuQr7ZzW2hMN/6rmhoqKDmoF/a5Vg6oWT8kR/v8g9wH+fFpMZ83iasXQPlfUb1b0j7KphsjrVhRVqs6GwAhUd3Yh6iW6cz48UDb0PAORMlwny2TvN/vcDwGxx8AwqU7cr6jPt4oNPVJN9brirjxzluB476MxPwL13bXzy4gk5IWaZm/jIY6MVigVGeqSycDMBWM3WswQTikiF/QMyowzM2hXGOcGbu3CUH0nqWOIJw0ffyhPbvN50Lrz7pC38Arj2y+AhPzckq3SFypjsGzneTtf2THM2FVsiL8yPssr+iNEN01qh4JNs0d7OH/6/vPWIX+tRoV9Cr6vmCX81cuEZbedQVKlkoBBcgfvy5iMsGGmsAcF4zbL+cAzVkdKypLk/ATKkL/qMFuP9NQf/Z5V314ezXQS0JeLkQ/iAWk5nH64NSl5MrMdbWmWKo9Ch3T+DMF5tX/EpcAA="></div>'+
       '<div class="rp_about_body">'+
         '<div class="rp_about_name">PHONE MOUSE</div>'+
-        '<div class="rp_about_ver">v0.0.1</div>'+
+        '<div class="rp_about_ver">для SillyTavern · v1.2.0</div>'+
         '<div class="rp_about_txt">Твой телефон внутри ролевой игры, с возможностью подглядеть к персонажу. В историю попадает только то, что ты отправишь в лорбук или OOC. Баг или идея — пиши автору.</div>'+
         '<a class="rp_about_tg" href="https://t.me/saturic" target="_blank" rel="noopener">SATURIC · @saturic</a>'+
       '</div>';
@@ -12929,7 +13098,7 @@ SCREENS.settings = {
         '<div><label><input type="radio" name="rp_api_fmt" value="gemini" '+(format==='gemini'?'checked':'')+'> Gemini</label></div>'+
         '<div><label><input type="radio" name="rp_api_fmt" value="openai" '+(format==='openai'?'checked':'')+'> OpenAI-совместимый</label></div>'+
       '</div>'+
-      '<div class="rp_muted" style="margin:6px 0 3px;">Base URL <span class="rp_muted">(необязательно для Gemini)</span></div><input class="rp_input" id="rp_api_url" placeholder="https://linkapi.ai/v1" value="'+escapeHtml(conf.baseUrl||'')+'">'+
+      '<div class="rp_muted" style="margin:6px 0 3px;">Base URL <span class="rp_muted">(необязательно для Gemini)</span></div><input class="rp_input" id="rp_api_url" placeholder="https://linkapi.ai/v1 (v1 можно не писать)" value="'+escapeHtml(conf.baseUrl||'')+'">'+
       '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">API-ключ</div><input class="rp_input rp_secret" id="rp_api_key" type="password" autocomplete="off" placeholder="sk-..." value="'+escapeHtml(conf.apiKey||'')+'">'+
       '<div style="height:8px;"></div><div class="rp_muted" style="margin-bottom:3px;">Модель</div><input class="rp_input" id="rp_api_model" placeholder="gemini-2.5-flash-lite" value="'+escapeHtml(conf.model||'')+'">'+
       '<div style="height:10px;"></div><div class="rp_btn" id="rp_api_save"><span>Сохранить</span></div>';
@@ -12987,7 +13156,7 @@ SCREENS.settings = {
     var hintBody = el('div'), hc = await rpHintConf(), hlast = await rpGet('rp_hint_last', null), lalast = await rpGet('rp_lore_auto_last', null);
     var hAgo = function(t){ var m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'только что' : (m < 60 ? m + ' мин назад' : Math.round(m / 60) + ' ч назад'); };
     var hChk = function(on){ return '<div class="rp_conseq_check' + (on ? ' on' : '') + '" id="rp_hint_on">' + (on ? '<svg><use href="#rpi-check"/></svg>' : '') + '</div>'; };
-    var hSt = function(){ return hlast && hlast.at ? 'Последняя подсказка ушла ' + hAgo(hlast.at) + ' · ' + hlast.chars + ' знаков' + (hlast.fresh ? ', нового: ' + hlast.fresh : '') : (hc.on ? 'Ещё не уходила — сделай ход в ролевой, и здесь появится отметка. Если отметки нет, подсказка не дошла до запроса — тогда выручит автосохранение в лорбук.' : 'Выключено'); };
+    var hSt = function(){ return hlast && hlast.at ? 'Последняя подсказка ушла ' + hAgo(hlast.at) + ' · ' + hlast.chars + ' знаков' + (hlast.fresh ? ', нового: ' + hlast.fresh : '') : (hc.on ? 'Ещё не уходила — сделай ход в ролевой, и здесь появится отметка. Если отметки нет, твоя версия SillyTavern не поддерживает подсказки — тогда выручит автосохранение в лорбук.' : 'Выключено'); };
     hintBody.innerHTML =
       '<div class="rp_title_row"><div><div class="rp_h" style="font-size:12px;">Невидимая подсказка боту</div><div class="rp_muted" style="font-size:10px;margin-top:2px;">Каждый твой ход к сообщению незаметно добавляется блок: что нового в телефоне и что в нём сейчас. В чате его не видно, в историю он не сохраняется.</div></div>' + hChk(hc.on) + '</div>' +
       '<div class="rp_muted rp_hint_st" id="rp_hint_st">' + escapeHtml(hSt()) + '</div>' +
@@ -13036,6 +13205,7 @@ SCREENS.settings = {
     var autoUserRef = await getAutoUserRef();
     var imgBody = el('div');
     var imgModeOn = imgConf.mode === 'on';
+    var imgAutoOn = imgConf.autoGen !== false;
     var styleOptionsHtml = imgStylesList.map(function(s){ return '<option value="'+s.id+'"'+(s.id===imgConf.styleId?' selected':'')+'>'+escapeHtml(s.name)+'</option>'; }).join('');
     function refBlockHtml(prefix, title, hint, placeholder, refObj){
       return '<div class="rp_muted" style="font-size:10px;margin-bottom:6px;">'+hint+'</div>'+
@@ -13047,10 +13217,13 @@ SCREENS.settings = {
     }
     function icard(n, title, sub, inner){ return '<div class="rp_imgcard"><div class="rp_imgcard_h"><span class="rp_imgcard_n">'+n+'</span>'+title+'</div><div class="rp_imgcard_s">'+sub+'</div>'+inner+'</div>'; }
     imgBody.innerHTML =
-      icard('1', 'Включить картинки', 'Выключено — все фото в телефоне остаются текстовой симуляцией. Переключатель сохраняется кнопкой «Сохранить» в блоке 2.',
+      icard('1', 'Включить картинки', 'Выключено — все фото в телефоне остаются текстовой симуляцией. Переключатели сохраняются сразу.',
       '<div class="rp_title_row" style="margin-bottom:8px;"><div><div class="rp_h" style="font-size:12px;">Режим с картинками</div>'+
         '<div class="rp_muted" style="font-size:10px;margin-top:1px;">Выключено — всё как сейчас, без картинок (симуляция). Включено — приложения будут реально генерировать фото через провайдера ниже.</div></div>'+
-        '<div class="rp_conseq_check'+(imgModeOn?' on':'')+'" id="rp_img_mode_check">'+(imgModeOn?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>') +
+        '<div class="rp_conseq_check'+(imgModeOn?' on':'')+'" id="rp_img_mode_check">'+(imgModeOn?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>'+
+        '<div class="rp_title_row" style="margin:10px 0 8px;"><div><div class="rp_h" style="font-size:12px;">Создавать картинки автоматически</div>'+
+        '<div class="rp_muted" style="font-size:10px;margin-top:1px;">Включено — картинки появляются сами: фото в чате, кадры в Сатток, фото в Satinder, иногда в постах каналов. Выключено — ничего не тратится само: на фото-заглушках будет кнопка «сгенерировать», а любую готовую картинку можно перегенерировать или поправить её промпт долгим нажатием (или по значку 🖼).</div></div>'+
+        '<div class="rp_conseq_check'+(imgAutoOn?' on':'')+'" id="rp_img_auto_check">'+(imgAutoOn?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>') +
       icard('2', 'Подключение к провайдеру', 'Куда уходят запросы на генерацию. «Сохранить» запоминает блоки 1 и 2, «Тест» делает пробную картинку.',
       '<div id="rp_img_prof"></div>'+
       '<div class="rp_muted" style="margin-bottom:4px;">Провайдер</div><div class="rp_chipsel">'+
@@ -13079,10 +13252,20 @@ SCREENS.settings = {
       refBlockHtml('refu', 'Референс твоей персоны', 'То же самое, но для твоего персонажа (игрока) — на случай, если ты сама отправляешь в чате селфи. Подтягивается аватарка и описание из персоны по умолчанию.', 'Например: девушка 24 года, длинные рыжие волосы, веснушки', imgRefsConf.user));
     buildAccordion(paneGeneral, 'Картинки', imgBody, false, function(){
       var modeChk = $('#rp_img_mode_check', imgBody);
-      modeChk.addEventListener('click', function(){
+      modeChk.addEventListener('click', async function(){
         imgModeOn = !imgModeOn;
         modeChk.classList.toggle('on', imgModeOn);
         modeChk.innerHTML = imgModeOn ? '<svg><use href="#rpi-check"/></svg>' : '';
+        var okM = await rpImgConfPatch({ mode: imgModeOn ? 'on' : 'off' });
+        if (okM) toast(imgModeOn ? 'Режим с картинками включён' : 'Режим с картинками выключен');
+      });
+      var autoChk = $('#rp_img_auto_check', imgBody);
+      autoChk.addEventListener('click', async function(){
+        imgAutoOn = !imgAutoOn;
+        autoChk.classList.toggle('on', imgAutoOn);
+        autoChk.innerHTML = imgAutoOn ? '<svg><use href="#rpi-check"/></svg>' : '';
+        var okA = await rpImgConfPatch({ autoGen: imgAutoOn });
+        if (okA) toast(imgAutoOn ? 'Картинки создаются автоматически' : 'Картинки только по кнопке');
       });
       var styleSelectEl = $('#rp_style_select', imgBody);
       var styleNameEl = $('#rp_style_name', imgBody);
@@ -13096,23 +13279,29 @@ SCREENS.settings = {
         styleSelectEl.innerHTML = '<option value="">— без стиля —</option>'+imgStylesList.map(function(s){ return '<option value="'+s.id+'"'+(s.id===selectedId?' selected':'')+'>'+escapeHtml(s.name)+'</option>'; }).join('');
         styleSelectEl.value = selectedId || '';
       }
-      styleSelectEl.addEventListener('change', async function(){ fillStyleFields(styleSelectEl.value); try{ var c0 = await getImgConfig(); c0.styleId = styleSelectEl.value || ''; if (await setImgConfig(c0)) toast(styleSelectEl.value ? 'Стиль выбран' : 'Стиль убран'); }catch(e){} });
+      fillStyleFields(styleSelectEl.value);
+      styleSelectEl.addEventListener('change', async function(){ fillStyleFields(styleSelectEl.value); try{ if (await rpImgConfPatch({ styleId: styleSelectEl.value || '' })) toast(styleSelectEl.value ? 'Стиль выбран' : 'Стиль убран'); }catch(e){} });
       $('#rp_style_save', imgBody).addEventListener('click', async function(){
         var name = styleNameEl.value.trim(), text = styleTextEl.value.trim();
         if (!name || !text){ toast('Укажите название и текст стиля'); return; }
+        var fresh = await getImgStylesStrict();
+        if (!fresh){ toast('Не удалось прочитать список стилей — попробуй ещё раз'); return; }
+        imgStylesList = fresh;
         var selId = styleSelectEl.value;
         var existing = imgStylesList.find(function(x){ return x.id === selId; });
         if (existing){ existing.name = name; existing.text = text; }
         else { selId = 'style-'+uid(); imgStylesList.push({ id:selId, name:name, text:text }); }
         var ok = await setImgStyles(imgStylesList);
-        if (ok){ rebuildStyleOptions(selId); try{ var cS = await getImgConfig(); cS.styleId = selId; await setImgConfig(cS); }catch(e){} toast('Стиль сохранён и выбран'); }
+        if (ok){ rebuildStyleOptions(selId); try{ await rpImgConfPatch({ styleId: selId }); }catch(e){} toast('Стиль сохранён и выбран'); }
       });
       $('#rp_style_del', imgBody).addEventListener('click', async function(){
         var selId = styleSelectEl.value;
         if (!selId){ toast('Выберите стиль для удаления'); return; }
-        imgStylesList = imgStylesList.filter(function(x){ return x.id !== selId; });
+        var fresh = await getImgStylesStrict();
+        if (!fresh){ toast('Не удалось прочитать список стилей — попробуй ещё раз'); return; }
+        imgStylesList = fresh.filter(function(x){ return x.id !== selId; });
         var ok = await setImgStyles(imgStylesList);
-        if (ok){ rebuildStyleOptions(''); fillStyleFields(''); toast('Стиль удалён'); }
+        if (ok){ rebuildStyleOptions(''); fillStyleFields(''); try{ await rpImgConfPatch({ styleId: '' }); }catch(e){} toast('Стиль удалён'); }
       });
 
       var imgRefsState = { char: Object.assign({}, imgRefsConf.char), user: Object.assign({}, imgRefsConf.user) };
@@ -13191,12 +13380,13 @@ SCREENS.settings = {
         imgSyncVis();
       }
       rpProfilesBlock($('#rp_img_prof', imgBody), 'rp_img_profiles', imgProfData, imgProfWrite,
-        async function(){ await setImgConfig(readImgForm()); },
+        async function(){ var rf = readImgForm(); delete rf.styleId; await rpImgConfPatch(rf); },
         function(d){ return (d.apiStyle==='naistera'?'Naistera':(d.apiStyle==='openai_chat'?'OpenAI':'Gemini'))+' · '+((d.apiStyle==='naistera'?d.naisteraModel:d.model)||'без модели'); });
       $('#rp_img_save', imgBody).addEventListener('click', async function(){
         var rec = readImgForm();
         if (rec.mode === 'on' && (!rec.apiKey || (rec.apiStyle !== 'naistera' && !rec.model))){ toast(rec.apiStyle === 'naistera' ? 'Впиши ключ Naistera, либо выключи режим с картинками' : 'Заполните ключ и модель, либо выключите режим с картинками'); return; }
-        var ok = await setImgConfig(rec);
+        var recSave = Object.assign({}, rec); delete recSave.styleId;
+        var ok = await rpImgConfPatch(recSave);
         if (ok) toast('Настройки сохранены');
       });
       wireBusyButton($('#rp_img_test', imgBody), 'img-test', async function(){
@@ -13400,7 +13590,14 @@ SCREENS.settings = {
           return '<div class="rp_swatch'+(cur===color.toLowerCase()?' on':'')+'" data-color="'+color+'"><div class="rp_swatch_dot" style="background:'+color+'"></div></div>';
         }).join('')+'</div>';
       appColorBody.innerHTML = pickRow + grid +
+        '<div class="rp_custom_btn" id="rp_icon_custom"><i></i><span>Свой цвет или градиент</span></div>' +
         '<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;"><div class="rp_btn rp_sm" id="rp_icon_apply_all"><span>Этот цвет — всем приложениям</span></div><div class="rp_btn rp_ghost rp_sm" id="rp_icon_reset_all"><span>Вернуть родные цвета</span></div></div>';
+      $('#rp_icon_custom', appColorBody).addEventListener('click', function(){
+        rpColorDialog({ title:'Цвет значка: ' + app.label, gradient:true, value:cur, onApply: async function(v){
+          customColors = await rpGet('rp_app_icon_colors', {}); customColors[app.id] = v;
+          await rpSet('rp_app_icon_colors', customColors); await buildGrid(); renderAppColorPicker();
+        } });
+      });
       $('#rp_icon_apply_all', appColorBody).addEventListener('click', async function(){
         var c = (await rpGet('rp_app_icon_colors', {}))[app.id] || app.c1;
         customColors = {}; APPS.forEach(function(a){ customColors[a.id] = c; });
@@ -13516,8 +13713,10 @@ SCREENS.settings = {
         '<div class="rp_swatch_dot" style="background:linear-gradient(160deg,'+p.accent+','+p.accent2+')"></div></div>';
     });
     iconHtml += '</div>';
-    designBody.innerHTML = bgHtml + iconHtml;
+    designBody.innerHTML = bgHtml + '<div class="rp_custom_btn" id="rp_bg_custom"><i></i><span>Свой фон или градиент</span></div>' + iconHtml + '<div class="rp_custom_btn" id="rp_acc_custom"><i></i><span>Свой акцент или градиент</span></div>';
     buildAccordion(paneDesignTab, 'Дизайн', designBody, false, function(){
+      $('#rp_bg_custom', designBody).addEventListener('click', function(){ rpCustomBg(); });
+      $('#rp_acc_custom', designBody).addEventListener('click', function(){ rpCustomAccent(); });
       designBody.querySelectorAll('[data-bg]').forEach(function(swEl){
         swEl.addEventListener('click', async function(){
           await applyBgPreset(swEl.getAttribute('data-bg'));
@@ -13608,6 +13807,7 @@ SCREENS.settings = {
           { id:'themes', title:'Темы и экран', hint:'Каталог тем, обои, приложения, виджет и расстановка значков', icon:'rpi-palette', color:'#a855f7', wide:true, go:function(){ openScreen('themes'); } }
         ]},
         { group:'Данные', items:[
+          { id:'win', title:'Размер и положение окна', hint:'Если телефон стоит низко или кажется мелким на твоём экране', icon:'rpi-pin', color:'#38bdf8', wide:true, nodes:[(function(){ try{ return winNode(); }catch(e){ console.error('RP win node failed', e); return null; } })()].filter(Boolean) },
           { id:'backup', title:'Резервная копия', hint:'Сохранить всё из телефона в файл и вернуть обратно', icon:'rpi-shield', color:'#22c55e', wide:true, nodes:[bkNode()] }
         ]}
       ];
@@ -13671,7 +13871,9 @@ function bkCrc32(b){
   var crc = 0xFFFFFFFF; for (var i = 0; i < b.length; i++) crc = BK_CRC_T[(crc ^ b[i]) & 255] ^ (crc >>> 8);
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
-function bkRaw(key, scope){ var v = PM.store.get(key, scope); return Promise.resolve(v === undefined ? null : v); }
+function bkRaw(key, scope){
+  return withTimeout(Promise.resolve().then(function(){ return PM.store.get(key, scope); }), 6000, null).then(function(v){ return v === undefined ? null : v; }, function(){ return null; });
+}
 async function bkListAll(scope){
   try{
     var t = PM.store.all(scope);
@@ -13681,7 +13883,7 @@ async function bkListAll(scope){
 function bkKeep(k, opt){
   if (!/^rp_[A-Za-z0-9_\-]+$/.test(k)) return false;
   if (/^rp_(busy_|mig_)/.test(k) || k === 'rp_open_cmd' || k === 'rp_img_log') return false;
-  if (!opt.gallery && k === 'rp_gal_idx') return false;
+  if (!opt.gallery && (k === 'rp_gal_idx' || k === 'rp_gal_idx_bak' || /^rp_gal_(img|th)_/.test(k))) return false;
   return true;
 }
 async function bkCollectRaw(opt, onStep){
@@ -13729,7 +13931,7 @@ async function bkCollect(opt, onStep){
     try{ files[list[i]] = await PM.media.asDataUrl(list[i]); }catch(e){}
     if (onStep) onStep(i + 1, list.length);
   }
-  data.files = files;
+  if (!opt.keys){ Object.keys(BK_SECRET_KEYS).forEach(function(k){ delete data.chat[k]; delete data.global[k]; }); }
   return data;
 }
 async function bkGz(bytes, inflate){
@@ -13753,11 +13955,13 @@ async function bkEncodePng(obj, meta){
   var grd = g.createLinearGradient(0, 0, W, BK_BANNER); grd.addColorStop(0, '#2a1446'); grd.addColorStop(1, '#ff6fae');
   g.fillStyle = grd; g.fillRect(0, 0, W, BK_BANNER);
   g.fillStyle = '#fff'; g.textBaseline = 'top';
-  g.font = '900 64px -apple-system, Segoe UI, Roboto, sans-serif'; g.fillText('PHONE MOUSE', 48, 34);
-  g.font = '700 30px -apple-system, Segoe UI, Roboto, sans-serif'; g.fillText('резервная копия · ' + meta.when, 50, 116);
+  g.font = '900 64px -apple-system, Segoe UI, Roboto, sans-serif'; g.fillText(meta.t1 || 'PHONE MOUSE', 48, 34);
+  g.font = '700 30px -apple-system, Segoe UI, Roboto, sans-serif'; g.fillText(meta.t2 || ('резервная копия · ' + meta.when), 50, 116);
   g.font = '500 24px -apple-system, Segoe UI, Roboto, sans-serif'; g.globalAlpha = .85;
-  g.fillText((meta.chat ? 'чат: ' + meta.chat + ' · ' : '') + 'храни как файл, не пересылай как фото', 50, 166);
+  g.fillText(meta.t3 || ((meta.chat ? 'чат: ' + meta.chat + ' · ' : '') + 'храни как файл, не пересылай как фото'), 50, 166);
   g.globalAlpha = 1;
+  if (meta.sw) meta.sw.slice(0, 5).forEach(function(c, i){ g.fillStyle = c; g.beginPath(); g.arc(W - 70 - i * 78, 70, 30, 0, 6.2832); g.fill(); g.lineWidth = 4; g.strokeStyle = 'rgba(255,255,255,.85)'; g.stroke(); });
+  g.fillStyle = '#fff';
   var id = g.createImageData(W, rows), d = id.data, bi = 0, src = function(i){ return i < 16 ? head[i] : (i < total ? payload[i - 16] : 0); };
   for (var p = 0; p < W * rows; p++){ var o = p * 4; d[o] = src(bi++); d[o+1] = src(bi++); d[o+2] = src(bi++); d[o+3] = 255; }
   g.putImageData(id, 0, BK_BANNER);
@@ -13792,7 +13996,7 @@ async function bkDecodeBlob(blob){
 }
 function bkStamp(){ var d = new Date(), p = function(n){ return ('0' + n).slice(-2); }; return { file: d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + '_' + p(d.getHours()) + p(d.getMinutes()), when: p(d.getDate()) + '.' + p(d.getMonth() + 1) + '.' + d.getFullYear() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes()) }; }
 async function bkSaveFile(name, dataUrl){
-  PM.media.download(name, dataUrl.slice(dataUrl.indexOf(',') + 1), 'image/png');
+  PM.media.download(name, dataUrl.slice(dataUrl.indexOf(',') + 1), (/^data:([^;,]+)/.exec(dataUrl) || [])[1] || 'image/png');
   return 'download';
 }
 async function bkMake(opt, status){
@@ -13801,6 +14005,11 @@ async function bkMake(opt, status){
   var data = await bkCollect(opt, function(a, b){ status('Собираю данные… ' + a + ' / ' + b); });
   var obj = { app:'PHONE MOUSE', v:1, at: Date.now(), chat: String(names.charName || ''), user: String(names.userName || ''), opt:{ gallery: !!opt.gallery, keys: !!opt.keys }, data: data };
   status('Упаковываю…');
+  if (opt.json){
+    status('Сохраняю файл…');
+    var jh = await bkSaveFile('phone-mouse-backup_' + st.file + '.json', await bkJsonUrl(obj));
+    return { how: jh, size: JSON.stringify(obj).length, chats: Object.keys(data.chat).length + Object.keys(data.global).length };
+  }
   var png = await bkEncodePng(obj, { when: st.when, chat: String(names.charName || '').slice(0, 40) });
   status('Сохраняю файл…');
   var how = await bkSaveFile('phone-mouse-backup_' + st.file + '.png', png.url);
@@ -13817,6 +14026,7 @@ async function bkApply(obj, status){
   ['chat','global'].forEach(function(s){ Object.keys(d[s] || {}).forEach(function(k){ if (/^rp_[A-Za-z0-9_\-]+$/.test(k)) list.push([s, k, d[s][k]]); }); });
   for (var i = 0; i < list.length; i++){
     await PM.store.set(list[i][1], list[i][2], list[i][0]);
+    if (list[i][0] === 'global' && RP_GLOBAL_KEYS[list[i][1]]){ try{ await PM.store.set('rp_mig_' + list[i][1], 1, 'global'); }catch(e){} }
     if (i % 10 === 0) status('Восстанавливаю… ' + (i + 1) + ' / ' + list.length);
   }
   RP_LOC_LOADED = false; RP_TICK_COUNT = -1;
@@ -13844,16 +14054,17 @@ function bkNode(){
     });
   });
   var busy = false;
-  $('#bk_save', inner).addEventListener('click', async function(){
+  var bkRun = async function(asJson){
     if (busy) return; busy = true;
     try{
-      var r = await bkMake(opt, status);
+      var r = await bkMake(Object.assign({}, opt, { json:!!asJson }), status);
       var mb = r.size >= 1048576 ? (r.size / 1048576).toFixed(1) + ' МБ' : Math.max(1, Math.round(r.size / 1024)) + ' КБ';
       status(r.how === 'preview' ? 'Копия открыта картинкой (' + mb + ') — сохрани её долгим нажатием как файл' : 'Готово: копия ' + mb + ' сохранена');
       toast('Копия сохранена');
     }catch(e){ console.error('RP backup failed', e); status('Не получилось: ' + (e && e.message ? e.message : e)); }
     busy = false;
-  });
+  };
+  $('#bk_save', inner).addEventListener('click', function(){ bkRun(true); });
   $('#bk_load', inner).addEventListener('click', async function(){
     if (busy) return; busy = true;
     try{
@@ -14042,6 +14253,7 @@ function toggleAppbarMenu(){
 
 function openHome(){
   stopDeliveryCountdown(); stopMarketCountdown();
+  rpEdSet(false); $('#rp_appbar_edit').style.display = 'none';
   closeNotifPanel();
   currentScreen = null;
   var home = $('#rp_home');
@@ -14064,6 +14276,76 @@ function clearAppbarActions(){
   a.innerHTML = '';
   a.style.display = 'none';
 }
+var RP_ED = { on:false, apps:{ status:1, messenger:1, love:1, diary:1, twitter:1, memories:1, npcs:1, twitch:1, delivery:1, bank:1, market:1, calendar:1, channels:1, health:1, maps:1, smarthome:1, rave:1, pet:1, tinder:1, sattok:1 } };
+var RP_ED_HOOK = [];
+function rpEdV(key, path){ var ps = Array.isArray(path) ? path : (path == null || path === '' ? [] : [path]); return String(key) + '|' + ps.map(function(x){ return encodeURIComponent(String(x)); }).join('/'); }
+function rpEdA(key, path){ return ' data-ed="' + escapeHtml(rpEdV(key, path)) + '"'; }
+function rpEdIf(key, pre, item, rest){ var k = item && item.id != null && item.id !== '' ? String(item.id) : (item && item.ts != null ? '~ts=' + item.ts : null); return k == null ? '' : rpEdA(key, (pre || []).concat([k], rest || ['text'])); }
+function rpEdSeg(cur, seg){
+  if (cur == null || typeof cur !== 'object') return null;
+  if (Array.isArray(cur)){
+    if (seg.charAt(0) === '#'){ var n = +seg.slice(1); return n >= 0 && n < cur.length ? { o:cur, k:n } : null; }
+    if (seg.charAt(0) === '~'){ var eq = seg.indexOf('='), f = seg.slice(1, eq), fv = seg.slice(eq + 1); for (var j = 0; j < cur.length; j++) if (cur[j] && typeof cur[j] === 'object' && String(cur[j][f]) === fv) return { o:cur, k:j }; return null; }
+    for (var i = 0; i < cur.length; i++) if (cur[i] && typeof cur[i] === 'object' && String(cur[i].id) === seg) return { o:cur, k:i };
+    return null;
+  }
+  return { o:cur, k:seg };
+}
+async function rpEdLoad(addr){
+  var p = String(addr || ''), cut = p.indexOf('|'), key = cut < 0 ? p : p.slice(0, cut), rest = cut < 0 ? '' : p.slice(cut + 1);
+  var segs = rest ? rest.split('/').map(function(x){ return decodeURIComponent(x); }) : [];
+  var root = await rpGet(key, null); if (root == null) return null;
+  var cur = root, ref = null;
+  for (var i = 0; i < segs.length; i++){ ref = rpEdSeg(cur, segs[i]); if (!ref) return null; cur = ref.o[ref.k]; }
+  if (cur != null && typeof cur === 'object') return null;
+  return { key:key, root:root, ref:ref, val: cur == null ? '' : String(cur) };
+}
+async function rpEdSave(addr, v){
+  var run = async function(){
+    var d = await rpEdLoad(addr); if (!d) return null;
+    var orig = d.ref ? d.ref.o[d.ref.k] : d.root, t = String(v).trim();
+    var nv = typeof orig === 'number' && /^-?\d+(?:[.,]\d+)?$/.test(t) ? +t.replace(',', '.') : v;
+    if (d.ref){ d.ref.o[d.ref.k] = nv; await rpSet(d.key, d.root); } else await rpSet(d.key, nv);
+    return d.key;
+  };
+  var key = /^rp_cx_/.test(String(addr)) ? await cxSerial(run) : await run();
+  if (!key) return false;
+  for (var i = 0; i < RP_ED_HOOK.length; i++){ if (RP_ED_HOOK[i][0].test(key)){ try{ await RP_ED_HOOK[i][1](key, addr); }catch(e){ console.error('RP edit hook failed', e); } } }
+  return true;
+}
+var RP_ED_FMT = { tw: function(v){ return twHighlight(v); }, stk: function(v){ return escapeHtml(v).replace(/(#[\wа-яёА-ЯЁ]+)/g, '<em>$1</em>'); } };
+function rpEdPaint(n, v){ var f = RP_ED_FMT[n.getAttribute('data-edf') || '']; n.innerHTML = f ? f(v) : escapeHtml(v).replace(/\n/g, '<br>'); }
+function rpEdOpen(node){ return rpEdEdit(node.getAttribute('data-ed')); }
+async function rpEdEdit(addr){
+  var d = await rpEdLoad(addr);
+  if (!d){ toast('Этот текст не нашёлся в памяти телефона — возможно, он уже обновился'); return; }
+  var old = $('.rp_ed_bg'); if (old) old.remove();
+  var bg = el('div', 'rp_confirm_overlay rp_ed_bg');
+  bg.innerHTML = '<div class="rp_confirm_card rp_ed_card"><div class="rp_confirm_title">Изменить текст</div><textarea class="rp_input rp_ed_ta" rows="7"></textarea><div class="rp_ed_btns"><div class="rp_btn rp_sm rp_ghost" data-x="0"><span>Отмена</span></div><div class="rp_btn rp_sm" data-x="1"><span>Сохранить</span></div></div></div>';
+  var ta = $('.rp_ed_ta', bg); ta.value = d.val;
+  $('#rp_screen').appendChild(bg);
+  setTimeout(function(){ try{ ta.focus(); }catch(e){} }, 60);
+  bg.addEventListener('click', function(e){ if (e.target === bg) bg.remove(); });
+  bg.querySelector('[data-x="0"]').addEventListener('click', function(){ bg.remove(); });
+  bg.querySelector('[data-x="1"]').addEventListener('click', async function(){
+    var v = ta.value;
+    if (!v.trim() && d.val.trim()){ toast('Пустым оставить нельзя — удали запись в самом приложении'); return; }
+    if (v === d.val){ bg.remove(); return; }
+    if (!(await rpEdSave(addr, v))){ toast('Не удалось сохранить'); return; }
+    bg.remove();
+    document.querySelectorAll('[data-ed]').forEach(function(n){ if (n.getAttribute('data-ed') === addr) rpEdPaint(n, v); });
+    toast('Сохранено');
+  });
+}
+function rpEdSet(on){
+  var was = RP_ED.on;
+  RP_ED.on = !!on;
+  var scr = $('#rp_screen'); if (scr) scr.classList.toggle('rp_edon', RP_ED.on);
+  var b = $('#rp_appbar_edit'); if (b){ b.classList.toggle('on', RP_ED.on); b.innerHTML = '<svg><use href="#' + (RP_ED.on ? 'rpi-check' : 'rpi-pen') + '"/></svg>'; b.title = RP_ED.on ? 'Готово' : 'Править тексты'; }
+  var t = $('#rp_appbar_title');
+  if (RP_ED.on && !was && t){ RP_ED.title = t.textContent; t.textContent = 'Нажми на текст'; }
+  if (!RP_ED.on && was){ if (t && t.textContent === 'Нажми на текст' && RP_ED.title != null) t.textContent = RP_ED.title; RP_ED.title = null; var ob = $('.rp_ed_bg'); if (ob) ob.remove(); }
+}
 async function openScreen(id){
   var s = SCREENS[id];
   if (!s) return;
@@ -14071,6 +14353,7 @@ async function openScreen(id){
   stopDeliveryCountdown(); stopMarketCountdown();
   backTarget = openHome;
   hlExitEdit();
+  rpEdSet(false); $('#rp_appbar_edit').style.display = RP_ED.apps[id] ? 'flex' : 'none';
   currentScreen = id;
   applyScreenPalette(id);
   $('#rp_home').style.display = 'none';
@@ -14092,6 +14375,8 @@ var CX_KC = 'rp_cx_contacts', CX_KT = 'rp_cx_threads', CX_KS = 'rp_cx_set', CX_K
 var CX_LIM = 300;
 var CX = { tab:'chats', open:null, hubOk:false, hubTab:'chats', callTab:'all', q:'', tray:'', busy:{}, again:{}, timers:{}, root:null, cont:null, names:null, cs:[], lastSync:0, scanBusy:false, peekBusy:false, lastCount:null, ticking:false };
 var CX_EVERY = [[0,'Выкл'],[15,'15 мин'],[30,'30 мин'],[60,'1 час'],[120,'2 часа'],[240,'4 часа'],[480,'8 часов']];
+var CX_GEVERY = [[0,'Выкл'],[30,'30 мин'],[60,'1 час'],[120,'2 часа'],[240,'4 часа'],[480,'8 часов'],[1440,'24 часа']];
+function cxGEvery(g){ return g && g.every != null ? (+g.every || 0) : (g && g.auto ? 60 : 0); }
 var CX_APPS_BOT = [['memories','Воспоминания'],['diary','Дневник'],['pet','Мой малыш'],['sattok','Сатток (ТикТок)'],['twitter','Твиттер'],['channels','Каналы'],['twitch','Twitch'],['calendar','Календарь'],['love','Love'],['delivery','Доставка'],['bank','Банк'],['rave','Rave']];
 var CX_APPS_PUB = [['channels','Каналы'],['twitch','Twitch'],['twitter','Твиттер'],['rave','Rave']];
 var CX_SMS_RE = /(смс|sms|эсэмэс|сообщени|фотк|фото|селфи|кружо|голосов|видео|скрин|написал|написала|написали|отправил|отправила|прислал|прислала|скинул|скинула|ответил|ответила|напечатал|телефон|мессендж|телеграм|ватсап|whatsapp|telegram|директ|в личк|переписк|уведомлени|завибрир|пиликн|экран|\btext(ed|ing|s)?\b|message|\bdm\b|phone)/i;
@@ -14112,6 +14397,26 @@ function cxTokCut(s, lim){
   return s.slice(0, lo).replace(/\s+\S*$/, '').trim();
 }
 function cxHM(ts){ var d = new Date(ts || Date.now()); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function cxClockMin(clk){
+  var s = clk ? String(clk.time || '') + ' ' + String(clk.date || '') : '';
+  var m = /(?:^|[^\d])([01]?\d|2[0-3]):([0-5]\d)(?!\d)/.exec(s);
+  return m ? (+m[1]) * 60 + (+m[2]) : null;
+}
+async function cxStamp(){
+  try{
+    var clk = await rpGet('rp_rpclock', null); if (!clk) return null;
+    var out = {}, base = cxClockMin(clk);
+    if (base != null){
+      var el = Math.max(0, Math.min(120, Math.floor((Date.now() - (clk.updatedAt || Date.now())) / 60000)));
+      var tm = (base + el) % 1440;
+      out.st = pad2(Math.floor(tm / 60)) + ':' + pad2(tm % 60);
+    }
+    var iso = clk.date ? parseFreeTextDateToISO(clk.date, null, RP_DATE_REF) : null;
+    if (iso) out.sd = new Date(iso + 'T00:00:00').toLocaleDateString('ru-RU', { day:'numeric', month:'long' });
+    return out;
+  }catch(e){ return null; }
+}
+function cxMT(m){ return (m && m.st) || ''; }
 function cxDayKey(ts){ var d = new Date(ts); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
 function cxDayLabel(ts){
   var k = cxDayKey(ts);
@@ -14148,12 +14453,12 @@ async function cxWho(){
   var n = await getNames(), ref = null; try{ ref = await getAutoCharRef(); }catch(e){}
   var mp = await rpGet('rp_my_profile', null) || {};
   var ua = mp.avatar || (n.chat && n.chat.persona && n.chat.persona.avatar) || '';
-  CX.names = { char: n.charName, user: mp.name || n.userName, userTavo: n.userName, charAv: (ref && ref.avatar) || n.charAvatar || '', userAv: ua, handle: mp.user || '', chat: n.chat };
+  CX.names = { char: n.charName, user: mp.name || n.userName, userSt: n.userName, charAv: (ref && ref.avatar) || n.charAvatar || '', userAv: ua, handle: mp.user || '', chat: n.chat };
   return CX.names;
 }
 function cxContact(id, cs){ cs = cs || CX.cs || []; for (var i = 0; i < cs.length; i++){ if (cs[i].id === id) return cs[i]; } return null; }
 function cxPerson(id, cs){
-  var nm = CX.names || { char:'Персонаж', user:'Я', userTavo:'Я', charAv:'', userAv:'' };
+  var nm = CX.names || { char:'Персонаж', user:'Я', userSt:'Я', charAv:'', userAv:'' };
   if (id === 'me') return { id:'me', name: nm.user, av: nm.userAv };
   if (id === 'char') return { id:'char', name: nm.char, av: nm.charAv, bot:true };
   var c = cxContact(id, cs);
@@ -14199,15 +14504,13 @@ async function cxShareAvatar(name, url){
 }
 function cxDur(s){ s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 function cxHistory(list, n, nameFn){
-  var out = [], day = '';
+  var out = [];
   list.filter(function(m){ return m.t !== 'sys' || /звон/i.test(m.text || ''); }).slice(-n).forEach(function(m){
-    var k = cxDayKey(m.ts || 0);
-    if (k !== day){ day = k; out.push('— ' + cxDayLabel(m.ts || 0) + ' —'); }
-    out.push('[' + cxHM(m.ts) + '] ' + nameFn(m.from) + ': ' + cxMsgLine(m));
+    out.push(nameFn(m.from) + ': ' + cxMsgLine(m));
   });
   return out.join('\n');
 }
-function cxMacro(s){ var nm = CX.names || {}; return String(s || '').replace(/\{\{\s*char\s*\}\}/gi, nm.char || '').replace(/\{\{\s*user\s*\}\}/gi, nm.userTavo || ''); }
+function cxMacro(s){ var nm = CX.names || {}; return String(s || '').replace(/\{\{\s*char\s*\}\}/gi, nm.char || '').replace(/\{\{\s*user\s*\}\}/gi, nm.userSt || ''); }
 async function cxCardFull(){
   try{
     var chat = await withTimeout(Promise.resolve(PM.who.current()), 5000, null);
@@ -14295,7 +14598,7 @@ async function cxRpText(n, cap){
     var nm = CX.names;
     var lines = (Array.isArray(msgs) ? msgs : []).filter(function(m){ return m && !m.hidden && (m.role === 'user' || m.role === 'assistant'); }).map(function(m){
       var c = stripBrailleNoise(String(m.content || '')).replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').replace(/\n{2,}/g, '\n').trim();
-      return (m.role === 'user' ? nm.userTavo : nm.char) + ': ' + (c.length > 1600 ? c.slice(0, 500) + ' […] ' + c.slice(-1000) : c);
+      return (m.role === 'user' ? nm.userSt : nm.char) + ': ' + (c.length > 1600 ? c.slice(0, 500) + ' […] ' + c.slice(-1000) : c);
     }).filter(function(l){ return l.length > 8; });
     var out = lines.join('\n\n');
     return out.length > cap ? out.slice(-cap) : out;
@@ -14335,7 +14638,8 @@ function cxStkText(){ return CX_STK.map(function(s){ return s.id + ' — «' + s
 function cxContactLine(c, n){ return c.name + (c.aliases && c.aliases.length ? ' (ещё зовут: ' + c.aliases.slice(0, 4).join(', ') + ')' : '') + (c.desc ? ' — ' + cxClip(c.desc, n || 90) : ''); }
 async function cxStoryNow(){ var l = ''; try{ l = await currentRpLabel(); }catch(e){} return l; }
 var CX_TAG_RULES = function(withRave){
-  return '- Стикер — отдельной строкой: [стикер: id]. Доступные стикеры: ' + cxStkText() + '.\n' +
+  return '- Реальные время и дата тебе неизвестны, в переписке их нет: время суток и день определяй только по времени в истории.\n' +
+    '- Стикер — отдельной строкой: [стикер: id]. Доступные стикеры: ' + cxStkText() + '.\n' +
     '- Репост — отдельной строкой: [репост: R2], рядом напиши, что думаешь, или спроси об этом. Бери только номера из списка «Можно переслать».\n' +
     (withRave ? '- Позвать смотреть фильм вместе в Rave: [кино: Название | минуты]. Только если это к месту.\n' : '') +
     '- Голосовое: [голосовое: что говоришь].\n' +
@@ -14350,7 +14654,7 @@ async function cxPromptBot(t, list, cs, mode){
   var card = await cxCardFull();
   var rpN = Math.max(4, Math.min(20, +cfg('contextRange', 20) || 20));
   var rp = await cxRpText(rpN, 9000);
-  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userSt : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
   var lore = await cxLore(card.chat, card.c, rp + '\n' + hist.slice(-2500), 4500);
   var per = await cxPersonaText(card.chat);
   var lmem = await cxLongMem(2500);
@@ -14359,11 +14663,11 @@ async function cxPromptBot(t, list, cs, mode){
   var cat = await cxCatalog(false);
   var when = await cxStoryNow();
   var known = cs.filter(function(c){ return c.desc || c.src !== 'auto'; }).slice(0, 18).map(function(c){ return '- ' + cxContactLine(c, 80); }).join('\n');
-  var p = 'Ты — ' + nm.char + '. Сейчас ты переписываешься с ' + nm.userTavo + ' в мессенджере на телефоне. Это живая переписка, а не ролевая сцена: пиши только свои сообщения — так, как пишет ' + nm.char + ', его словами, манерой и характером из карточки.\n\n' +
+  var p = 'Ты — ' + nm.char + '. Сейчас ты переписываешься с ' + nm.userSt + ' в мессенджере на телефоне. Это живая переписка, а не ролевая сцена: пиши только свои сообщения — так, как пишет ' + nm.char + ', его словами, манерой и характером из карточки.\n\n' +
     '[КАРТОЧКА ' + nm.char + ']\n' + (card.text || '(нет данных)') + '\n\n' +
     (lore ? '[ЛОРБУК И ПАМЯТЬ]\n' + lore + '\n\n' : '') +
     (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
-    (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userTavo + ']\n' + per + '\n\n' : '') +
+    (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userSt + ']\n' + per + '\n\n' : '') +
     (rel ? '[ОТНОШЕНИЯ]\n' + rel + '\n\n' : '') +
     (apps ? '[ЧТО ПРОИСХОДИТ В ПРИЛОЖЕНИЯХ ТЕЛЕФОНА — ' + nm.char + ' это знает]\n' + apps + '\n\n' : '') +
     (rp ? '[РОЛЕВАЯ — последние события истории]\n' + rp + '\n\n' : '') +
@@ -14372,30 +14676,32 @@ async function cxPromptBot(t, list, cs, mode){
     (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
     '[ПЕРЕПИСКА В ЭТОМ ЧАТЕ]\n' + (hist || '(пока пусто)') + '\n\n' +
     (mode === 'init'
-      ? '[СЕЙЧАС] ' + nm.userTavo + ' давно не писал(а) — ты пишешь ПЕРВЫМ. Найди живой повод: чаще всего перешли что-то интересное из «Можно переслать» и спроси мнение или подколи, либо напиши по тому, что сейчас происходит в истории и в его жизни. Можно начать с [звонок] — если характер такой, что он сначала позвонит, а потом напишет.\n'
-      : '[СЕЙЧАС] Ответь на последние сообщения ' + nm.userTavo + '.\n') +
+      ? '[СЕЙЧАС] ' + nm.userSt + ' давно не писал(а) — ты пишешь ПЕРВЫМ. Найди живой повод: чаще всего перешли что-то интересное из «Можно переслать» и спроси мнение или подколи, либо напиши по тому, что сейчас происходит в истории и в его жизни. Можно начать с [звонок] — если характер такой, что он сначала позвонит, а потом напишет.\n'
+      : '[СЕЙЧАС] Ответь на последние сообщения ' + nm.userSt + '.\n') +
     'ПРАВИЛА:\n- 1–4 коротких сообщения, каждое с новой строки, без имени в начале. Как в мессенджере, а не как в книге.\n' +
     '- Никаких описаний действий, звёздочек, ремарок, рассказчика и перевода.\n' +
     '- Пиши из своего текущего положения в истории: где он и чем занят. Не противоречь сюжету и не двигай его сам.\n' +
-    '- Не пиши за ' + nm.userTavo + ', не повторяй уже сказанное, не прощайся без причины.\n' +
+    '- Не пиши за ' + nm.userSt + ', не повторяй уже сказанное, не прощайся без причины.\n' +
     CX_TAG_RULES(true) + '\nОтветь только сообщениями.';
   return { prompt:p, cat:cat, ctx:{ def:'char', isSelf:function(n){ return rpSameContact({ name:nm.char }, n); } } };
 }
 async function cxPromptNpc(t, list, cs, mode){
   var nm = CX.names, c = cxContact(t.who[0], cs);
   if (!c) return null;
-  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : cxNameOf(id, cs); });
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userSt : cxNameOf(id, cs); });
   var pub = await cxAppsText(CX_APPS_PUB, 600, 3200);
-  var prof = await cxAppsText([['profile', 'Профиль ' + nm.userTavo]], 500, 600);
+  var when = await cxStoryNow();
+  var prof = await cxAppsText([['profile', 'Профиль ' + nm.userSt]], 500, 600);
   var cat = await cxCatalog(true);
-  var p = 'Ты — ' + c.name + '. Ты переписываешься с ' + nm.userTavo + ' в мессенджере. Пиши только свои сообщения, своим голосом.\n\n' +
+  var p = 'Ты — ' + c.name + '. Ты переписываешься с ' + nm.userSt + ' в мессенджере. Пиши только свои сообщения, своим голосом.\n\n' +
     '[АНКЕТА ' + c.name + ']\n' + (c.desc ? 'Кто это: ' + c.desc + '\n' : '') + (c.pers ? 'Характер: ' + c.pers + '\n' : '') + (c.ex ? 'Как пишет (примеры):\n' + c.ex + '\n' : '') + (c.mem ? 'Что было между вами: ' + c.mem + '\n' : '') +
     (c.aliases && c.aliases.length ? 'Также зовут: ' + c.aliases.join(', ') + '\n' : '') + '\n' +
     (pub ? '[ПУБЛИЧНЫЕ НОВОСТИ — это видят все]\n' + pub + '\n\n' : '') +
-    (prof ? '[ПУБЛИЧНОЕ О ' + nm.userTavo + ']\n' + prof + '\n\n' : '') +
+    (prof ? '[ПУБЛИЧНОЕ О ' + nm.userSt + ']\n' + prof + '\n\n' : '') +
     (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
+    (when ? 'Сейчас в истории: ' + when + '.\n\n' : '') +
     '[ПЕРЕПИСКА]\n' + (hist || '(пока пусто)') + '\n\n' +
-    'ПРАВИЛА:\n- Ты знаешь только себя, публичные новости выше и то, что тебе написали здесь. Что происходит наедине у ' + nm.userTavo + ' и ' + nm.char + ', их переписки и личные приложения ты НЕ знаешь.\n' +
+    'ПРАВИЛА:\n- Ты знаешь только себя, публичные новости выше и то, что тебе написали здесь. Что происходит наедине у ' + nm.userSt + ' и ' + nm.char + ', их переписки и личные приложения ты НЕ знаешь.\n' +
     '- Можно обсуждать новости из каналов, твиттера, стримов и Rave — это хороший повод сблизиться.\n' +
     '- 1–3 коротких сообщения, каждое с новой строки, без имени в начале. Без описаний действий и звёздочек.\n' +
     CX_TAG_RULES(false) + '\nОтветь только сообщениями.';
@@ -14411,23 +14717,25 @@ async function cxPromptGroup(t, list, cs, mode){
   var hasChar = mem.indexOf('char') >= 0;
   var card = hasChar ? await cxCardFull() : null;
   var rp = hasChar ? await cxRpText(8, 3000) : '';
-  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
+  var hist = cxHistory(list, 40, function(id){ return id === 'me' ? nm.userSt : (id === 'char' ? nm.char : cxNameOf(id, cs)); });
   var pub = await cxAppsText(CX_APPS_PUB, 500, 3000);
+  var when = await cxStoryNow();
   var cat = await cxCatalog(true);
-  var p = 'Это групповой чат «' + cxTitle(t, cs) + '» в мессенджере. В нём ' + nm.userTavo + ' и участники:\n' + people + '\n\n' +
+  var p = 'Это групповой чат «' + cxTitle(t, cs) + '» в мессенджере. В нём ' + nm.userSt + ' и участники:\n' + people + '\n\n' +
     (hasChar ? '[КАРТОЧКА ' + nm.char + ']\n' + cxClip(card.text, 2200) + '\n' + (rp ? '[ЧТО СЕЙЧАС В ИСТОРИИ — знает только ' + nm.char + ']\n' + rp + '\n' : '') + nm.char + ' в группе ведёт себя публично и не выдаёт личного.\n\n' : '') +
     (pub ? '[ПУБЛИЧНЫЕ НОВОСТИ — это видят все]\n' + pub + '\n\n' : '') +
     (cat.length ? '[МОЖНО ПЕРЕСЛАТЬ]\n' + cxCatText(cat) + '\n\n' : '') +
+    (when ? 'Сейчас в истории: ' + when + '.\n\n' : '') +
     '[ПЕРЕПИСКА]\n' + (hist || '(пока пусто)') + '\n\n' +
     (mode === 'auto'
-      ? '[СЕЙЧАС] В чате тихо. Кто-то из участников сам начинает разговор: новость, мем, вопрос, планы. Остальные могут подхватить. ' + nm.userTavo + ' сейчас не пишет. 2–5 строк.\n'
-      : '[СЕЙЧАС] Ответь одним ответом сразу за всех, кому есть что сказать: кому адресовано сообщение — обязательно; остальные — если захотят вмешаться, поддержать, поспорить или перебить друг друга. Обычно 2–4 участника, каждый своей строкой. 3–8 строк.\n') +
+      ? '[СЕЙЧАС] В чате тихо. Кто-то из участников сам начинает разговор: новость, мем, вопрос, планы. Остальные могут подхватить. ' + nm.userSt + ' сейчас не пишет. 2–5 строк.\n'
+      : '[СЕЙЧАС] Отреагируйте на последние сообщения. Как в живом групповом чате: иногда отвечает один, иногда несколько — по смыслу. 1–5 строк.\n') +
     'ПРАВИЛА:\n- Формат строго: Имя: текст — одна строка, одно сообщение. Имена только участников из списка выше, точно как в списке, без перевода и транслитерации.\n' +
     '- У каждого свой голос по анкете. Участники знают только публичное и то, что написано в этом чате.\n' +
-    '- Не пиши за ' + nm.userTavo + '. Без описаний действий и звёздочек.\n' +
+    '- Не пиши за ' + nm.userSt + '. Без описаний действий и звёздочек.\n' +
     CX_TAG_RULES(false) + '\n- В группе тег пишется после имени: Имя: [стикер: id].\nОтветь только строками чата.';
   var res = function(n){
-    if (rpSameContact({ name:nm.userTavo }, n) || rpSameContact({ name:nm.user }, n)) return null;
+    if (rpSameContact({ name:nm.userSt }, n) || rpSameContact({ name:nm.user }, n)) return null;
     for (var i = 0; i < mem.length; i++){
       if (mem[i] === 'char'){ if (rpSameContact({ name:nm.char }, n)) return 'char'; continue; }
       var c = cxContact(mem[i], cs); if (c && rpSameContact(c, n)) return c.id;
@@ -14450,18 +14758,17 @@ async function cxGroupMore(tid, t, cs, mode, built, items){
     var last = items[items.length - 1].from, rest = mem.filter(function(id){ return id !== last; });
     if (rest.length) queue = [rest[Math.floor(Math.random() * rest.length)]];
   }
-  queue = queue.slice(0, 1);
+  queue = queue.slice(0, 3);
   for (var q = 0; q < queue.length; q++){
     var id = queue[q], who = id === 'char' ? nm.char : cxNameOf(id, cs);
     var cur = await cxMsgs(tid);
-    var b2 = { self: built.self, ctx: built.ctx, cat: [] };
-    var cardTxt = ''; if (mem.indexOf('char') >= 0){ try{ cardTxt = cxClip((await cxCardFull()).text, 700); }catch(eC){} }
-    var ppl = mem.map(function(m2){ if (m2 === 'char') return '- ' + nm.char + (cardTxt ? ': ' + cardTxt : ''); var c = cxContact(m2, cs); return c ? '- ' + c.name + ': ' + cxClip([c.desc, c.pers ? 'характер: ' + c.pers : '', c.ex ? 'пишет так: ' + c.ex.replace(/\n/g, ' / ') : ''].filter(Boolean).join('. '), 360) : ''; }).filter(Boolean).join('\n');
-    var hist2 = cxHistory(cur, 14, function(id2){ return id2 === 'me' ? nm.userTavo : (id2 === 'char' ? nm.char : cxNameOf(id2, cs)); });
-    var raw2 = await callModel('Это групповой чат «' + cxTitle(t, cs) + '» в мессенджере. В нём ' + nm.userTavo + ' и участники:\n' + ppl + '\n\n[ПЕРЕПИСКА]\n' + (hist2 || '(пока пусто)') + '\n\nНе пиши за ' + nm.userTavo + '. Без описаний действий и звёздочек.\n\n[ТЕПЕРЬ] Сейчас пишет только ' + who + ': живая реакция на последние сообщения чата, в своём голосе, 1–2 строки, формат «' + who + ': текст». Можно отвечать другим участникам и спорить с ними. Если по смыслу ему нечего добавить, ответь одним словом SKIP.');
+    var b2 = await cxPromptGroup(t, cur, cs, mode === 'auto' ? 'auto' : 'reply');
+    if (!b2) return;
+    b2.self = built.self;
+    var raw2 = await callModel(b2.prompt + '\n\n[ТЕПЕРЬ] Сейчас пишет только ' + who + ': живая реакция на последние сообщения чата, в своём голосе, 1–2 строки, формат «' + who + ': текст». Можно отвечать другим участникам и спорить с ними. Если по смыслу ему нечего добавить, ответь одним словом SKIP.');
     var clean = String(raw2 || '').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, '').trim();
     if (!clean || /^SKIP\b/i.test(clean)) continue;
-    var it2 = cxFinal(cxParse(clean, 'dm', { def: id, isSelf: function(n){ return rpSameContact({ name: nm.userTavo }, n) || rpSameContact({ name: nm.user }, n) || rpSameContact(id === 'char' ? { name: nm.char } : (cxContact(id, cs) || { name: who }), n); } }), b2);
+    var it2 = cxFinal(cxParse(clean, 'dm', { def: id, isSelf: function(n){ return rpSameContact({ name: nm.userSt }, n) || rpSameContact({ name: nm.user }, n) || rpSameContact(id === 'char' ? { name: nm.char } : (cxContact(id, cs) || { name: who }), n); } }), b2);
     it2.forEach(function(x){ x.from = id; });
     if (!it2.length) continue;
     await cxDeliver(tid, it2, b2);
@@ -14527,8 +14834,8 @@ async function cxPush(tid, add, opts){
   opts = opts || {};
   return cxSerial(async function(){
     var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return null;
-    var l = await cxMsgs(tid);
-    add.forEach(function(m){ m.id = m.id || uid(); m.ts = m.ts || Date.now(); l.push(m); });
+    var l = await cxMsgs(tid), stp = await cxStamp();
+    add.forEach(function(m){ m.id = m.id || uid(); m.ts = m.ts || Date.now(); if (stp && !m.st && !m.sd){ if (stp.st) m.st = stp.st; if (stp.sd) m.sd = stp.sd; } l.push(m); });
     await cxMsgsSave(tid, l);
     var last = add[add.length - 1];
     t.ts = Math.max(t.ts || 0, last.ts); t.last = { f: last.from, x: cxPreview(last) };
@@ -14547,12 +14854,12 @@ function cxAfter(tid){
   if (CX.open === tid) cxDrawMsgs(); else if (!CX.open) cxRender();
 }
 async function cxDeliver(tid, items, built){
-  var cs = await cxContacts(), photoOn = false; try{ photoOn = await imagesEnabled(); }catch(e){}
+  var cs = await cxContacts(), photoOn = false, autoOn = true; try{ photoOn = await imagesEnabled(); autoOn = await rpAutoGen(); }catch(e){}
   for (var i = 0; i < items.length; i++){
     var it = items[i];
     await cxSleep(i === 0 ? 350 : Math.min(2200, 500 + String(it.text || '').length * 22));
     var m = { from: it.from, t: it.t, text: it.text || '', d: it.d || null, self: built.self ? 1 : undefined };
-    if (cxNeedsImg(m)) m.d.busy = photoOn;
+    if (cxNeedsImg(m)){ m.d.busy = photoOn && autoOn; if (photoOn && !autoOn) m.d.manual = 1; }
     if (m.t === 'call'){
       var cl = await cxCalls(); cl.unshift({ id:uid(), who:m.from, dir:'missed', ts:Date.now(), dur:0 }); await rpSet(CX_KCALL, cl.slice(0, 80));
       m.t = 'call'; m.d = { dir:'missed' };
@@ -14561,13 +14868,13 @@ async function cxDeliver(tid, items, built){
     if (!r) return;
     if (i === items.length - 1) cxNotify(r.t, m, cs);
     cxAfter(tid);
-    if (photoOn && cxNeedsImg(m)) cxDrawMedia(tid, m, cs);
+    if (photoOn && autoOn && cxNeedsImg(m)) cxDrawMedia(tid, m, cs);
   }
 }
 var CX_DOC_RE = /(\.|\b)(pdf|docx?|xlsx?|pptx?|txt|zip|rar|apk|mp3|wav|csv|rtf|odt|epub)\b|документ|таблиц|презентац|резюме|договор|архив|аудиофайл|трек|справк|счёт|счет|отчёт|отчет|скан|выписк|квитанц/i;
 var CX_IMG_T = { photo:1, circle:1, video:1 };
 function cxNeedsImg(m){ return !!(m && CX_IMG_T[m.t] && m.d && !m.d.img && !m.d.vid); }
-function cxNm(id, cs){ return id === 'me' ? (CX.names && CX.names.userTavo) || 'Я' : cxNameOf(id, cs); }
+function cxNm(id, cs){ return id === 'me' ? (CX.names && CX.names.userSt) || 'Я' : cxNameOf(id, cs); }
 function cxSec(s){ var m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '').trim()); return m ? (+m[1]) * 60 + (+m[2]) : 0; }
 function cxFileD(b){
   b = String(b || '').trim();
@@ -14695,7 +15002,7 @@ async function cxDirect(tid, m, cs){
     var hist = prev.map(function(x){ return cxNm(x.from, cs) + ': ' + cxMsgLine(x); }).join('\n');
     var rp = (m.from === 'char' || m.from === 'me') ? await cxRpText(6, 2400) : '';
     var when = await cxStoryNow();
-    var people = ['- ' + nm.char + ' — главный персонаж', '- ' + nm.userTavo + ' — игрок'].concat(cs.slice(0, 30).map(function(c){ return '- ' + cxContactLine(c, 50); })).join('\n');
+    var people = ['- ' + nm.char + ' — главный персонаж', '- ' + nm.userSt + ' — игрок'].concat(cs.slice(0, 30).map(function(c){ return '- ' + cxContactLine(c, 50); })).join('\n');
     var kl = m.t === 'circle' ? 'видеосообщение-кружок — его снимают на фронтальную камеру, отправитель смотрит в камеру и говорит' : (m.t === 'video' ? 'видео — опиши один характерный кадр' : (d.asFile ? 'фото файлом' : 'фото'));
     var raw = await callModel('Подготовь кадр для генератора картинок. ' + sender + ' отправляет ' + (other ? other + ' ' : '') + 'в мессенджере ' + kl + '.\n' +
       'Что на нём, со слов отправителя: ' + (d.desc || '(не сказано)') + '\n' +
@@ -14706,40 +15013,59 @@ async function cxDirect(tid, m, cs){
       (rp ? '[ЧТО СЕЙЧАС В ИСТОРИИ]\n' + rp + '\n\n' : '') +
       (when ? 'Время в истории: ' + when + '\n\n' : '') +
       'Реши, кто в кадре. «я» — это ' + sender + (other ? ', «ты» — ' + other : '') + ', «мы» — оба. Если в кадре нет людей — еда, вещь, животное, вид из окна, экран, документ — "in": [].\n' +
-      'prompt — по-английски: что в кадре, ракурс, место, одежда, свет, время суток, детали из истории. Людей в кадре называй ТОЧНО как в списке, кириллицей. Если людей нет — никаких имён. Без надписей на картинке.\n' +
+      'prompt — по-английски: что в кадре, ракурс, место, одежда, поза, выражение, свет, время суток, детали из истории. Внешность людей (лицо, волосы, цвет кожи, национальность, возраст, телосложение) НЕ описывай — она берётся с референсов. Людей в кадре называй ТОЧНО как в списке, кириллицей. Если людей нет — никаких имён. Без надписей на картинке.\n' +
       'Ответь только JSON: {"in":["Имя"],"prompt":"..."}');
     var o = cxJson(raw, false);
     if (!o){ var s0 = String(raw || ''), a = s0.indexOf('{'), b = s0.lastIndexOf('}'); if (a >= 0 && b > a){ try{ o = JSON.parse(cxJsonFix(s0.slice(a, b + 1))); }catch(e){ o = null; } } }
-    if (!o || !o.prompt) return fallback;
-    return { in: Array.isArray(o.in) ? o.in.map(String).slice(0, 4) : fallback.in, prompt: cxClip(String(o.prompt), 1400) };
+    var selfieRe = /селфи|selfie|себя|своё фото|свое фото|мо[её] фото|мо[её] лицо/i;
+    var selfieTxt = [d.desc, m.text, d.cast, prev.length ? cxMsgLine(prev[prev.length - 1]) : ''].join(' ');
+    var asked = selfieRe.test(selfieTxt);
+    if (!o || !o.prompt){
+      if (asked && !fallback.in.length && m.t !== 'video') fallback.in = [sender];
+      return fallback;
+    }
+    var inList = Array.isArray(o.in) && o.in.length ? o.in.map(String).slice(0, 4) : fallback.in;
+    if (asked && m.t !== 'video' && !inList.some(function(x){ return /^(я|me)$/i.test(String(x).trim()) || rpSameContact({ name:sender }, x); })) inList = [sender].concat(inList).slice(0, 4);
+    return { in: inList, prompt: cxClip(String(o.prompt), 1400) };
   }catch(e){ return fallback; }
 }
-async function cxDrawMedia(tid, m, cs){
+async function cxDrawMedia(tid, m, cs, ov){
   cs = cs || await cxContacts();
   try{
-    var dir = await cxDirect(tid, m, cs);
+    var dir = ov && ov.prompt ? { in: (ov.in && ov.in.length ? ov.in : (m.d && m.d.inn) || []), prompt: ov.prompt } : await cxDirect(tid, m, cs);
     var who = cxCastWho(dir.in, cs);
     var conf = Object.assign({}, await getImgConfig(), { galleryTag:'Чат', refWho: who.refWho, withUser: !!who.withUser });
     if (m.t === 'circle') conf.aspectRatio = '1:1'; else if (m.t === 'video') conf.aspectRatio = '9:16';
     var url = await rpGenerateImage(buildChatImagePrompt(dir.prompt, cxNm(m.from, cs), m.t === 'circle' ? 'circle' : ''), conf);
     try{ var sh = await galKeep(url, 900, 0.84); if (sh && sh.data) url = sh.data; }catch(eS){}
-    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.img = url; x.d.busy = false; x.d.err = 0; x.d.inn = (dir.in || []).slice(0, 4); });
+    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.img = url; x.d.busy = false; x.d.err = 0; x.d.manual = 0; x.d.inn = (dir.in || []).slice(0, 4); x.d.prompt = dir.prompt; });
   }catch(e){
     console.error('RP chat media failed', e);
-    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.busy = false; x.d.err = 1; });
+    await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.busy = false; x.d.manual = 0; if (!x.d.img) x.d.err = 1; });
+    cxAfter(tid);
+    if (ov && ov.strict) throw e;
+    if (ov) toast('Не вышло: ' + (e && e.message ? e.message : e));
+    return;
   }
   cxAfter(tid);
 }
-async function cxMediaQueue(jobs){
+async function cxMediaQueue(jobs, forced){
   if (!jobs || !jobs.length) return;
   var on = false; try{ on = await imagesEnabled(); }catch(e){}
-  if (!on) return;
+  if (!on){ if (forced) toast('Включи режим с картинками и заполни ключ в настройках картинок'); return; }
+  if (!forced && !(await rpAutoGen())){
+    for (var k = 0; k < jobs.length; k++){
+      await cxPatchMsg(jobs[k].tid, jobs[k].m.id, function(x){ x.d = x.d || {}; x.d.busy = false; x.d.manual = 1; });
+      cxAfter(jobs[k].tid);
+    }
+    return;
+  }
   var cs = await cxContacts();
   for (var i = 0; i < jobs.length; i++){
     var j = jobs[i];
-    await cxPatchMsg(j.tid, j.m.id, function(x){ x.d = x.d || {}; x.d.busy = true; });
+    await cxPatchMsg(j.tid, j.m.id, function(x){ x.d = x.d || {}; x.d.busy = true; x.d.manual = 0; });
     cxAfter(j.tid);
-    await cxDrawMedia(j.tid, j.m, cs);
+    await cxDrawMedia(j.tid, j.m, cs, j.ov);
   }
 }
 async function cxVisionOk(){ try{ var c = await getApiConfig(); return !!(c && c.enabled && c.apiKey && c.model && (c.format === 'gemini' || c.baseUrl)); }catch(e){ return false; } }
@@ -14754,17 +15080,17 @@ async function cxSee(src){
   try{ cr = await getAutoCharRef() || {}; }catch(e){}
   try{ ur = await getAutoUserRef() || {}; }catch(e){}
   var look = function(r, a){ return cxClip((r && r.text) || (a && a.desc) || '', 260); };
-  var people = ['- ' + nm.char + ': ' + (look(refs.char, cr) || 'главный персонаж'), '- ' + nm.userTavo + ': ' + (look(refs.user, ur) || 'игрок, отправитель фото')].concat(cs.filter(function(x){ return x.desc; }).slice(0, 15).map(function(x){ return '- ' + x.name + ': ' + cxClip(x.desc, 120); })).join('\n');
-  var prompt = 'Это фото, которое ' + nm.userTavo + ' отправляет в мессенджере. Опиши по-русски в 1–2 предложениях, что на нём: что видно, где, какое настроение. Если на фото люди — внешность, одежда, эмоции. Если кто-то похож на людей из списка — назови их.\n\n[ЛЮДИ]\n' + people + '\n\nОтветь только JSON: {"desc":"...","in":["Имя"]}';
+  var people = ['- ' + nm.char + ': ' + (look(refs.char, cr) || 'главный персонаж'), '- ' + nm.userSt + ': ' + (look(refs.user, ur) || 'игрок, отправитель фото')].concat(cs.filter(function(x){ return x.desc; }).slice(0, 15).map(function(x){ return '- ' + x.name + ': ' + cxClip(x.desc, 120); })).join('\n');
+  var prompt = 'Это фото, которое ' + nm.userSt + ' отправляет в мессенджере. Опиши по-русски в 1–2 предложениях, что на нём: что видно, где, какое настроение. Если на фото люди — внешность, одежда, эмоции. Если кто-то похож на людей из списка — назови их.\n\n[ЛЮДИ]\n' + people + '\n\nОтветь только JSON: {"desc":"...","in":["Имя"]}';
   var text = '';
   if (c.format === 'gemini'){
-    var base = (c.baseUrl || 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '');
+    var base = rpApiBase(c.baseUrl, 'gemini') || 'https://generativelanguage.googleapis.com/v1beta';
     var r1 = await fetch(base + '/models/' + encodeURIComponent(c.model) + ':generateContent?key=' + encodeURIComponent(c.apiKey), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ contents:[{ parts:[{ text: prompt }, { inlineData:{ mimeType: inl.mimeType, data: inl.data } }] }] }) });
     if (!r1.ok) throw new Error('API вернул ошибку ' + r1.status);
     var j1 = await r1.json();
     text = (((j1.candidates || [])[0] || {}).content || {}).parts ? j1.candidates[0].content.parts.map(function(p){ return p.text || ''; }).join('') : '';
   } else {
-    var r2 = await fetch(c.baseUrl.replace(/\/+$/, '') + '/chat/completions', { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer ' + c.apiKey }, body: JSON.stringify({ model: c.model, messages:[{ role:'user', content:[{ type:'text', text: prompt }, { type:'image_url', image_url:{ url:'data:' + inl.mimeType + ';base64,' + inl.data } }] }] }) });
+    var r2 = await rpOpenAIPost(c.baseUrl, c.apiKey, { model: c.model, messages:[{ role:'user', content:[{ type:'text', text: prompt }, { type:'image_url', image_url:{ url:'data:' + inl.mimeType + ';base64,' + inl.data } }] }] }, 120000);
     if (!r2.ok) throw new Error('API вернул ошибку ' + r2.status);
     var j2 = await r2.json();
     var cc = j2 && j2.choices && j2.choices[0] && j2.choices[0].message && j2.choices[0].message.content;
@@ -14901,7 +15227,7 @@ async function cxReply(tid, mode){
     }
     if (!items.length && t.kind === 'group' && built.ctx.mem && built.ctx.mem.length){
       var dm = built.ctx.mem.indexOf('char') >= 0 ? 'char' : built.ctx.mem[0];
-      items = cxFinal(cxParse(raw, 'dm', { def: dm, isSelf: function(n){ return rpSameContact({ name: CX.names.userTavo }, n) || rpSameContact({ name: CX.names.user }, n); } }), built);
+      items = cxFinal(cxParse(raw, 'dm', { def: dm, isSelf: function(n){ return rpSameContact({ name: CX.names.userSt }, n) || rpSameContact({ name: CX.names.user }, n); } }), built);
     }
     if (!items.length){
       try{ await rpSet('rp_cx_lastraw', { at: Date.now(), tid: tid, mode: mode, raw: String(raw || '').slice(0, 1500) }); }catch(eR){}
@@ -14909,7 +15235,7 @@ async function cxReply(tid, mode){
       return;
     }
     await cxDeliver(tid, items, built);
-    if (t.kind === 'group' && mode !== 'auto' && Math.random() < 0.2) await cxGroupMore(tid, t, cs, mode, built, items);
+    if (t.kind === 'group') await cxGroupMore(tid, t, cs, mode, built, items);
   }catch(e){
     console.error('RP chat reply failed', e);
     if (mode === 'reply') toast('Ответ не пришёл: ' + (e && e.message ? e.message : e));
@@ -14931,8 +15257,9 @@ async function cxTick(){
     }
     for (var i = 0; i < ts.length; i++){
       var g = ts[i];
-      if (g.kind !== 'group' || g.owner !== 'me' || !g.auto || !(g.every > 0) || CX.busy[g.id]) continue;
-      if (now - Math.max(g.ts || 0, g.autoAt || 0) < g.every * 60000) continue;
+      var gev = cxGEvery(g);
+      if (g.kind !== 'group' || g.owner !== 'me' || !gev || CX.busy[g.id]) continue;
+      if (now - Math.max(g.ts || 0, g.autoAt || 0) < gev * 60000) continue;
       await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === g.id) x.autoAt = now; }); await cxThreadsSave(l); });
       cxReply(g.id, 'auto');
       break;
@@ -14947,7 +15274,7 @@ async function cxTick(){
 function cxIdOf(name, cs, mk){
   var n = String(name || '').trim().replace(/^@/, ''); if (!n) return null;
   var nm = CX.names;
-  if (/^(я|ты|me|you|user|игрок|пользователь)$/i.test(n) || rpSameContact({ name:nm.userTavo, aliases:[nm.user] }, n)) return 'me';
+  if (/^(я|ты|me|you|user|игрок|пользователь)$/i.test(n) || rpSameContact({ name:nm.userSt, aliases:[nm.user] }, n)) return 'me';
   if (rpSameContact({ name:nm.char }, n)) return 'char';
   for (var i = 0; i < cs.length; i++){ if (rpSameContact(cs[i], n)) return cs[i].id; }
   if (!mk) return null;
@@ -15078,28 +15405,76 @@ function cxUndoBar(n, rb){
     cxAfterDrop(null);
   });
 }
+async function cxRegen(tid, mid){
+  if (CX.busy[tid]){ toast('Ответ уже печатается'); return; }
+  var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t || t.owner !== 'me') return;
+  var l = await cxMsgs(tid), at = -1;
+  l.forEach(function(x, i){ if (x.id === mid) at = i; });
+  if (at < 0) return;
+  var plain = function(x){ return x && x.from !== 'me' && x.t !== 'sys' && !x.rp; };
+  var s0 = at; while (s0 > 0 && plain(l[s0 - 1])) s0--;
+  var e0 = at; while (e0 + 1 < l.length && plain(l[e0 + 1])) e0++;
+  var keepList = l.slice(0, s0), cut = l.slice(s0), prev = keepList[keepList.length - 1], mode = 'reply';
+  if (!prev || prev.from !== 'me'){
+    mode = !keepList.length && tid !== 'main' ? '' : (t.kind === 'group' ? 'auto' : (tid === 'main' ? 'init' : ''));
+    if (!mode){ toast('Перед этим ответом нет твоего сообщения — перегенерировать не к чему'); return; }
+  }
+  if (cut.length > e0 - s0 + 1){
+    var ch = await showChoiceModal({ title:'Перегенерировать этот ответ?', message:'Всё, что написано после него, тоже удалится: бот ответит заново с этого места.', buttons:[{ label:'Перегенерировать', value:'y' }, { label:'Отмена', value:null, ghost:true }] });
+    if (!ch) return;
+  }
+  var ids = cut.map(function(x){ return x.id; });
+  await cxDropMsgs(function(x, th){ return th.id === tid && ids.indexOf(x.id) >= 0; }, false);
+  if (panelOpen && CX.open === tid) await cxDrawMsgs();
+  await cxReply(tid, mode);
+  var after = await cxMsgs(tid);
+  if (!after.some(function(x){ return ids.indexOf(x.id) < 0 && keepList.every(function(k){ return k.id !== x.id; }); })){
+    await cxPush(tid, cut, { silent:true });
+    toast('Новый ответ не пришёл — вернула прежний');
+    cxAfter(tid);
+  }
+}
+function cxPromptSheet(tid, m){
+  var d = m.d || {};
+  var base = d.prompt || d.desc || '';
+  var bg = rpxSheet({ title:'Фото: промпт', sub:'По этому тексту рисуется картинка. Лица берутся из аватаров тех, кто указан в поле ниже.', prompt: base,
+    extra:'<div class="rpx_lbl">Кто в кадре (имена через запятую; пусто — как было; «никто» — без людей)</div><input type="text" id="rpx_in" maxlength="140">',
+    regen: async function(pr, sheet){
+      var raw = ((sheet.querySelector('#rpx_in') || {}).value || '').trim();
+      var names = raw ? raw.split(/\s*,\s*/).filter(Boolean) : null;
+      var cs = await cxContacts();
+      await cxPatchMsg(tid, m.id, function(x){ x.d = x.d || {}; x.d.busy = true; x.d.err = 0; });
+      cxAfter(tid);
+      await cxDrawMedia(tid, m, cs, { prompt: pr || base, in: names, strict: true });
+    } });
+  var inp = bg.querySelector('#rpx_in'); if (inp) inp.value = (d.inn || []).join(', ');
+}
 async function cxMsgMenu(tid, mid){
   var l = await cxMsgs(tid), m = l.filter(function(x){ return x.id === mid; })[0]; if (!m) return;
+  var thr = (await cxThreads()).filter(function(x){ return x.id === tid; })[0];
   var batch = [];
   if (m.rp){
     var ts = await cxThreads();
     for (var i = 0; i < ts.length; i++){ (await cxMsgs(ts[i].id)).forEach(function(x){ if (x.rp && (m.rb ? x.rb === m.rb : (!x.rb && Math.abs((x.ts || 0) - (m.ts || 0)) <= 5000))) batch.push(x.id); }); }
   }
   var acts = [{ ic:'trash', t:'Удалить', red:true, fn:async function(){ await cxDropMsgs(function(x, t){ return t.id === tid && x.id === mid; }, false); cxAfterDrop(tid); } }];
-  if (m.t !== 'sys' && typeof m.text === 'string' && m.text !== ''){
-    acts.unshift({ ic:'edit', t:'Редактировать', s:'Изменить текст сообщения', fn:async function(){
-      var res = await rpEditFields('Сообщение', [{ k:'text', label:'Текст', rows:6, value:m.text }]);
-      if (!res || !res.text.trim()) return;
-      await cxPatchMsg(tid, mid, function(x){ x.text = res.text; x.edited = true; });
-      cxAfter(tid);
-    } });
-  }
+  if (m.text && m.t !== 'sys') acts.unshift({ ic:'pen', t:'Изменить', fn:function(){ rpEdEdit('rp_cx_m_' + tid + '|' + encodeURIComponent(mid) + '/text'); } });
   if (m.rp){
     acts.unshift({ ic:'eye', t:'Это не переписка', s:'Удалю и запомню — при следующем разборе это сообщение не вернётся', fn:async function(){ await cxDropMsgs(function(x, t){ return t.id === tid && x.id === mid; }, true); toast('Убрано'); cxAfterDrop(tid); } });
     if (batch.length > 1) acts.splice(1, 0, { ic:'refresh', t:'Убрать весь этот разбор (' + batch.length + ')', s:'Всё, что этот разбор ролевой добавил в Чат, во всех переписках', fn:async function(){ var k = await cxDropMsgs(function(x){ return batch.indexOf(x.id) >= 0; }, true); toast('Убрано сообщений: ' + k); cxAfterDrop(tid); } });
   }
+  if ((m.t === 'photo' || m.t === 'circle' || m.t === 'video') && m.d && !m.d.vid && m.d.src !== 'dev'){
+    acts.unshift({ ic:'pen', t:'Изменить промпт и перегенерировать', s:'Поправить, что и кто на картинке', fn:function(){ cxPromptSheet(tid, m); } });
+    acts.unshift({ ic:'refresh', t: m.d.img ? 'Перегенерировать картинку' : 'Сгенерировать картинку', fn:function(){ cxMediaQueue([{ tid: tid, m: m }], true); } });
+  }
+  if (thr && thr.owner === 'me' && m.from !== 'me' && m.t !== 'sys' && m.t !== 'call' && !m.rp) acts.unshift({ ic:'refresh', t:'Перегенерировать ответ', s:'Бот напишет заново вместо этого ответа', fn:function(){ cxRegen(tid, mid); } });
   cxActions(cxPreview(m).slice(0, 60) || 'Сообщение', m.rp ? 'Пришло из ролевой' : '', acts);
 }
+RP_ED_HOOK.push([/^rp_cx_m_/, async function(key){
+  var tid = key.slice(8), l = await cxMsgs(tid), lm = l[l.length - 1];
+  if (lm) await cxSerial(async function(){ var ts = await cxThreads(); ts.forEach(function(x){ if (x.id === tid) x.last = { f: lm.from, x: cxPreview(lm) }; }); await cxThreadsSave(ts); });
+  if (CX.open === tid) cxDrawMsgs();
+}]);
 async function cxScanRp(opts){
   opts = opts || {};
   if (CX.scanBusy) return null;
@@ -15123,7 +15498,7 @@ async function cxScanRp(opts){
     var rb = uid();
     var res0 = bridge.length ? await cxRoute(bridge, { rp:true, rb:rb }) : null;
     var text = vis.map(function(m){
-      return (m.role === 'user' ? nm.userTavo : nm.char) + ': ' + stripBrailleNoise(String(m.content || '')).replace(/\[CHAT_N\][\s\S]*?\[\/CHAT_N\]/g, ' ').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').trim();
+      return (m.role === 'user' ? nm.userSt : nm.char) + ': ' + stripBrailleNoise(String(m.content || '')).replace(/\[CHAT_N\][\s\S]*?\[\/CHAT_N\]/g, ' ').replace(/<(think|thinking|reasoning)[^>]*>[\s\S]*?<\/\1>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/[ \t]+/g, ' ').trim();
     }).join('\n\n').slice(-14000);
     var done = function(res){
       var all = [res0, res].filter(function(x){ return x && x.n; });
@@ -15140,7 +15515,7 @@ async function cxScanRp(opts){
     if (!text.replace(/[^:\n]*:\s*/g, '').trim()) return done(null);
     if (!opts.depth && !CX_SMS_RE.test(text)) return done(null);
     var cs = await cxContacts();
-    var people = ['- ' + nm.userTavo + ' — игрок, это его/её телефон', '- ' + nm.char + ' — главный персонаж'].concat(cs.slice(0, 40).map(function(c){ return '- ' + cxContactLine(c, 60); }));
+    var people = ['- ' + nm.userSt + ' — игрок, это его/её телефон', '- ' + nm.char + ' — главный персонаж'].concat(cs.slice(0, 40).map(function(c){ return '- ' + cxContactLine(c, 60); }));
     var raw = await callModel('Ниже фрагмент ролевой истории. Разбери, как переданы реплики персонажей.\n\n' +
       'Шаг 1. Пойми сцену: где сейчас каждый из героев и кто с кем рядом. Если двое рядом и разговаривают, их слова друг другу почти всегда сказаны вслух, даже если у кого-то в руках телефон. Исключение — когда прямо сказано, что это напечатали или отправили.\n' +
       'Шаг 2. Для каждой реплики — прямая речь в кавычках или без, текст после двоеточия, слова в отдельной строке — реши, как она передана:\n' +
@@ -15201,8 +15576,8 @@ async function cxPeek(){
       (apps ? '[ТЕЛЕФОН]\n' + apps + '\n\n' : '') +
       (known ? '[ЛЮДИ ИЗ ЖИЗНИ ' + nm.char + ']\n' + known + '\n\n' : '') +
       (have.length ? '[УЖЕ ЕСТЬ ПЕРЕПИСКИ — их можно продолжить]\n' + have.join('\n\n') + '\n\n' : '') +
-      'Покажи, с кем и о чём ' + nm.char + ' переписывался в своём телефоне за последнее время — НЕ с ' + nm.userTavo + '. 1–3 переписки, в каждой 3–8 коротких сообщений.\n' +
-      'Переписки вытекают из сюжета, характера и его жизни: друзья, работа, семья, люди из истории. Каждый пишет своим голосом. ' + nm.char + ' может обсуждать ' + nm.userTavo + ' за глаза — это его личная переписка.\n' +
+      'Покажи, с кем и о чём ' + nm.char + ' переписывался в своём телефоне за последнее время — НЕ с ' + nm.userSt + '. 1–3 переписки, в каждой 3–8 коротких сообщений.\n' +
+      'Переписки вытекают из сюжета, характера и его жизни: друзья, работа, семья, люди из истории. Каждый пишет своим голосом. ' + nm.char + ' может обсуждать ' + nm.userSt + ' за глаза — это его личная переписка.\n' +
       'Имена бери ТОЧНО из списка «Люди». Если нужного человека нет — придумай уместного и напиши имя так, как ' + nm.char + ' записал бы его в телефоне.\n' +
       'Можно стикер внутри текста: [стикер: id] из списка: ' + cxStkText() + '. Изредка — фото: [фото: что на снимке | кто в кадре] или голосовое: [голосовое: текст].\n' +
       'Ответь только JSON-массивом: [{"with":"Имя","msgs":[{"from":"' + nm.char + ' или Имя","text":"..."}]}]');
@@ -15264,27 +15639,6 @@ async function cxMerge(srcId, dstId){
     return true;
   });
 }
-async function cxMoveOwner(tid, to){
-  return cxSerial(async function(){
-    var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
-    if (!t || tid === 'main' || t.owner === to) return false;
-    var l = await cxMsgs(tid), a = t.owner === 'char' ? 'char' : 'me', b = to === 'char' ? 'char' : 'me';
-    var hadSelf = l.some(function(m){ return m.from === a; });
-    l.forEach(function(m){ if (m.t !== 'sys' && m.from === a) m.from = b; });
-    if (t.kind === 'group'){
-      if (to === 'char') t.who = t.who.filter(function(w){ return w !== 'char'; });
-      else if (hadSelf && t.who.indexOf('char') < 0) t.who.push('char');
-    }
-    t.owner = to;
-    t.unread = 0;
-    t.auto = false;
-    await cxMsgsSave(tid, l);
-    var lm = l[l.length - 1];
-    if (lm) t.last = { f: lm.from, x: cxPreview(lm) };
-    await cxThreadsSave(ts);
-    return true;
-  });
-}
 async function cxDelete(tid){
   return cxSerial(async function(){
     var ts = await cxThreads();
@@ -15317,7 +15671,7 @@ async function cxSyncContacts(force){
     var cs = await cxContacts(), gone = await rpGet(CX_KGONE, []), add = 0;
     all.forEach(function(p){
       if (!p || p.src === 'char' || !p.name) return;
-      if (rpSameContact({ name:nm.char }, p.name) || rpSameContact({ name:nm.userTavo }, p.name)) return;
+      if (rpSameContact({ name:nm.char }, p.name) || rpSameContact({ name:nm.userSt }, p.name)) return;
       if ((gone || []).some(function(g){ return rpSameContact({ name:g }, p.name); })) return;
       var ex = cs.filter(function(c){ return rpSameContact(c, p.name); })[0];
       if (ex){ if (!ex.avatar && p.img){ ex.avatar = p.img; add++; } return; }
@@ -15335,7 +15689,7 @@ async function cxFillContact(c){
   var rp = await cxRpText(Math.max(10, Math.min(40, +cfg('scanDepth', 20) || 20)), 9000);
   var lore = await cxLore(card.chat, card.c, c.name + ' ' + (c.aliases || []).join(' '), 2500);
   var lmem = await cxLongMem(1800);
-  var raw = await callModel('Заполни анкету человека «' + c.name + '» для мессенджера по ролевой истории. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n\n' +
+  var raw = await callModel('Заполни анкету человека «' + c.name + '» для мессенджера по ролевой истории. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userSt + '.\n\n' +
     (c.desc || c.pers ? '[УЖЕ ИЗВЕСТНО]\n' + [c.desc, c.pers].filter(Boolean).join('\n') + '\n\n' : '') +
     (lore ? '[ЛОРБУК]\n' + lore + '\n\n' : '') +
     (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
@@ -15344,7 +15698,7 @@ async function cxFillContact(c){
     'ОПИСАНИЕ: кто это, возраст, внешность, чем занят, кем приходится героям\n' +
     'ХАРАКТЕР: какой человек\n' +
     'ПРИМЕРЫ:\n- 2–4 коротких сообщения, как он(а) пишет в мессенджере, каждое с новой строки\n' +
-    'ВОСПОМИНАНИЯ: что было между ' + c.name + ' и ' + nm.userTavo + ' или ' + nm.char + '\n' +
+    'ВОСПОМИНАНИЯ: что было между ' + c.name + ' и ' + nm.userSt + ' или ' + nm.char + '\n' +
     'Если чего-то не видно — допиши правдоподобно, но не противоречь истории.');
   var txt = String(raw || '');
   var grab = function(lbl, nx){ var re = new RegExp(lbl + '\\s*:\\s*([\\s\\S]*?)(?=\\n\\s*(?:' + nx + ')\\s*:|$)', 'i'); var m = re.exec(txt); return m ? m[1].trim() : ''; };
@@ -15426,15 +15780,15 @@ async function cxLbFind(step){
   if (cur) chunks.push(cur);
   var cut = chunks.length > 24; if (cut) chunks = chunks.slice(0, 24);
   var po = await cxPersonaGet(card.chat), pName = po && po.name ? String(po.name) : '';
-  var isMain = function(n){ return rpSameContact({ name:nm.char }, n) || rpSameContact({ name:nm.userTavo }, n) || (!!nm.user && rpSameContact({ name:nm.user }, n)) || (!!pName && rpSameContact({ name:pName }, n)); };
+  var isMain = function(n){ return rpSameContact({ name:nm.char }, n) || rpSameContact({ name:nm.userSt }, n) || (!!nm.user && rpSameContact({ name:nm.user }, n)) || (!!pName && rpSameContact({ name:pName }, n)); };
   var clean = function(v){ return String(v || '').replace(/[«»"*_]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); };
   var found = [], fails = 0;
   for (var i = 0; i < chunks.length; i++){
     if (step) step(i, chunks.length);
     var raw = '';
     try{
-      raw = await callModel('Ниже записи лорбука и карточка ролевой. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n' +
-        'Выпиши всех НПС — отдельных персонажей с именем или постоянным прозвищем, кроме ' + nm.char + ' и ' + nm.userTavo + '. Не выписывай места, организации, расы, предметы, безымянных людей и массовку.\n' +
+      raw = await callModel('Ниже записи лорбука и карточка ролевой. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userSt + '.\n' +
+        'Выпиши всех НПС — отдельных персонажей с именем или постоянным прозвищем, кроме ' + nm.char + ' и ' + nm.userSt + '. Не выписывай места, организации, расы, предметы, безымянных людей и массовку.\n' +
         'name — имя, как его записали бы в телефоне: имя и фамилия, если известны. aliases — другие имена: прозвища, фамилия, уменьшительные, как его зовут другие. e — номера записей, где о нём хоть что-то сказано.\n' +
         'Ответь только JSON: {"npcs":[{"name":"…","aliases":["…"],"e":["E1"]}]} или {"npcs":[]}.\n\n[ЗАПИСИ]\n' + chunks[i]);
     }catch(e){ fails++; continue; }
@@ -15494,19 +15848,19 @@ async function cxLbFill(sel, ents, card, step){
         (info(f) || '(в лорбуке только упоминание)') +
         (c && (c.desc || c.pers || c.mem) ? '\nУже в анкете: ' + cxClip([c.desc, c.pers, c.mem].filter(Boolean).join(' / '), 700) : '');
     }).join('\n\n');
-    var raw = await callModel('Заполни анкеты НПС для мессенджера в телефоне. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userTavo + '.\n\n' +
+    var raw = await callModel('Заполни анкеты НПС для мессенджера в телефоне. Главный персонаж — ' + nm.char + ', игрок — ' + nm.userSt + '.\n\n' +
       '[КАРТОЧКА ' + nm.char + ']\n' + cxClip(card.text, 1500) + '\n\n' +
-      (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userTavo + ']\n' + cxClip(per, 600) + '\n\n' : '') +
+      (per ? '[КТО ТАКАЯ(ОЙ) ' + nm.userSt + ']\n' + cxClip(per, 600) + '\n\n' : '') +
       (rel ? '[ОТНОШЕНИЯ]\n' + cxClip(rel, 1000) + '\n\n' : '') +
       (lmem ? '[ДОЛГАЯ ПАМЯТЬ ЧАТА]\n' + lmem + '\n\n' : '') +
       (rp ? '[РОЛЕВАЯ — последние события]\n' + rp + '\n\n' : '') +
       blocks + '\n\n' +
       'Для КАЖДОГО НПС заполни все четыре поля, ни одно не оставляй пустым:\n' +
-      '- desc — кто это: возраст, внешность, чем занят, кем приходится ' + nm.char + ' и ' + nm.userTavo + '. До 700 знаков.\n' +
+      '- desc — кто это: возраст, внешность, чем занят, кем приходится ' + nm.char + ' и ' + nm.userSt + '. До 700 знаков.\n' +
       '- pers — характер: какой человек, как держится, что любит и чего не терпит. До 700 знаков.\n' +
       '- ex — 3 коротких сообщения, как он(а) пишет в мессенджере, через \\n. Его или её голос: слова, эмодзи, пунктуация.\n' +
-      '- mem — сводка воспоминаний: что было между ним или ней и ' + nm.userTavo + ' или ' + nm.char + ' — по лорбуку, памяти и ролевой. Если вместе ещё ничего не было, напиши, как они связаны и что знают друг о друге. До 700 знаков.\n' +
-      '- rel — кем он(а) приходится ' + nm.userTavo + ', 1–3 слова: подруга, начальник, бывший, сосед.\n' +
+      '- mem — сводка воспоминаний: что было между ним или ней и ' + nm.userSt + ' или ' + nm.char + ' — по лорбуку, памяти и ролевой. Если вместе ещё ничего не было, напиши, как они связаны и что знают друг о друге. До 700 знаков.\n' +
+      '- rel — кем он(а) приходится ' + nm.userSt + ', 1–3 слова: подруга, начальник, бывший, сосед.\n' +
       'Факты бери из лорбука и не противоречь им. Чего не хватает — допиши правдоподобно по характеру и миру.\n' +
       'Ответь только JSON: {"npcs":[{"name":"имя как в заголовке","desc":"…","pers":"…","ex":"…","mem":"…","rel":"…"}]}');
     var items = cxJsonItems(raw, 'npcs').filter(function(x){ return x && typeof x === 'object'; });
@@ -15653,12 +16007,12 @@ async function cxRaveGo(title, dur){
 async function gatherOocChat(){
   await cxWho();
   var ts = await cxThreads(), cs = await cxContacts(), nm = CX.names, parts = [];
-  var name = function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
+  var name = function(id){ return id === 'me' ? nm.userSt : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
   for (var i = 0; i < ts.length; i++){
     var t = ts[i]; if (t.owner !== 'me') continue;
     var l = (await cxMsgs(t.id)).filter(function(m){ return !m.hidden && m.t !== 'sys'; });
     if (!l.length) continue;
-    parts.push({ main: t.id === 'main', ts: t.ts || 0, txt: (t.id === 'main' ? 'Переписка ' + nm.userTavo + ' и ' + nm.char + ' в мессенджере' : (t.kind === 'group' ? 'Групповой чат «' + cxTitle(t, cs) + '»' : 'Переписка ' + nm.userTavo + ' с ' + cxTitle(t, cs))) + ':\n' + l.slice(t.id === 'main' ? -20 : -8).map(function(m){ return name(m.from) + ': ' + cxMsgLine(m); }).join('\n') });
+    parts.push({ main: t.id === 'main', ts: t.ts || 0, txt: (t.id === 'main' ? 'Переписка ' + nm.userSt + ' и ' + nm.char + ' в мессенджере' : (t.kind === 'group' ? 'Групповой чат «' + cxTitle(t, cs) + '»' : 'Переписка ' + nm.userSt + ' с ' + cxTitle(t, cs))) + ':\n' + l.slice(t.id === 'main' ? -20 : -8).map(function(m){ return name(m.from) + ': ' + cxMsgLine(m); }).join('\n') });
   }
   parts.sort(function(a, b){ return (b.main - a.main) || (b.ts - a.ts); });
   return parts.slice(0, 5).map(function(p){ return p.txt; });
@@ -15751,6 +16105,7 @@ function cxStkHtml(id){
 }
 var CX_EMO = ['❤️','🥺','😂','🤭','😘','😍','🔥','✨','😭','😤','🙄','😏','👀','💀','🫶','🤍','💔','😴','☕','🎬','🍕','🐾','🌙','⭐','🙈','🤗','😳','😌','💅','🤡','👍','🙏','💯','🎉','🫠','😇','😈','💋','🌸','🥰','😡','🤔','😎','🤯','😅','🥲','🫡','💜'];
 var CX_IC = {
+  palette:'<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.3-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3a4 4 0 0 0 4-4C21 6 17 2 12 2z"/>',
   cam:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/>',
   circ:'<circle cx="12" cy="12" r="9"/><path d="M10 9l5 3-5 3z"/>',
   file:'<path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/>',
@@ -15951,6 +16306,19 @@ function cxTimerSheet(){
     $('#cx_now', bg).addEventListener('click', function(){ bg.remove(); cxSetSave({ lastInit:Date.now() }); cxReply('main', 'init'); if (CX.open !== 'main') cxOpenChat('main'); });
   });
 }
+async function cxGroupTimerSheet(tid){
+  var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return;
+  var cur = cxGEvery(t);
+  var bg = cxSheet('<div class="cx_sht">Как часто пишут сами</div><div class="cx_shs">Если в группе «' + escapeHtml(cxTitle(t, CX.cs || [])) + '» тихо дольше выбранного, кто-то из участников сам начнёт разговор. Каждый такой раз — запрос к нейросети, а если пришлют фото — ещё и генерация картинки. Отсчёт идёт от последнего сообщения в группе.</div><div class="cx_chips">' +
+    CX_GEVERY.map(function(o){ return '<div class="cx_chip' + (cur === o[0] ? ' on' : '') + '" data-v="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div>');
+  bg.querySelectorAll('[data-v]').forEach(function(c){ c.addEventListener('click', async function(){
+    var v = +c.getAttribute('data-v');
+    await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === tid){ x.every = v; x.auto = v > 0; x.autoAt = Date.now(); } }); await cxThreadsSave(l); });
+    bg.remove();
+    toast(v ? 'Группа пишет сама не чаще раза в ' + CX_GEVERY.filter(function(o){ return o[0] === v; })[0][1] : 'Группа больше не пишет сама');
+    if (CX.open === tid) cxHeadSub();
+  }); });
+}
 function cxNewSheet(){
   var cs = CX.cs, nm = CX.names;
   var bg = cxSheet('<div class="cx_sht">Новый чат</div><div class="cx_shs">Выбери, кому написать, или собери группу.</div>' +
@@ -15969,6 +16337,236 @@ async function cxEnsureDm(cid){
     ts.push(t); await cxThreadsSave(ts); return t.id;
   });
 }
+
+var CX_KLOOK = 'rp_cx_look';
+var CX_PRESETS = ['#ffffff','#000000','#e5e7eb','#14141b','#8b5cf6','#6d28d9','#ec4899','#f43f5e','#f59e0b','#22c55e','#06b6d4','#3b82f6'];
+function cxHsvHex(h, s, v){
+  var f = function(n){ var k = (n + h / 60) % 6; return Math.round((v - v * s * Math.max(0, Math.min(k, 4 - k, 1))) * 255); };
+  return '#' + [f(5), f(3), f(1)].map(function(x){ return x.toString(16).padStart(2, '0'); }).join('');
+}
+function cxHexHsv(hex){
+  var m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim()); if (!m) return null;
+  var n = parseInt(m[1], 16), r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+  var mx = Math.max(r, g, b), d = mx - Math.min(r, g, b), h = 0;
+  if (d){ h = mx === r ? ((g - b) / d + 6) % 6 : (mx === g ? (b - r) / d + 2 : (r - g) / d + 4); h *= 60; }
+  return { h: h, s: mx ? d / mx : 0, v: mx };
+}
+function rpWheel(box, start, onChange){
+  var c = cxHexHsv(start) || { h: 270, s: 0.6, v: 0.9 };
+  box.innerHTML = '<div class="cxp_wrap"><div class="cxp_ring"></div><div class="cxp_sv"></div><div class="cxp_k cxp_hk"></div><div class="cxp_k cxp_vk"></div></div>' +
+    '<div class="cxp_row"><div class="cxp_cur"></div><input type="text" class="cxp_hex" maxlength="7" spellcheck="false" autocomplete="off"></div>' +
+    '<div class="cxp_pre">' + CX_PRESETS.map(function(x){ return '<i data-c="' + x + '" style="background:' + x + '"></i>'; }).join('') + '</div>';
+  var q = function(sel){ return box.querySelector(sel); }, w = q('.cxp_wrap'), hexIn = q('.cxp_hex');
+  var render = function(notify, keepHex){
+    var hex = cxHsvHex(c.h, c.s, c.v), a = c.h * Math.PI / 180;
+    q('.cxp_sv').style.background = 'linear-gradient(to top,#000,rgba(0,0,0,0)),linear-gradient(to right,#fff,' + cxHsvHex(c.h, 1, 1) + ')';
+    q('.cxp_hk').style.left = (112 + 96 * Math.sin(a)) + 'px'; q('.cxp_hk').style.top = (112 - 96 * Math.cos(a)) + 'px';
+    q('.cxp_vk').style.left = (56 + c.s * 112) + 'px'; q('.cxp_vk').style.top = (56 + (1 - c.v) * 112) + 'px';
+    q('.cxp_cur').style.background = hex;
+    if (!keepHex) hexIn.value = hex;
+    if (notify) onChange(hex);
+  };
+  var mode = '';
+  var pos = function(e){ var r = w.getBoundingClientRect(), k = 224 / r.width; return { x: (e.clientX - r.left) * k - 112, y: (e.clientY - r.top) * k - 112 }; };
+  var move = function(e){
+    var p = pos(e);
+    if (mode === 'h') c.h = (Math.atan2(p.x, -p.y) * 180 / Math.PI + 360) % 360;
+    else { c.s = Math.max(0, Math.min(1, (p.x + 56) / 112)); c.v = Math.max(0, Math.min(1, 1 - (p.y + 56) / 112)); }
+    render(true);
+  };
+  w.addEventListener('pointerdown', function(e){
+    var p = pos(e);
+    mode = Math.max(Math.abs(p.x), Math.abs(p.y)) <= 62 ? 'sv' : 'h';
+    try{ w.setPointerCapture(e.pointerId); }catch(er){}
+    move(e); e.preventDefault();
+  });
+  w.addEventListener('pointermove', function(e){ if (mode) move(e); });
+  var end = function(){ mode = ''; };
+  w.addEventListener('pointerup', end); w.addEventListener('pointercancel', end);
+  hexIn.addEventListener('input', function(){
+    var v = hexIn.value.trim(); if (v && v[0] !== '#') v = '#' + v;
+    var p = cxHexHsv(v); if (p){ c = p; render(true, true); }
+  });
+  box.querySelectorAll('.cxp_pre [data-c]').forEach(function(i){ i.addEventListener('click', function(){ c = cxHexHsv(i.getAttribute('data-c')); render(true); }); });
+  render(false);
+  return { set: function(hex){ var p = cxHexHsv(hex); if (p){ c = p; render(false); } } };
+}
+function cxColorPick(start, onPick){
+  var bg = cxSheet('<div class="cx_sht">Цвет</div><div id="cxp_box"></div><div class="cx_btns"><div class="cx_btn" id="cxp_ok">Готово</div></div>');
+  rpWheel(bg.querySelector('#cxp_box'), start, onPick);
+  bg.querySelector('#cxp_ok').addEventListener('click', function(){ bg.remove(); });
+}
+function rpHex6(x){
+  x = String(x || '').trim().toLowerCase();
+  if (/^#[0-9a-f]{3}$/.test(x)) x = '#' + x[1] + x[1] + x[2] + x[2] + x[3] + x[3];
+  return /^#[0-9a-f]{6}$/.test(x) ? x : '';
+}
+function rpColorDialog(opts){
+  var host = document.getElementById('rp_screen') || document.body;
+  var old = host.querySelector('.rpc_bg'); if (old) old.remove();
+  var val = String(opts.value || ''), gm = /linear-gradient\(\s*(-?[\d.]+)deg\s*,\s*([^)]+)\)/i.exec(val);
+  var stops = gm ? gm[2].split(',').map(rpHex6).filter(Boolean).slice(0, 3) : [];
+  var solid = rpHex6(val) || stops[0] || '#8b5cf6';
+  var gradOk = !!opts.gradient, mode = gradOk && stops.length >= 2 ? 'g' : 'c', sel = 0, angle = gm ? Math.round(+gm[1]) : 135;
+  if (stops.length < 2) stops = [solid, '#ec4899'];
+  var bg = el('div', 'rpc_bg');
+  bg.innerHTML = '<div class="rpc_sheet"><div class="rpc_t"></div>' +
+    (gradOk ? '<div class="rpc_seg"><div data-m="c">Цвет</div><div data-m="g">Градиент</div></div>' : '') +
+    '<div class="rpc_prev"></div>' +
+    '<div class="rpc_g"><div class="rpc_stops"></div><div class="rpc_arow"><span>Угол</span><input type="range" class="rpc_ang" min="0" max="360" step="5"><b class="rpc_av"></b></div></div>' +
+    '<div class="rpc_wheel"></div>' +
+    '<div class="rpc_row"><div class="rpc_btn ghost" data-x="0">Отмена</div><div class="rpc_btn" data-x="1">Применить</div></div></div>';
+  host.appendChild(bg);
+  var q = function(sel2){ return bg.querySelector(sel2); };
+  q('.rpc_t').textContent = opts.title || 'Цвет';
+  var out = function(){ return mode === 'g' ? 'linear-gradient(' + angle + 'deg,' + stops.join(',') + ')' : solid; };
+  var curHex = function(){ return mode === 'g' ? stops[sel] : solid; };
+  var wheel = rpWheel(q('.rpc_wheel'), curHex(), function(hex){ if (mode === 'g') stops[sel] = hex; else solid = hex; refresh(); });
+  var refresh = function(){
+    q('.rpc_prev').style.background = out();
+    q('.rpc_g').style.display = mode === 'g' ? 'block' : 'none';
+    bg.querySelectorAll('.rpc_seg [data-m]').forEach(function(d){ d.classList.toggle('on', d.getAttribute('data-m') === mode); });
+    q('.rpc_ang').value = angle; q('.rpc_av').textContent = angle + '°';
+    var h = stops.map(function(c, i){ return '<i data-i="' + i + '" class="' + (i === sel ? 'on' : '') + '" style="background:' + c + '"></i>'; }).join('');
+    if (stops.length < 3) h += '<u data-add="1">+</u>';
+    if (stops.length > 2) h += '<u data-del="1">−</u>';
+    q('.rpc_stops').innerHTML = h;
+    q('.rpc_stops').querySelectorAll('[data-i]').forEach(function(d){ d.addEventListener('click', function(){ sel = +d.getAttribute('data-i'); wheel.set(stops[sel]); refresh(); }); });
+    var ad = q('.rpc_stops [data-add]'); if (ad) ad.addEventListener('click', function(){ stops.push(stops[stops.length - 1]); sel = stops.length - 1; refresh(); });
+    var dl = q('.rpc_stops [data-del]'); if (dl) dl.addEventListener('click', function(){ stops.splice(sel, 1); sel = Math.max(0, sel - 1); wheel.set(stops[sel]); refresh(); });
+  };
+  bg.querySelectorAll('.rpc_seg [data-m]').forEach(function(d){ d.addEventListener('click', function(){ mode = d.getAttribute('data-m'); wheel.set(curHex()); refresh(); }); });
+  q('.rpc_ang').addEventListener('input', function(){ angle = +q('.rpc_ang').value; refresh(); });
+  bg.addEventListener('click', function(e){ if (e.target === bg) bg.remove(); });
+  q('[data-x="0"]').addEventListener('click', function(){ bg.remove(); });
+  q('[data-x="1"]').addEventListener('click', function(){ var v = out(); bg.remove(); if (opts.onApply) opts.onApply(v); });
+  refresh();
+}
+function rpLuma(hex){ var h = rpHex6(hex); if (!h) return 0; var n = parseInt(h.slice(1), 16); return (0.299 * (n >> 16 & 255) + 0.587 * (n >> 8 & 255) + 0.114 * (n & 255)) / 255; }
+function rpBgFromColors(o){
+  if (!o || !rpHex6(o.bg1)) return null;
+  var b1 = rpHex6(o.bg1), b2 = rpHex6(o.bg2) || b1, dark = (rpLuma(b1) + rpLuma(b2)) / 2 < 0.55;
+  var base = BG_PRESETS.filter(function(p){ return p.id === (dark ? 'black' : 'white'); })[0];
+  return Object.assign({}, base, { id:'custom', label:'Свой', bg1:b1, bg2:b2 });
+}
+function rpSplitCss(v){
+  var gm = /linear-gradient\(\s*-?[\d.]+deg\s*,\s*([^)]+)\)/i.exec(String(v || ''));
+  if (!gm){ var h = rpHex6(v); return h ? [h, h] : null; }
+  var st = gm[1].split(',').map(rpHex6).filter(Boolean);
+  return st.length >= 2 ? [st[0], st[st.length - 1]] : null;
+}
+async function rpCustomBg(after){
+  var cur = await rpGet('rp_bg_custom', null), root = $('#rp_root'), cs = getComputedStyle(root);
+  var b1 = (cur && cur.bg1) || rpHex6(cs.getPropertyValue('--bg1').trim()) || '#1b1233', b2 = (cur && cur.bg2) || rpHex6(cs.getPropertyValue('--bg2').trim()) || '#000000';
+  rpColorDialog({ title:'Свой фон', gradient:true, value:'linear-gradient(160deg,' + b1 + ',' + b2 + ')', onApply: async function(v){
+    var p = rpSplitCss(v); if (!p) return;
+    await rpSet('rp_bg_custom', { bg1:p[0], bg2:p[1] });
+    await applyBgPreset('custom');
+    if (after) await after();
+    toast('Фон применён');
+  } });
+}
+async function rpCustomAccent(after){
+  var cur = await rpGet('rp_icon_custom', null), cs = getComputedStyle($('#rp_root'));
+  var a = (cur && cur.accent) || rpHex6(cs.getPropertyValue('--accent').trim()) || '#ff6fae', a2 = (cur && cur.accent2) || rpHex6(cs.getPropertyValue('--accent2').trim()) || '#8b5cf6';
+  rpColorDialog({ title:'Свой акцентный цвет', gradient:true, value:'linear-gradient(160deg,' + a2 + ',' + a + ')', onApply: async function(v){
+    var p = rpSplitCss(v); if (!p) return;
+    var solid = p[0] === p[1];
+    await rpSet('rp_icon_custom', { accent: p[1], accent2: solid ? shadeHexColor(p[1], 0.3) : p[0] });
+    await applyIconPreset('custom');
+    if (after) await after();
+    toast('Акцент применён');
+  } });
+}
+var CX_WALLS = [
+  ['n1', 'linear-gradient(160deg,#0b0b0f,#1b1233)'],
+  ['n2', 'linear-gradient(160deg,#1f1147,#6d28d9)'],
+  ['n3', 'linear-gradient(160deg,#3b0a2a,#be185d)'],
+  ['n4', 'linear-gradient(160deg,#052e2b,#0f766e)'],
+  ['n5', 'linear-gradient(160deg,#0c1a3a,#2563eb)'],
+  ['n6', 'linear-gradient(160deg,#2b1a0c,#b45309)'],
+  ['n7', 'linear-gradient(160deg,#f5e9ff,#ffd6ea)'],
+  ['n8', 'linear-gradient(160deg,#111827,#374151)']
+];
+async function cxLookGet(){ var v = await rpGet(CX_KLOOK, null); return { def: (v && v.def) || {}, th: (v && v.th) || {} }; }
+function cxLookEff(all, tid){ return Object.assign({}, all.def, all.th[tid] || {}); }
+function cxHexA(h, a){
+  var m = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return h;
+  var x = m[1]; if (x.length === 3) x = x.replace(/(.)/g, '$1$1');
+  return 'rgba(' + parseInt(x.slice(0, 2), 16) + ',' + parseInt(x.slice(2, 4), 16) + ',' + parseInt(x.slice(4, 6), 16) + ',' + a + ')';
+}
+function cxCssUrlRaw(u){ return 'url("' + String(u || '').replace(/["\\\s]/g, function(c){ return encodeURIComponent(c); }) + '")'; }
+function cxLookApply(node, L){
+  if (!node) return;
+  L = L || {};
+  var set = function(k, v){ if (v == null || v === '') node.style.removeProperty(k); else node.style.setProperty(k, v); };
+  var dim = Math.max(0, Math.min(85, +L.dim || 0)) / 100;
+  if (L.wall){
+    set('--cxw-img', (dim ? 'linear-gradient(rgba(0,0,0,' + dim + '),rgba(0,0,0,' + dim + ')),' : '') + cxCssUrlRaw(L.wall));
+    set('--cxw-size', 'cover'); set('--cxw-pos', 'center'); set('--cxw-col', '#000');
+  } else if (L.grad){
+    set('--cxw-img', dim ? 'linear-gradient(rgba(0,0,0,' + dim + '),rgba(0,0,0,' + dim + ')),' + L.grad : L.grad);
+    set('--cxw-size', 'cover'); set('--cxw-pos', 'center'); set('--cxw-col', '');
+  } else { set('--cxw-img', ''); set('--cxw-size', ''); set('--cxw-pos', ''); set('--cxw-col', ''); }
+  var a = L.op ? Math.max(0.3, Math.min(1, L.op / 100)) : 1;
+  set('--cxb-r', L.r ? L.r + 'px' : ''); set('--cxb-fs', L.fs ? L.fs + 'px' : '');
+  set('--cxb-th', L.th ? cxHexA(L.th, a) : (a < 1 ? cxHexA('#14141B', a) : ''));
+  set('--cxb-th-tx', L.thTx || '');
+  var m1 = L.me1 || (a < 1 ? '#8B5CF6' : ''), m2 = L.me2 || L.me1 || (a < 1 ? '#6D28D9' : '');
+  set('--cxb-me1', m1 ? cxHexA(m1, a) : ''); set('--cxb-me2', m2 ? cxHexA(m2, a) : '');
+  set('--cxb-me-tx', L.meTx || '');
+}
+function cxPickWall(){
+  return new Promise(function(res){
+    var native = false; try{ native = rpNativeOk(); }catch(e){}
+    if (native){ rpImport({ multiple:false }).then(function(r){ res(r && r[0] && r[0].path ? String(r[0].path) : null); }, function(){ toast('Не удалось выбрать фото'); res(null); }); return; }
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = function(){ var f = inp.files && inp.files[0]; if (!f){ res(null); return; } var rd = new FileReader(); rd.onload = async function(){ var sh = await galShrink(String(rd.result), 1100, 0.8); res(sh ? sh.data : null); }; rd.readAsDataURL(f); };
+    inp.click();
+  });
+}
+async function cxLookSheet(tid){
+  var all = await cxLookGet(), scope = 'th', saveT = null;
+  var cur = function(){ return scope === 'def' ? all.def : (all.th[tid] || (all.th[tid] = {})); };
+  var h = '<div class="cx_sht">Оформление чата</div><div class="cx_shs">Обои, цвета и форма пузырей. Выбери, для чего менять: только для этого чата или для всех. Настройки этого чата важнее общих.</div>' +
+    '<div class="cx_seg" id="cxl_scope"><div data-s="th" class="on">Этот чат</div><div data-s="def">Все чаты</div></div>' +
+    '<div class="cxl_prev" id="cxl_prev"><div class="cx_msgs"><div class="cx_m"><div class="cx_mrow"><div><div class="cx_b">Привет! Как тебе такие обои?<div class="cx_bt"><span>12:04</span></div></div></div></div></div><div class="cx_m me"><div class="cx_mrow"><div><div class="cx_b">Выглядит отлично<div class="cx_bt"><span>12:05</span></div></div></div></div></div></div></div>' +
+    '<div class="cxl_h">Обои</div><div class="cxl_walls" id="cxl_walls">' + CX_WALLS.map(function(w){ return '<div class="cxl_sw" data-g="' + w[0] + '" style="background:' + w[1] + '"></div>'; }).join('') + '</div>' +
+    '<div class="cx_btns"><div class="cx_btn soft" id="cxl_pick">' + cxI('img') + 'Своё фото</div><div class="cx_btn ghost" id="cxl_nowall">Без обоев</div></div>' +
+    '<div class="cxl_row"><span>Затемнение обоев</span><input type="range" id="cxl_dim" min="0" max="85" step="5"></div>' +
+    '<div class="cxl_h">Мои сообщения</div>' +
+    '<div class="cxl_row"><span>Цвет от</span><div class="cxl_col" id="cxl_me1"></div></div><div class="cxl_row"><span>Цвет до</span><div class="cxl_col" id="cxl_me2"></div></div><div class="cxl_row"><span>Цвет текста</span><div class="cxl_col" id="cxl_meTx"></div></div>' +
+    '<div class="cxl_h">Сообщения собеседника</div>' +
+    '<div class="cxl_row"><span>Цвет фона</span><div class="cxl_col" id="cxl_th"></div></div><div class="cxl_row"><span>Цвет текста</span><div class="cxl_col" id="cxl_thTx"></div></div>' +
+    '<div class="cxl_h">Форма</div>' +
+    '<div class="cxl_row"><span>Скругление</span><input type="range" id="cxl_r" min="4" max="26" step="1"></div><div class="cxl_row"><span>Размер текста</span><input type="range" id="cxl_fs" min="11" max="17" step="0.5"></div><div class="cxl_row"><span>Непрозрачность</span><input type="range" id="cxl_op" min="40" max="100" step="5"></div>' +
+    '<div class="cx_btns"><div class="cx_btn ghost" id="cxl_reset">Сбросить</div><div class="cx_btn" id="cxl_ok">Готово</div></div>';
+  var bg = cxSheet(h), q = function(id){ return bg.querySelector(id); };
+  var prev = q('#cxl_prev');
+  var defaults = { me1:'#8b5cf6', me2:'#6d28d9', meTx:'#ffffff', th:'#14141b', thTx:'#e5e7eb' };
+  var paint = function(){
+    var L = cur();
+    q('#cxl_dim').value = L.dim || 0; q('#cxl_r').value = L.r || 17; q('#cxl_fs').value = L.fs || 12.5; q('#cxl_op').value = L.op || 100;
+    ['me1','me2','meTx','th','thTx'].forEach(function(k){ q('#cxl_' + k).style.background = L[k] || defaults[k]; });
+    bg.querySelectorAll('.cxl_sw').forEach(function(w){ var g = CX_WALLS.filter(function(x){ return x[0] === w.getAttribute('data-g'); })[0]; w.classList.toggle('on', !!g && !L.wall && L.grad === g[1]); });
+  };
+  var apply = function(){
+    var eff = Object.assign({}, all.def, all.th[tid] || {});
+    cxLookApply(prev, eff);
+    var ov = CX.root && $('#cx_chat', CX.root); if (ov && CX.open === tid) cxLookApply(ov, eff);
+    clearTimeout(saveT); saveT = setTimeout(function(){ rpSet(CX_KLOOK, all); }, 350);
+  };
+  bg.querySelectorAll('#cxl_scope [data-s]').forEach(function(b){ b.addEventListener('click', function(){ scope = b.getAttribute('data-s'); bg.querySelectorAll('#cxl_scope [data-s]').forEach(function(x){ x.classList.toggle('on', x === b); }); paint(); }); });
+  bg.querySelectorAll('.cxl_sw').forEach(function(w){ w.addEventListener('click', function(){ var g = CX_WALLS.filter(function(x){ return x[0] === w.getAttribute('data-g'); })[0]; var L = cur(); L.grad = g[1]; delete L.wall; paint(); apply(); }); });
+  q('#cxl_pick').addEventListener('click', async function(){ var p = await cxPickWall(); if (!p) return; var L = cur(); L.wall = p; delete L.grad; paint(); apply(); });
+  q('#cxl_nowall').addEventListener('click', function(){ var L = cur(); delete L.wall; delete L.grad; delete L.dim; paint(); apply(); });
+  var num = function(id, key){ q(id).addEventListener('input', function(){ var L = cur(); L[key] = +q(id).value; apply(); }); };
+  num('#cxl_dim', 'dim'); num('#cxl_r', 'r'); num('#cxl_fs', 'fs'); num('#cxl_op', 'op');
+  ['me1','me2','meTx','th','thTx'].forEach(function(k){ q('#cxl_' + k).addEventListener('click', function(){ cxColorPick(cur()[k] || defaults[k], function(hex){ cur()[k] = hex; q('#cxl_' + k).style.background = hex; apply(); }); }); });
+  q('#cxl_reset').addEventListener('click', function(){ if (scope === 'def') all.def = {}; else delete all.th[tid]; paint(); apply(); toast(scope === 'def' ? 'Общее оформление сброшено' : 'Оформление этого чата сброшено'); });
+  q('#cxl_ok').addEventListener('click', function(){ clearTimeout(saveT); rpSet(CX_KLOOK, all); bg.remove(); });
+  paint(); apply();
+}
 async function cxOpenChat(tid, keep){
   var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0];
   if (!t || !CX.root){ CX.open = null; return; }
@@ -15981,15 +16579,16 @@ async function cxOpenChat(tid, keep){
   var old = $('#cx_chat', CX.root); if (old) old.remove();
   var ov = el('div', 'cx_chat'); ov.id = 'cx_chat';
   var p = t.kind === 'group' ? null : cxPerson(t.who[0], cs);
-  var right = '';
+  var right = '<div class="cx_ib" id="cx_c_look" title="Оформление чата">' + cxI('palette') + '</div>';
   if (tid === 'main') right += '<div class="cx_ib" id="cx_c_timer" title="Бот пишет первым">' + cxI('clock') + '<em id="cx_c_timer_v"></em></div>';
   if (!ro && t.kind !== 'group') right += '<div class="cx_ib" id="cx_c_call">' + cxI('phone') + '</div><div class="cx_ib" id="cx_c_video">' + cxI('video') + '</div>';
-  if (!ro && t.kind === 'group') right += '<div class="cx_ib" id="cx_c_live" title="Оживить чат">' + cxI('spark') + '</div><div class="cx_ib" id="cx_c_gset">' + cxI('gear') + '</div>';
+  if (!ro && t.kind === 'group') right += '<div class="cx_ib" id="cx_c_timer" title="Как часто пишут сами">' + cxI('clock') + '<em id="cx_c_timer_v"></em></div><div class="cx_ib" id="cx_c_live" title="Оживить чат">' + cxI('spark') + '</div><div class="cx_ib" id="cx_c_gset">' + cxI('gear') + '</div>';
   ov.innerHTML = '<div class="cx_chead"><div class="cx_chl"><div class="cx_back" id="cx_c_back">' + cxI('back') + '</div>' + cxThreadAv(t, cs, 'sm') + '<div class="cx_cht" id="cx_c_title"><b>' + (ro ? '[Зеркало] ' : '') + escapeHtml(cxTitle(t, cs)) + '</b><span id="cx_c_sub"></span></div></div><div class="cx_chr">' + right + '</div></div>' +
     '<div class="cx_msgs" id="cx_msgs"></div>' +
     (ro ? '<div class="cx_ro">' + cxI('eye') + 'Режим наблюдения — только чтение</div>'
         : '<div id="cx_tray"></div><div class="cx_in"><div class="cx_inr"><div class="cx_ib" id="cx_c_clip">' + cxI('clip') + '</div><textarea id="cx_c_in" rows="1" placeholder="Сообщение..."></textarea><div class="cx_ib" id="cx_c_mic">' + cxI('mic') + '</div><div class="cx_send" id="cx_c_send">' + cxI('send') + '</div></div></div>');
   CX.root.appendChild(ov);
+  try{ cxLookApply(ov, cxLookEff(await cxLookGet(), tid)); }catch(e){}
   await cxDrawMsgs(); cxHeadSub(); cxDrawTray();
   $('#cx_c_back', ov).addEventListener('click', cxCloseChat);
   $('#cx_c_title', ov).addEventListener('click', function(){
@@ -15997,10 +16596,11 @@ async function cxOpenChat(tid, keep){
     if (t.who[0] === 'char'){ cxBotSheet(); return; }
     var c = cxContact(t.who[0], CX.cs); if (c) cxContactForm(c);
   });
-  var tb = $('#cx_c_timer', ov); if (tb) tb.addEventListener('click', cxTimerSheet);
+  var tb = $('#cx_c_timer', ov); if (tb) tb.addEventListener('click', function(){ if (t.kind === 'group') cxGroupTimerSheet(tid); else cxTimerSheet(); });
   var cb = $('#cx_c_call', ov); if (cb) cb.addEventListener('click', function(){ cxCall(t.who[0], false, tid); });
   var vb = $('#cx_c_video', ov); if (vb) vb.addEventListener('click', function(){ cxCall(t.who[0], true, tid); });
   var gs = $('#cx_c_gset', ov); if (gs) gs.addEventListener('click', function(){ cxGroupForm(t); });
+  var lkb = $('#cx_c_look', ov); if (lkb) lkb.addEventListener('click', function(){ cxLookSheet(tid); });
   var lv = $('#cx_c_live', ov); if (lv) lv.addEventListener('click', function(){ if (CX.busy[tid]) return; toast('Участники оживляются…'); cxReply(tid, 'auto'); });
   if (ro) return;
   var ta = $('#cx_c_in', ov);
@@ -16023,12 +16623,12 @@ async function cxHeadSub(){
   var txt, off = false;
   if (CX.busy[tid]) txt = t.kind === 'group' ? 'кто-то печатает…' : 'печатает…';
   else if (t.owner === 'char') { txt = 'Режим наблюдения'; off = true; }
-  else if (t.kind === 'group') { txt = cxPlural(t.who.length + 1, 'участник', 'участника', 'участников') + (t.auto && t.every ? ' · пишут сами' : ''); off = true; }
+  else if (t.kind === 'group') { txt = cxPlural(t.who.length + 1, 'участник', 'участника', 'участников') + (cxGEvery(t) ? ' · пишут сами' : ''); off = true; }
   else if (t.who[0] === 'char'){ var s = await cxSet(); txt = 'в сети' + (s.every ? ' · пишет сам' : ''); }
   else { var fresh = t.last && t.last.f !== 'me' && Date.now() - (t.ts || 0) < 3600000; txt = fresh ? 'в сети' : 'был(а) недавно'; off = !fresh; }
   sub.textContent = txt; sub.className = off ? 'off' : '';
   var tv = $('#cx_c_timer_v', CX.root);
-  if (tv){ var s2 = await cxSet(); tv.textContent = s2.every ? (s2.every >= 60 ? (s2.every / 60) + 'ч' : s2.every + 'м') : ''; }
+  if (tv){ var ev2 = t.kind === 'group' ? cxGEvery(t) : (await cxSet()).every; tv.textContent = ev2 ? (ev2 >= 60 ? (ev2 / 60) + 'ч' : ev2 + 'м') : ''; }
 }
 function cxMsgBody(m, t, cs){
   var d = m.d || {};
@@ -16042,29 +16642,29 @@ function cxMsgBody(m, t, cs){
     var n = d.dur || Math.max(3, Math.min(60, Math.ceil(String(m.text || '').length / 12))), bars = '', seed = 0, sm = String(m.id || '');
     for (var i = 0; i < sm.length; i++) seed = (seed * 31 + sm.charCodeAt(i)) % 9973;
     for (var k = 0; k < 24; k++){ seed = (seed * 57 + 13) % 9973; bars += '<i style="height:' + (5 + seed % 15) + 'px"></i>'; }
-    return { h:'<div class="cx_voice"><div class="cx_vplay">' + cxI('play') + '</div><div class="cx_wave">' + bars + '</div><span class="cx_vdur">' + cxDur(n) + '</span></div><div class="cx_vtx">' + escapeHtml(m.text || '') + '</div>' };
+    return { h:'<div class="cx_voice"><div class="cx_vplay">' + cxI('play') + '</div><div class="cx_wave">' + bars + '</div><span class="cx_vdur">' + cxDur(n) + '</span></div><div class="cx_vtx"' + rpEdA('rp_cx_m_' + t.id, [m.id, 'text']) + '>' + escapeHtml(m.text || '') + '</div>' };
   }
-  var cap = m.text ? '<div class="cx_cap">' + escapeHtml(m.text) + '</div>' : '';
-  var stat = function(lbl){ return d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg><span>' + lbl + ' загружается… ' + escapeHtml(d.desc || '') + '</span>' : (d.err ? cxI('refresh') + '<span>Не загрузилось — нажми, чтобы повторить. ' + escapeHtml(d.desc || '') + '</span>' : cxI('img') + '<span>' + escapeHtml(d.desc || lbl) + '</span>'); };
+  var cap = m.text ? '<div class="cx_cap"' + rpEdA('rp_cx_m_' + t.id, [m.id, 'text']) + '>' + escapeHtml(m.text) + '</div>' : '';
+  var stat = function(lbl){ return d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg><span>' + lbl + ' загружается… ' + escapeHtml(d.desc || '') + '</span>' : (d.err ? cxI('refresh') + '<span>Не загрузилось — нажми, чтобы повторить. ' + escapeHtml(d.desc || '') + '</span>' : (d.manual ? cxI('refresh') + '<span>Нажми, чтобы сгенерировать. ' + escapeHtml(d.desc || '') + '</span>' : cxI('img') + '<span>' + escapeHtml(d.desc || lbl) + '</span>')); };
   if (m.t === 'photo'){
     var ff = d.asFile ? '<div class="cx_phf">' + cxI('file') + '<span>' + escapeHtml(d.name || 'IMG_' + String(m.id || '').slice(-4).toUpperCase() + '.jpg') + '</span></div>' : '';
-    if (d.img) return { raw:true, h:'<div class="cx_ph">' + ff + '<img src="' + escapeHtml(d.img) + '" alt="" data-view="1">' + cap + '</div>' };
-    return { raw:true, h:'<div class="cx_ph">' + ff + '<div class="cx_phd' + (d.err ? ' cx_pherr' : '') + '"' + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + stat('Фото') + '</div>' + cap + '</div>' };
+    if (d.img) return { raw:true, h:'<div class="cx_ph' + (d.busy ? ' busy' : '') + '">' + ff + '<img src="' + escapeHtml(d.img) + '" alt="" data-view="1">' + (d.busy ? '<div class="cx_phbusy"><svg class="rp_spin"><use href="#rpi-spinner"/></svg><span>Генерирую…</span></div>' : '') + cap + '</div>' };
+    return { raw:true, h:'<div class="cx_ph">' + ff + '<div class="cx_phd' + (d.err ? ' cx_pherr' : '') + '"' + (d.err || d.manual ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + stat('Фото') + '</div>' + cap + '</div>' };
   }
   if (m.t === 'circle'){
     var cd = d.dur || Math.max(4, Math.min(60, Math.ceil(String(m.text || '').length / 12)));
-    return { raw:true, h:'<div class="cx_circw"><div class="cx_circ' + (d.err ? ' err' : '') + '"' + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '><div class="cx_circv"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '"' : '') + '>' + (d.img ? '' : '<span>' + escapeHtml(d.err ? 'Не загрузилось — нажми' : (d.desc || 'Кружок')) + '</span>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err ? 'refresh' : 'play')) + '</i><em class="cx_cdur cx_mono">' + cxDur(cd) + '</em></div></div>' + (m.text ? '<div class="cx_ctx">' + escapeHtml(m.text) + '</div>' : '') + '</div>' };
+    return { raw:true, h:'<div class="cx_circw"><div class="cx_circ' + (d.err ? ' err' : '') + '"' + (d.err || d.manual ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '><div class="cx_circv"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '"' : '') + '>' + (d.img ? '' : '<span>' + escapeHtml(d.err ? 'Не загрузилось — нажми' : (d.manual ? 'Нажми — сгенерирую' : (d.desc || 'Кружок'))) + '</span>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err || d.manual ? 'refresh' : 'play')) + '</i><em class="cx_cdur cx_mono">' + cxDur(cd) + '</em></div></div>' + (m.text ? '<div class="cx_ctx"' + rpEdA('rp_cx_m_' + t.id, [m.id, 'text']) + '>' + escapeHtml(m.text) + '</div>' : '') + '</div>' };
   }
   if (m.t === 'video'){
     var vd = d.dur || (8 + (String(m.id || '').charCodeAt(2) || 7) % 40);
     if (d.vid) return { raw:true, h:'<div class="cx_vid"><video src="' + escapeHtml(d.vid) + '" controls playsinline preload="metadata"></video>' + cap + '</div>' };
-    return { raw:true, h:'<div class="cx_vid"><div class="cx_vidf' + (d.err ? ' err' : '') + '"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '" data-viewbg="' + escapeHtml(m.id) + '"' : '') + (d.err ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + (d.img ? '' : '<em>' + escapeHtml(d.err ? 'Не загрузилось — нажми, чтобы повторить' : (d.desc || 'Видео')) + '</em>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err ? 'refresh' : 'play')) + '</i><span class="cx_vlen cx_mono">' + cxDur(vd) + '</span></div>' + cap + '</div>' };
+    return { raw:true, h:'<div class="cx_vid"><div class="cx_vidf' + (d.err ? ' err' : '') + '"' + (d.img ? ' style="background-image:' + rpCssUrl(d.img) + '" data-viewbg="' + escapeHtml(m.id) + '"' : '') + (d.err || d.manual ? ' data-regen="' + escapeHtml(m.id) + '"' : '') + '>' + (d.img ? '' : '<em>' + escapeHtml(d.err ? 'Не загрузилось — нажми, чтобы повторить' : (d.manual ? 'Нажми, чтобы сгенерировать кадр' : (d.desc || 'Видео'))) + '</em>') + '<i class="cx_cplay">' + (d.busy ? '<svg class="rp_spin"><use href="#rpi-spinner"/></svg>' : cxI(d.err || d.manual ? 'refresh' : 'play')) + '</i><span class="cx_vlen cx_mono">' + cxDur(vd) + '</span></div>' + cap + '</div>' };
   }
   if (m.t === 'file'){
     var ext = (/\.([a-z0-9]{1,5})$/i.exec(d.name || '') || [])[1] || 'DOC';
-    return { raw:true, h:'<div class="cx_file"><div class="cx_fic">' + escapeHtml(ext.toUpperCase().slice(0, 4)) + '</div><div class="cx_fm"><b>' + escapeHtml(d.name || 'Файл') + '</b>' + (d.desc ? '<span>' + escapeHtml(d.desc) + '</span>' : '') + '</div></div>' + cap };
+    return { raw:true, h:'<div class="cx_file"><div class="cx_fic">' + escapeHtml(ext.toUpperCase().slice(0, 4)) + '</div><div class="cx_fm"><b>' + escapeHtml(d.name || 'Файл') + '</b>' + (d.desc ? '<span' + rpEdA('rp_cx_m_' + t.id, [m.id, 'd', 'desc']) + '>' + escapeHtml(d.desc) + '</span>' : '') + '</div></div>' + cap };
   }
-  return { h: escapeHtml(m.text || '') };
+  return { h: '<span' + rpEdA('rp_cx_m_' + t.id, [m.id, 'text']) + '>' + escapeHtml(m.text || '') + '</span>' };
 }
 async function cxDrawMsgs(){
   var box = CX.root && $('#cx_msgs', CX.root); if (!box) return;
@@ -16075,19 +16675,19 @@ async function cxDrawMsgs(){
   var answered = false; for (var j = lastMine + 1; j < list.length; j++){ if (list[j].from !== self && list[j].t !== 'sys') answered = true; }
   var html = '', day = '', prevFrom = null;
   list.forEach(function(m, i){
-    var dk = cxDayKey(m.ts || 0);
-    if (dk !== day){ day = dk; html += '<div class="cx_day cx_mono">' + escapeHtml(cxDayLabel(m.ts || 0)) + '</div>'; prevFrom = null; }
+    var dk = m.sd || '';
+    if (dk && dk !== day){ day = dk; html += '<div class="cx_day cx_mono">' + escapeHtml(dk) + '</div>'; prevFrom = null; }
     if (m.t === 'sys' || m.t === 'call'){
       var miss = m.t === 'call' && m.d && m.d.dir === 'missed';
       var txt = m.t === 'sys' ? m.text : (miss ? 'Пропущенный звонок · ' + cxNameOf(m.from, cs) : 'Звонок' + (m.d && m.d.dur ? ' · ' + cxDur(m.d.dur) : ''));
-      html += '<div class="cx_sys' + (miss ? ' miss' : '') + '">' + (m.t === 'call' ? cxI(miss ? 'cmiss' : 'phone') : '') + escapeHtml(txt) + '<span class="cx_mono" style="opacity:.6">' + cxHM(m.ts) + '</span></div>';
+      html += '<div class="cx_sys' + (miss ? ' miss' : '') + '">' + (m.t === 'call' ? cxI(miss ? 'cmiss' : 'phone') : '') + escapeHtml(txt) + '<span class="cx_mono" style="opacity:.6">' + cxMT(m) + '</span></div>';
       prevFrom = null; return;
     }
     var mine = m.from === self, body = cxMsgBody(m, t, cs);
     var who = (!mine && (t.kind === 'group' || t.owner === 'char' && t.who.length > 1) && prevFrom !== m.from) ? '<div class="cx_mfrom" style="color:' + cxColor(m.from) + '">' + escapeHtml(cxNameOf(m.from, cs)) + '</div>' : '';
     var tick = mine && self === 'me' ? (i <= lastMine && (answered || i < lastMine) ? cxI('chk2') : cxI('chk', 'wait')) : '';
-    var meta = '<div class="cx_bt cx_mono">' + (m.rp ? '<span class="cx_rp">из ролевой</span>' : '') + '<span>' + cxHM(m.ts) + '</span>' + tick + '</div>';
-    var inner = body.raw ? body.h + (m.t === 'sticker' ? '<div class="cx_stkt cx_mono" style="text-align:' + (mine ? 'right' : 'left') + '">' + (m.rp ? 'из ролевой · ' : '') + cxHM(m.ts) + '</div>' : meta) : '<div class="cx_b">' + body.h + meta + '</div>';
+    var meta = '<div class="cx_bt cx_mono">' + (m.rp ? '<span class="cx_rp">из ролевой</span>' : '') + '<span>' + cxMT(m) + '</span>' + tick + '</div>';
+    var inner = body.raw ? body.h + (m.t === 'sticker' ? '<div class="cx_stkt cx_mono" style="text-align:' + (mine ? 'right' : 'left') + '">' + [m.rp ? 'из ролевой' : '', cxMT(m)].filter(Boolean).join(' · ') + '</div>' : meta) : '<div class="cx_b">' + body.h + meta + '</div>';
     html += '<div class="cx_m' + (mine ? ' me' : '') + '" data-mid="' + escapeHtml(m.id) + '">' + who + '<div class="cx_mrow"><div>' + inner + '</div></div></div>';
     prevFrom = m.from;
   });
@@ -16104,7 +16704,7 @@ async function cxDrawMsgs(){
   box.querySelectorAll('.cx_ph img').forEach(function(im){ im.addEventListener('load', function(){ if (stick) box.scrollTop = box.scrollHeight; }); im.addEventListener('click', function(){ cxView(im.getAttribute('src')); }); });
   box.querySelectorAll('[data-viewbg]').forEach(function(v){ v.addEventListener('click', function(){ var mm = list.filter(function(x){ return x.id === v.getAttribute('data-viewbg'); })[0]; if (mm && mm.d && mm.d.img) cxView(mm.d.img); }); });
   box.querySelectorAll('.cx_circ:not(.err)').forEach(function(c){ c.addEventListener('click', function(){ c.parentNode.classList.toggle('open'); }); });
-  box.querySelectorAll('[data-regen]').forEach(function(r){ r.addEventListener('click', function(e){ e.stopPropagation(); var mm = list.filter(function(x){ return x.id === r.getAttribute('data-regen'); })[0]; if (mm) cxMediaQueue([{ tid: tid, m: mm }]); }); });
+  box.querySelectorAll('[data-regen]').forEach(function(r){ r.addEventListener('click', function(e){ e.stopPropagation(); var mm = list.filter(function(x){ return x.id === r.getAttribute('data-regen'); })[0]; if (mm) cxMediaQueue([{ tid: tid, m: mm }], true); }); });
 }
 function cxDrawTray(){
   var tr = CX.root && $('#cx_tray', CX.root); if (!tr) return;
@@ -16163,16 +16763,54 @@ function cxBotSheet(){
 async function cxThreadMenu(tid){
   var ts = await cxThreads(), cs = CX.cs = await cxContacts(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return;
   var nm = CX.names, title = cxTitle(t, cs), acts = [];
+  acts.push({ ic:'palette', t:'Оформление чата', s:'Обои и пузыри сообщений', fn:function(){ cxLookSheet(tid); } });
   acts.push({ ic:'edit', t:'Переименовать', s:'Название меняется только на экране — кто есть кто, Чат помнит по людям', fn:async function(){ var v = await cxAsk('Новое название', t.title || title, 'Название чата'); if (v == null) return; await cxRename(tid, v); cxAfterEdit(); } });
   if (t.owner === 'me' && tid !== 'main') acts.push({ ic:'pinr', t: t.pin ? 'Открепить' : 'Закрепить', fn:async function(){ await cxSerial(async function(){ var l = await cxThreads(); l.forEach(function(x){ if (x.id === tid) x.pin = !x.pin; }); await cxThreadsSave(l); }); cxAfterEdit(); } });
   if (tid !== 'main'){
     acts.push({ ic:'heart', t:'Слить в основной чат', s: t.owner === 'char' ? 'Если это на самом деле твоя переписка с ботом' : 'Если на самом деле здесь писал бот: ' + nm.char, fn:async function(){ var ch = await showChoiceModal({ title:'Слить «' + title + '» с основным чатом?', message:'Сообщения перенесутся в твой чат с ботом и встанут по времени. Этот чат исчезнет.', buttons:[{ label:'Слить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMerge(tid, 'main'); toast('Слито с основным чатом'); cxAfterEdit(true); } });
-    if (t.owner === 'char') acts.push({ ic:'merge', t:'Перенести в мои диалоги', s:'Если это писали тебе, а попало в скрытые чаты бота', fn:async function(){ var ch = await showChoiceModal({ title:'Перенести «' + title + '» в твои диалоги?', message:'Реплики, которые числились за ' + nm.char + ', станут твоими.', buttons:[{ label:'Перенести', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMoveOwner(tid, 'me'); toast('Перенесено в твои диалоги'); cxAfterEdit(true); } });
-    else acts.push({ ic:'merge', t:'Перенести к боту', s:'Если это писали боту ' + nm.char + ', а попало к тебе', fn:async function(){ var ch = await showChoiceModal({ title:'Перенести «' + title + '» к боту?', message:'Твои реплики станут репликами ' + nm.char + ', чат уйдёт в «Режим наблюдения».', buttons:[{ label:'Перенести', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxMoveOwner(tid, 'char'); toast('Перенесено к боту'); cxAfterEdit(true); } });
+    acts.push(t.owner === 'char'
+      ? { ic:'user', t:'Перенести в мои диалоги', s:'Если это была твоя переписка, а попала в чаты бота', fn:function(){ cxMoveAsk(t, title); } }
+      : { ic:'eye', t:'Перенести к боту', s:'Если это была переписка бота, а попала к тебе', fn:function(){ cxMoveAsk(t, title); } });
     acts.push({ ic:'merge', t:'Слить с выбранным чатом', s:'Если это один и тот же человек под разными именами', fn:function(){ cxMergePick(t); } });
   }
   acts.push({ ic:'trash', t: tid === 'main' ? 'Очистить переписку' : 'Удалить', red:true, fn:async function(){ var ch = await showChoiceModal({ title:(tid === 'main' ? 'Очистить' : 'Удалить') + ' «' + title + '»?', message:'Сообщения удалятся без возможности вернуть.', buttons:[{ label: tid === 'main' ? 'Очистить' : 'Удалить', value:'y' }, { label:'Отмена', value:null, ghost:true }] }); if (!ch) return; await cxDelete(tid); cxAfterEdit(true); } });
   cxActions(title, t.owner === 'char' ? 'Скрытый чат бота: ' + nm.char : '', acts);
+}
+async function cxMoveAsk(t, title){
+  var nm = CX.names, toMe = t.owner === 'char', ts = await cxThreads();
+  var who = t.who.filter(function(w){ return w !== 'me' && w !== 'char'; });
+  if (!who.length){ toast('Здесь нет других участников — перенести некуда'); return; }
+  var dup = t.kind === 'dm' ? cxFindDm(ts, toMe ? 'me' : 'char', who[0]) : null;
+  var ch = await showChoiceModal({
+    title: toMe ? 'Перенести «' + title + '» в твои диалоги?' : 'Перенести «' + title + '» в чаты бота?',
+    message: (toMe ? 'Чат переедет к тебе, а всё, что в нём написано от имени ' + nm.char + ', станет твоими сообщениями.' : 'Чат переедет в скрытые чаты бота, а твои сообщения в нём станут сообщениями ' + nm.char + '.') + (dup ? ' С этим человеком там уже есть чат — переписки объединятся по времени.' : ''),
+    buttons:[{ label:'Перенести', value:'y' }, { label:'Отмена', value:null, ghost:true }]
+  });
+  if (!ch) return;
+  var r = await cxMoveOwner(t.id);
+  if (!r){ toast('Не получилось перенести'); return; }
+  toast(toMe ? 'Перенесено в твои диалоги' : 'Перенесено в чаты бота');
+  cxAfterEdit(true);
+}
+async function cxMoveOwner(tid){
+  if (tid === 'main') return null;
+  var r = await cxSerial(async function(){
+    var ts = await cxThreads(), t = ts.filter(function(x){ return x.id === tid; })[0]; if (!t) return null;
+    var from = t.owner === 'char' ? 'char' : 'me', to = from === 'char' ? 'me' : 'char';
+    var who = t.who.filter(function(w){ return w !== 'me' && w !== 'char'; });
+    if (!who.length) return null;
+    var dup = t.kind === 'dm' ? cxFindDm(ts, to, who[0]) : null;
+    var l = await cxMsgs(tid);
+    l.forEach(function(m){ if (m.t !== 'sys' && m.from === from) m.from = to; });
+    await cxMsgsSave(tid, l);
+    t.owner = to; t.who = who;
+    if (to === 'char') delete t.pin;
+    var lm = l[l.length - 1]; if (lm) t.last = { f: lm.from, x: cxPreview(lm) };
+    await cxThreadsSave(ts);
+    return { to: to, id: tid, dup: dup ? dup.id : null };
+  });
+  if (r && r.dup){ await cxMerge(tid, r.dup); r.id = r.dup; }
+  return r;
 }
 function cxAfterEdit(closeOpen){ if (closeOpen && CX.open){ var ov = CX.root && $('#cx_chat', CX.root); if (ov) ov.remove(); CX.open = null; } cxRender(); }
 async function cxMergePick(src){
@@ -16256,12 +16894,12 @@ function cxContactForm(c){
 }
 function cxGroupForm(t){
   var isNew = !t, cs = CX.cs, nm = CX.names;
-  var cur = t ? { title:t.title || '', avatar:t.avatar || '', who:t.who.slice(), every:(t.auto && t.every) ? t.every : 0 } : { title:'', avatar:'', who:[], every:0 };
+  var cur = t ? { title:t.title || '', avatar:t.avatar || '', who:t.who.slice(), every:cxGEvery(t) } : { title:'', avatar:'', who:[], every:60 };
   var memHtml = function(){ return [['char', nm.char, CX.names.charAv]].concat(cs.map(function(c){ return [c.id, c.name, c.avatar]; })).map(function(x){ return '<div class="cx_chip' + (cur.who.indexOf(x[0]) >= 0 ? ' on' : '') + '" data-m="' + x[0] + '">' + cxAv({ name:x[1], av:x[2] }) + escapeHtml(x[1]) + '</div>'; }).join(''); };
   var bg = cxSheet('<div class="cx_sht">' + (isNew ? 'Новая группа' : 'Настройки группы') + '</div><div class="cx_shs">Участники отвечают по смыслу: иногда один, иногда несколько сразу.</div>' +
     '<div class="cx_avpick"><div id="cx_g_av">' + cxAv({ name: cur.title || 'Группа', av: cur.avatar }, 'lg grp') + '</div><div style="flex:1;min-width:0;"><div class="cx_fld" style="margin-bottom:8px;"><label><span>Название</span></label><input id="cx_g_t" maxlength="40" value="' + escapeHtml(cur.title) + '" placeholder="Например: Наша банда"></div><div class="cx_btn ghost" id="cx_g_pick" style="padding:8px;">' + cxI('img') + 'Аватарка группы</div></div></div>' +
     '<div class="cx_fld"><label><span>Участники</span><em id="cx_g_n">' + cur.who.length + '</em></label><div class="cx_chips" id="cx_g_mem">' + memHtml() + '</div></div>' +
-    '<div class="cx_fld"><label><span>Участники пишут сами</span></label><div class="cx_chips" id="cx_g_every">' + [[0, 'Выкл'], [30, '30 мин'], [60, '1 час'], [120, '2 часа'], [240, '4 часа'], [480, '8 часов']].map(function(o){ return '<div class="cx_chip' + (cur.every === o[0] ? ' on' : '') + '" data-e="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div><small class="rp_muted" style="display:block;margin-top:6px;">Каждое сообщение от них — запрос к нейросети. Работает, пока открыта Таверна.</small></div>' +
+    '<div class="cx_fld"><label><span>Пишут сами</span><em>если в чате тихо</em></label><div class="cx_chips" id="cx_g_ev">' + CX_GEVERY.map(function(o){ return '<div class="cx_chip' + (cur.every === o[0] ? ' on' : '') + '" data-ev="' + o[0] + '">' + o[1] + '</div>'; }).join('') + '</div></div>' +
     '<div class="cx_btns"><div class="cx_btn" id="cx_g_ok">' + (isNew ? 'Создать' : 'Сохранить') + '</div></div>' +
     (isNew ? '' : '<div class="cx_act red" id="cx_g_del" style="justify-content:center;margin-top:8px;">' + cxI('trash') + 'Удалить группу</div>'));
   var redraw = function(){ $('#cx_g_av', bg).innerHTML = cxAv({ name: $('#cx_g_t', bg).value || 'Группа', av: cur.avatar }, 'lg grp'); };
@@ -16269,7 +16907,7 @@ function cxGroupForm(t){
   $('#cx_g_pick', bg).addEventListener('click', pick); $('#cx_g_av', bg).addEventListener('click', pick);
   var wireMem = function(){ $('#cx_g_mem', bg).querySelectorAll('[data-m]').forEach(function(ch){ ch.addEventListener('click', function(){ var id = ch.getAttribute('data-m'), i = cur.who.indexOf(id); if (i >= 0) cur.who.splice(i, 1); else cur.who.push(id); ch.classList.toggle('on', i < 0); $('#cx_g_n', bg).textContent = cur.who.length; }); }); };
   wireMem();
-  $('#cx_g_every', bg).querySelectorAll('[data-e]').forEach(function(ch){ ch.addEventListener('click', function(){ cur.every = +ch.getAttribute('data-e'); $('#cx_g_every', bg).querySelectorAll('[data-e]').forEach(function(x){ x.classList.toggle('on', x === ch); }); }); });
+  $('#cx_g_ev', bg).querySelectorAll('[data-ev]').forEach(function(ch){ ch.addEventListener('click', function(){ cur.every = +ch.getAttribute('data-ev'); $('#cx_g_ev', bg).querySelectorAll('[data-ev]').forEach(function(x){ x.classList.toggle('on', x === ch); }); }); });
   $('#cx_g_ok', bg).addEventListener('click', async function(){
     cur.title = $('#cx_g_t', bg).value.trim().slice(0, 40);
     if (!cur.title){ toast('Назови группу'); return; }
@@ -16278,7 +16916,8 @@ function cxGroupForm(t){
     await cxSerial(async function(){
       var ts = await cxThreads(), g = ts.filter(function(x){ return x.id === id; })[0];
       if (!g){ g = { id:id, kind:'group', owner:'me', who:[], title:'', ts:Date.now(), unread:0 }; ts.push(g); }
-      g.title = cur.title; g.avatar = cur.avatar; g.who = cur.who.slice(); g.auto = cur.every > 0; g.every = cur.every;
+      if (g.every !== cur.every) g.autoAt = Date.now();
+      g.title = cur.title; g.avatar = cur.avatar; g.who = cur.who.slice(); g.every = cur.every; g.auto = cur.every > 0;
       await cxThreadsSave(ts);
     });
     bg.remove();
@@ -16796,20 +17435,21 @@ async function satRenderSwipe(main, container){
 }
 async function tdEnsureDeckPhotos(deck){
   if (!(await imagesEnabled())) return;
+  if (!(await rpAutoGen())) return;
   deck.slice(0,3).forEach(function(pr){ tdEnsureCardPhoto(pr); });
 }
 function satFillCard(cardEl, prof){
   var media;
-  if (prof.img) media = '<img class="sat_img" src="'+escapeHtml(prof.img)+'" alt="">';
+  if (prof.img) media = '<img class="sat_img" data-rpimg="td|'+prof.id+'" src="'+escapeHtml(prof.img)+'" alt="">';
   else {
-    var status = TD_BUSY[prof.id] ? '⏳ Вызываю образ…' : (prof.imgFailed ? '⚠️ Фото не вышло — нажми, чтобы повторить'+(prof.imgErr?'<div style="font-size:9px;font-weight:400;opacity:.85;margin-top:6px;word-break:break-word;">'+escapeHtml(prof.imgErr)+'</div>':'') : '');
+    var status = TD_BUSY[prof.id] ? '⏳ Вызываю образ…' : (prof.imgFailed ? '⚠️ Фото не вышло — нажми, чтобы повторить'+(prof.imgErr?'<div style="font-size:9px;font-weight:400;opacity:.85;margin-top:6px;word-break:break-word;">'+escapeHtml(prof.imgErr)+'</div>':'') : '🖼 Нажми, чтобы сгенерировать фото');
     media = '<div class="sat_ph" data-retry="1"><div class="ini">'+escapeHtml(prof.name.charAt(0).toUpperCase())+'</div><div>'+status+'</div></div>';
   }
   cardEl.innerHTML = media+'<div class="sat_shade"></div>'+
     '<div class="sat_mbadge">'+satIco('rpi-flame')+'<span>'+(prof.synergy||0)+'% совпадение душ</span></div>'+
     '<div class="sat_stamp like">ДУШЕВНАЯ ПАРА</div><div class="sat_stamp nope">ИЗГНАТЬ</div><div class="sat_stamp sup">СДЕЛКА С ДЬЯВОЛОМ</div>'+
     '<div class="sat_info"><div class="sat_name">'+escapeHtml(prof.name)+'<span>'+prof.age+'</span></div><div class="sat_dist">📍 '+escapeHtml(prof.distance)+'</div>'+
-    '<div class="sat_bio"><div class="t">'+escapeHtml(prof.bio)+'</div></div>'+
+    '<div class="sat_bio"><div class="t"'+rpEdA('rp_tinder_deck',[prof.id,'bio'])+'>'+escapeHtml(prof.bio)+'</div></div>'+
     '<div class="sat_tags">'+(prof.tags||[]).map(function(t){ return '<span class="sat_tag">'+escapeHtml(t)+'</span>'; }).join('')+'</div></div>';
   var ph = cardEl.querySelector('[data-retry]');
   var bioEl = cardEl.querySelector('.sat_bio');
@@ -16825,6 +17465,7 @@ async function tdEnsureCardPhoto(prof, force){
   if (prof.img || TD_BUSY[prof.id]) return;
   if (!(await imagesEnabled())) return;
   if (prof.imgFailed && !force) return;
+  if (!force && !(await rpAutoGen())) return;
   TD_BUSY[prof.id] = true;
   var live = document.querySelector('.sat_card[data-pid="'+prof.id+'"]');
   if (live) satFillCard(live, prof);
@@ -16973,7 +17614,7 @@ async function tdDrawMsgs(box, mid){
       }
       return '<div class="'+cls+' photo" data-mid="'+m.id+'">'+inner+'<span class="t">'+escapeHtml(tdTime(m.ts))+'</span></div>';
     }
-    return '<div class="'+cls+'">'+escapeHtml(m.text)+'<span class="t">'+escapeHtml(tdTime(m.ts))+'</span></div>';
+    return '<div class="'+cls+'"><span'+rpEdIf('rp_tinder_msgs_'+mid,[],m)+'>'+escapeHtml(m.text)+'</span><span class="t">'+escapeHtml(tdTime(m.ts))+'</span></div>';
   }).join('') + (TD_REPLYING[mid] ? '<div class="sat_typing">● ● ●</div>' : '');
   box.querySelectorAll('[data-retry]').forEach(function(p){
     p.addEventListener('click', function(){ tdRetryPhoto(mid, p.getAttribute('data-retry')); });
@@ -17650,6 +18291,15 @@ async function generateOocSummary(){
   return parts.join('\n\n');
 }
 function rpNativeOk(){ return true; }
+function rpPathToBlob(path){
+  return fetch(path).then(function(r){ if (!r.ok) throw new Error('http '+r.status); return r.blob(); }).catch(function(){
+    return new Promise(function(res){
+      var im = new Image(); im.crossOrigin = 'anonymous';
+      im.onload = function(){ try{ var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im,0,0); c.toBlob(function(b){ res(b); }, 'image/jpeg', .92); }catch(e){ res(null); } };
+      im.onerror = function(){ res(null); }; im.src = path;
+    });
+  });
+}
 function rpOverlayInput(host, multiple, onFiles){
   host.style.position = 'relative'; host.style.overflow = 'hidden'; host.style.cursor = 'pointer';
   var busy = false;
@@ -17662,16 +18312,81 @@ function rpOverlayInput(host, multiple, onFiles){
   });
   return null;
 }
+async function rpNativePick(multiple){
+  var res = await rpImport({ multiple:!!multiple });
+  var out = [];
+  for (var i = 0; i < (res||[]).length; i++){ var b = await rpPathToBlob(res[i].path); if (b) out.push(b); }
+  return out;
+}
+function rpOverlayInput(host, multiple, onFiles){
+  host.style.position = 'relative'; host.style.overflow = 'hidden';
+  var native = false; try{ native = rpNativeOk(); }catch(e){}
+  if (native){
+    var busy = false;
+    host.style.cursor = 'pointer';
+    host.addEventListener('click', async function(e){
+      e.preventDefault(); e.stopPropagation();
+      if (busy) return; busy = true;
+      try{ var f = await rpNativePick(multiple); if (f.length) onFiles(f); else toast('Не удалось открыть выбранное фото'); }
+      catch(err){ console.error('RP pick failed', err); toast('Галерея: '+(err && err.message ? err.message : err)); }
+      busy = false;
+    });
+    return null;
+  }
+  var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; if (multiple) inp.multiple = true;
+  inp.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0;margin:0;padding:0;border:0;';
+  inp.addEventListener('change', function(){ var f = Array.prototype.slice.call(inp.files || []); if (f.length) onFiles(f); try{ inp.value = ''; }catch(e){} });
+  host.appendChild(inp); return inp;
+}
+document.addEventListener('click', async function(e){
+  if (!rpLive()) return;
+  var inp = e.target && e.target.closest ? e.target.closest('input[type=file]') : null;
+  if (!inp || !$('#rp_root') || !$('#rp_root').contains(inp)) return;
+  var native = false; try{ native = rpNativeOk(); }catch(x){}
+  if (!native) return;
+  e.preventDefault();
+  if (inp.__rpBusy) return; inp.__rpBusy = true;
+  try{
+    var blobs = await rpNativePick(!!inp.multiple);
+    if (blobs.length){
+      var dt = new DataTransfer();
+      blobs.forEach(function(b,i){ dt.items.add(new File([b], 'photo'+i+'.jpg', { type: b.type || 'image/jpeg' })); });
+      inp.files = dt.files; inp.dispatchEvent(new Event('change', { bubbles:true }));
+      toast('Фото выбрано');
+    }
+  }catch(err){ console.error('RP pick failed', err); toast('Галерея: '+(err && err.message ? err.message : err)); }
+  inp.__rpBusy = false;
+}, true);
 var HOME_EDIT = false;
 var HOME_EDIT_REQ = false;
-var HL_DEFAULT = { cols:5, size:44, shape:14, labels:true };
+var HL_DEFAULT = { cols:5, size:44, shape:14, labels:true, cell:'rect', lbs:8.5 };
 async function hlGet(){ var l = null; try{ l = await rpGet('rp_home_layout', null); }catch(e){} return Object.assign({}, HL_DEFAULT, l||{}); }
 async function hlSave(patch){ var l = await hlGet(); Object.assign(l, patch); await rpSet('rp_home_layout', l); return l; }
+var HL_CUR = null, HL_RO = false, HL_LASTW = 0;
+function hlRowH(l){ return l.size + 14 + (l.labels ? Math.round((l.lbs || 8.5) * 2.1) : 0); }
+function hlSquareFit(){
+  var root = $('#rp_root'), grid = $('#rp_grid'), l = HL_CUR;
+  if (!root || !grid || !l || l.cell !== 'square') return;
+  var gs = getComputedStyle(grid), w = grid.clientWidth - parseFloat(gs.paddingLeft) - parseFloat(gs.paddingRight);
+  if (!(w > 40)) return;
+  var cw = (w - (l.cols - 1) * 4) / l.cols, lab = l.labels ? Math.round((l.lbs || 8.5) * 2.4) + 6 : 4;
+  root.style.setProperty('--hrow', cw.toFixed(2) + 'px');
+  root.style.setProperty('--hti', Math.max(26, Math.min(l.size, Math.floor(cw - lab))) + 'px');
+}
 function hlVars(l){
   var root = $('#rp_root'); if (!root) return;
+  HL_CUR = l;
   root.style.setProperty('--hcols', String(l.cols));
   root.style.setProperty('--hti', l.size+'px');
-  root.style.setProperty('--hrow', (l.size + (l.labels ? 32 : 14))+'px');
+  root.style.setProperty('--hrow', hlRowH(l)+'px');
+  root.style.setProperty('--hgy', l.cell === 'square' ? '4px' : '8px');
+  root.style.setProperty('--tfs', (l.lbs || 8.5)+'px');
+  var g0 = $('#rp_grid');
+  if (!HL_RO && g0 && window.ResizeObserver){
+    HL_RO = true;
+    new ResizeObserver(function(){ if (!rpLive()) return; var w = g0.clientWidth; if (w !== HL_LASTW){ HL_LASTW = w; hlSquareFit(); } }).observe(g0);
+  }
+  hlSquareFit();
   root.style.setProperty('--hrad', l.shape==='circle' ? '50%' : (l.shape+'px'));
   root.classList.toggle('rp_nolabels', !l.labels);
   if (l.lblc) root.style.setProperty('--tlc', l.lblc); else root.style.removeProperty('--tlc');
@@ -17772,8 +18487,33 @@ async function buildGrid(){
   grid.classList.toggle('edit', HOME_EDIT);
   clearTimeout(window.__thHomeSync); window.__thHomeSync = setTimeout(function(){ try{ Promise.all([rpGet('rp_theme', null), thEditId()]).then(function(r){ if (r[0] && r[1] && r[0].id === r[1]) return thSyncEdit(false); }).catch(function(){}); }catch(e){} }, 700);
   grid.scrollTop = keep;
+  thHook();
+  wgFitAll();
 }
+function wgFit(card){
+  var wi = card.querySelector('.wg_in'); if (!wi) return;
+  var bodies = Array.prototype.slice.call(wi.querySelectorAll('.wg_cb,.wg_note')); if (!bodies.length) return;
+  var sec = Array.prototype.slice.call(wi.querySelectorAll('.wg_tag,.wg_chip,.wg_chead,.wg_qm,.wg_foot'));
+  sec.forEach(function(x){ x.style.display = ''; });
+  bodies.forEach(function(b){ b.style.webkitLineClamp = ''; });
+  var cs = getComputedStyle(wi), pt = parseFloat(cs.paddingTop) || 0, pb = parseFloat(cs.paddingBottom) || 0;
+  var fits = function(){
+    var r = wi.getBoundingClientRect(), top = r.top + pt - 1, bot = r.bottom - pb + 1;
+    return bodies.concat(sec).every(function(x){ if (x.style.display === 'none' || getComputedStyle(x).display === 'none' || getComputedStyle(x).position === 'absolute') return true; var q = x.getBoundingClientRect(); return q.top >= top && q.bottom <= bot; });
+  };
+  if (fits()) return;
+  var b = bodies[0], lh = parseFloat(getComputedStyle(b).lineHeight) || (parseFloat(getComputedStyle(b).fontSize) * 1.3);
+  var n = Math.max(1, Math.round(b.getBoundingClientRect().height / lh)), hide = sec.filter(function(x){ return getComputedStyle(x).display !== 'none' && getComputedStyle(x).position !== 'absolute'; });
+  for (var g = 0; g < 14 && !fits(); g++){
+    if (n > 2){ n--; b.style.webkitLineClamp = n; }
+    else if (hide.length){ hide.shift().style.display = 'none'; }
+    else if (n > 1){ n--; b.style.webkitLineClamp = n; }
+    else break;
+  }
+}
+function wgFitAll(){ requestAnimationFrame(function(){ try{ Array.prototype.forEach.call(document.querySelectorAll('#rp_grid .rp_wg'), wgFit); }catch(e){} }); }
 async function renderHomeWidgets(){ await buildGrid(); }
+function thHook(){ try{ if (typeof thHistSchedule === 'function') thHistSchedule(); }catch(e){} }
 function hlSaveOrderFromDom(){
   var ids = Array.prototype.map.call($('#rp_grid').children, function(c){ return c.getAttribute('data-id'); }).filter(Boolean);
   return rpSet('rp_home_order', ids);
@@ -17844,7 +18584,7 @@ function hlWireHome(){
     if (s.mode === 'resize'){
       var c = +s.item.getAttribute('data-cols'), r = +s.item.getAttribute('data-rows');
       var rid = s.item.getAttribute('data-id');
-      if (/^wg_/.test(rid)) await wgUpdate(rid, { cols:c, rows:r }); else await hwSave({ cols:c, rows:r });
+      if (/^wg_/.test(rid)){ await wgUpdate(rid, { cols:c, rows:r }); wgFit(s.item); } else await hwSave({ cols:c, rows:r });
       return;
     }
     if (s.drag){
@@ -17866,7 +18606,6 @@ function hlWireHome(){
     await rpSet('rp_home_order', []); await buildGrid(); toast('Порядок сброшен');
   });
 }
-function rpZoom(){ var f = document.getElementById('rp_frame'); var z = f ? parseFloat(getComputedStyle(f).zoom) : 1; return z > 0 ? z : 1; }
 function hlDragStart(st, e, home, grid){
   st.drag = true;
   var r = st.item.getBoundingClientRect();
@@ -17874,18 +18613,16 @@ function hlDragStart(st, e, home, grid){
   st.offX = st.x - r.left; st.offY = st.y - r.top;
   var g = st.item.cloneNode(true);
   g.classList.add('rp_drag_ghost'); g.removeAttribute('id');
-  var zz = rpZoom();
-  g.style.width = (r.width / zz)+'px'; g.style.height = (r.height / zz)+'px';
-  g.style.left = ((r.left - hr.left) / zz)+'px'; g.style.top = ((r.top - hr.top) / zz)+'px';
+  g.style.width = r.width+'px'; g.style.height = r.height+'px';
+  g.style.left = (r.left - hr.left)+'px'; g.style.top = (r.top - hr.top)+'px';
   g.style.gridColumn = 'auto'; g.style.gridRow = 'auto';
   home.appendChild(g); st.ghost = g;
   st.item.classList.add('rp_dragging');
 }
 function hlDragMove(st, e, home, grid){
   var hr = home.getBoundingClientRect();
-  var zz = rpZoom();
-  st.ghost.style.left = ((e.clientX - st.offX - hr.left) / zz)+'px';
-  st.ghost.style.top = ((e.clientY - st.offY - hr.top) / zz)+'px';
+  st.ghost.style.left = (e.clientX - st.offX - hr.left)+'px';
+  st.ghost.style.top = (e.clientY - st.offY - hr.top)+'px';
   var gr = grid.getBoundingClientRect();
   if (e.clientY < gr.top + 28) grid.scrollTop -= 7;
   else if (e.clientY > gr.bottom - 28) grid.scrollTop += 7;
@@ -17906,15 +18643,14 @@ function hlDragMove(st, e, home, grid){
 }
 function hlResizeMove(st, dx, dy){
   var grid = $('#rp_grid');
-  var zz = rpZoom(); dx = dx / zz; dy = dy / zz;
   var l = { cols: +getComputedStyle($('#rp_root')).getPropertyValue('--hcols') || 5 };
   var gs = getComputedStyle(grid);
   var inner = grid.clientWidth - parseFloat(gs.paddingLeft) - parseFloat(gs.paddingRight);
   var gapX = parseFloat(gs.columnGap) || 4, gapY = parseFloat(gs.rowGap) || 8;
   var cellW = (inner - (l.cols - 1) * gapX) / l.cols;
   var rowH = parseFloat(gs.gridAutoRows) || 76;
-  var nc = Math.round((st.w0 / zz + dx + gapX) / (cellW + gapX));
-  var nr = Math.round((st.h0 / zz + dy + gapY) / (rowH + gapY));
+  var nc = Math.round((st.w0 + dx + gapX) / (cellW + gapX));
+  var nr = Math.round((st.h0 + dy + gapY) / (rowH + gapY));
   nc = Math.max(1, Math.min(l.cols, nc)); nr = Math.max(1, Math.min(4, nr));
   st.item.style.gridColumn = 'span '+nc; st.item.style.gridRow = 'span '+nr;
   st.item.setAttribute('data-cols', nc); st.item.setAttribute('data-rows', nr);
@@ -17924,7 +18660,12 @@ var WG_TYPES = {
   notes: { name:'Записки', emoji:'📝', desc:'Красивая записка из Love и статуса отношений. Нажми — следующая.', cols:3, rows:2 },
   love:  { name:'Любовь', emoji:'💞', desc:'Сколько дней вы вместе. Дата, подпись и оформление — твои.', cols:2, rows:2 },
   photo: { name:'Моё фото', emoji:'🖼️', desc:'Любое твоё фото на главном экране: рамка, подпись, затемнение.', cols:2, rows:2 },
-  pet:   { name:'Малыш', emoji:'🐾', desc:'Ваш мини-питомец на главном экране, с настроением и сытостью.', cols:2, rows:2 }
+  pet:   { name:'Малыш', emoji:'🐾', desc:'Ваш мини-питомец на главном экране, с настроением и сытостью.', cols:2, rows:2 },
+  clock: { name:'Часы', emoji:'🕰️', desc:'Время и дата из истории (по шапке или по контексту) или реальные.', cols:2, rows:2 },
+  count: { name:'Отсчёт', emoji:'⏳', desc:'Сколько дней до важного события (или прошло с него) по дате истории.', cols:2, rows:2 },
+  status:{ name:'Статус', emoji:'📊', desc:'Статус отношений и счёт из приложения «Статус». Нажми — откроется оно.', cols:2, rows:2 },
+  text:  { name:'Свой текст', emoji:'✍️', desc:'Цитата, девиз или любая надпись с подписью.', cols:3, rows:1 },
+  chat:  { name:'Последнее сообщение', emoji:'💬', desc:'Свежее сообщение из чата. Нажми — откроется мессенджер.', cols:3, rows:1 }
 };
 var WG_FONTS = { sans:["Обычный","inherit"], serif:["Классика","Georgia,'Times New Roman',serif"], hand:["Рукописный","'Segoe Script','Bradley Hand','Marker Felt','Comic Sans MS',cursive"], mono:["Моно","ui-monospace,Menlo,Consolas,monospace"], cinzel:["Элегантный","'Cinzel',Georgia,serif"] };
 var WG_SW_BG = ['#fff3a8','#ffd1dc','#d1f0ff','#d6f5d6','#e9d5ff','#ffffff','#1e1b4b','#111827','#ff4d6d','#6366f1','#10b981','#f59e0b'];
@@ -17937,6 +18678,11 @@ function wgDefaults(type){
   if (type === 'love') Object.assign(d, { mode:'gradient', c1:'var(--accent2)', c2:'var(--accent)', tc:'#ffffff', ac:'#ffffff', label:'', start:'', showNames:true, showSub:true, rad:20, border:false });
   if (type === 'photo') Object.assign(d, { mode:'glass', pimg:'', fit:'cover', caption:'', rad:20, border:true, dim:0 });
   if (type === 'pet') Object.assign(d, { showBars:true, showName:true, ac:'', rad:20 });
+  if (type === 'clock') Object.assign(d, { src:'story', showDate:true, rad:20 });
+  if (type === 'count') Object.assign(d, { mode:'gradient', c1:'var(--accent2)', c2:'var(--accent)', tc:'#ffffff', ac:'#ffffff', border:false, rad:20, label:'До события', date:'' });
+  if (type === 'status') Object.assign(d, { showReason:true, rad:20 });
+  if (type === 'text') Object.assign(d, { text:'Здесь твой текст', sub:'', font:'serif', tilt:false, rad:20 });
+  if (type === 'chat') Object.assign(d, { csrc:'main', showName:true, rad:20 });
   return d;
 }
 async function wgList(){ var l = null; try{ l = await rpGet('rp_home_wgts', []); }catch(e){} return Array.isArray(l) ? l : []; }
@@ -18048,6 +18794,50 @@ async function wgFill(card, w){
     var bar = function(v){ return '<div class="wg_bar"><i style="width:'+Math.max(4, Math.min(100, Math.round(v||0)))+'%"></i></div>'; };
     inner = '<div class="wg_petsvg">'+svg+'</div>'+(w.showName ? '<div class="wg_petname">'+escapeHtml(g.name || 'Малыш')+(pd.isSleeping ? ' · спит' : '')+'</div>' : '')+
       (w.showBars ? '<div class="wg_bars">'+bar(pd.hunger)+bar(pd.happiness)+'</div>' : '');
+  } else if (w.type === 'clock'){
+    var tm = '', dl = '', dy = '', cki = null;
+    if (w.src === 'real'){
+      var nd = new Date(); tm = pad2(nd.getHours()) + ':' + pad2(nd.getMinutes());
+      dl = nd.toLocaleDateString('ru-RU', { day:'numeric', month:'long' }); dy = nd.toLocaleDateString('ru-RU', { weekday:'long' });
+    } else {
+      cki = await rpGet('rp_rpclock', null); var st0 = await cxStamp();
+      tm = (st0 && st0.st) || '--:--'; dl = (st0 && st0.sd) || (cki && cki.date) || ''; dy = (cki && cki.day) || '';
+    }
+    if (dy) dy = dy.charAt(0).toUpperCase() + dy.slice(1);
+    inner = '<div class="wg_clk">' + tm + '</div>' +
+      (w.showDate ? (dy ? '<div class="wg_lbl">' + escapeHtml(dy) + '</div>' : '') + (dl ? '<div class="wg_sub">' + escapeHtml(dl) + '</div>' : '') : '') +
+      (w.src !== 'real' && tm === '--:--' ? '<div class="wg_sub">времени в истории пока нет</div>' : '');
+  } else if (w.type === 'count'){
+    var cd = String(w.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(cd)) inner = '<div class="wg_note">Укажи дату события в настройках ⚙</div>';
+    else {
+      var sdn = await getStoryDate(), dd = Math.round((new Date(cd + 'T00:00:00Z') - new Date(sdn + 'T00:00:00Z')) / 864e5), nn = Math.abs(dd);
+      inner = '<div class="wg_tag">' + escapeHtml(w.label || 'До события') + '</div><div class="wg_num">' + nn + '</div><div class="wg_lbl">' + escapeHtml(dd === 0 ? 'сегодня!' : wgPl(nn, ['день','дня','дней']) + (dd < 0 ? ' назад' : ' осталось')) + '</div>';
+    }
+  } else if (w.type === 'status'){
+    var rs = await rpGet('rp_relstatus', null), stt = rs ? STATUS_TYPES.filter(function(x){ return x.id === rs.statusId; })[0] : null;
+    var lgs = rs && Array.isArray(rs.log) ? rs.log.filter(function(x){ return x && x.reason; }) : [], lrs = lgs.length ? lgs[lgs.length - 1].reason : '';
+    var sc = rs && typeof rs.score === 'number' ? rs.score : 0, spct = Math.max(4, Math.min(100, Math.round((sc + 1000) / 20)));
+    var stt2 = stt || STATUS_TYPES.filter(function(x){ return x.id === 'neutral'; })[0];
+    inner = '<div class="wg_sico" style="background:' + (w.ac || stt2.color) + '"><svg><use href="#' + stt2.icon + '"/></svg></div><div class="wg_stat">' + escapeHtml(stt2.label) + '</div>' +
+      '<div class="wg_sub">' + sc + ' / 1000</div><div class="wg_bars"><div class="wg_bar"><i style="width:' + spct + '%"></i></div></div>' +
+      (w.showReason && lrs ? '<div class="wg_sub wg_clamp">' + escapeHtml(lrs) + '</div>' : '');
+  } else if (w.type === 'text'){
+    var tx = String(w.text || ''), fx = tx.length < 30 ? 1.15 : (tx.length < 70 ? 1 : (tx.length < 120 ? .85 : .72));
+    inner = '<div class="wg_qm">“</div><div class="wg_note' + (w.tilt ? ' tilt' : '') + '" style="font-size:calc(' + fx + '*var(--wfs,1)*clamp(7px,10cqmin,26px));">' + escapeHtml(tx || '…') + '</div>' +
+      (w.sub ? '<div class="wg_sub">— ' + escapeHtml(w.sub) + '</div>' : '');
+  } else if (w.type === 'chat'){
+    try{
+      await cxWho();
+      var ths = (await cxThreads()).filter(function(t){ return t.owner === 'me' && (w.csrc === 'any' || t.id === 'main'); }).slice(0, 30), cs3 = await cxContacts(), bt = null, bmm = null;
+      for (var ti = 0; ti < ths.length; ti++){
+        var ml = (await cxMsgs(ths[ti].id)).filter(function(x){ return x.t !== 'sys'; }), lm2 = ml[ml.length - 1];
+        if (lm2 && (!bmm || (lm2.ts || 0) > (bmm.ts || 0))){ bt = ths[ti]; bmm = lm2; }
+      }
+      var cnm = bt ? cxTitle(bt, cs3) : '';
+      inner = bt ? '<div class="wg_chat"><div class="wg_chead"><i class="wg_av">' + escapeHtml(String(cnm).trim().charAt(0).toUpperCase()) + '</i>' + (w.showName ? '<b>' + escapeHtml(cnm) + '</b>' : '') + '<span>' + escapeHtml(cxMT(bmm)) + '</span></div>' +
+        '<div class="wg_cb">' + escapeHtml(cxClip(cxPreview(bmm), 160)) + '</div></div>' : '<div class="wg_note">Сообщений пока нет</div>';
+    }catch(eC){ inner = '<div class="wg_note">Чат пока недоступен</div>'; }
   }
   card.style.setProperty('--hwrad', (w.rad == null ? 18 : w.rad)+'px');
   card.innerHTML = '<div class="wg_in'+(w.border ? ' bd' : '')+'" style="'+wgBgCss(w)+tc+ac+'font-family:'+(WG_FONTS[w.font] || WG_FONTS.sans)[1]+';--wfs:'+((w.fs||100)/100)+';--wsc:'+Math.max(.5, Math.min(1, Math.min((w.cols||2)*66, (w.rows||2)*76)/150)).toFixed(2)+';">'+tape+inner+foot+'</div>'+
@@ -18057,15 +18847,16 @@ async function wgBuild(w, l){
   var card = el('div','rp_hw_card rp_wg'); card.setAttribute('data-id', w.id);
   var cols = Math.max(1, Math.min(l.cols, w.cols || 2)), rows = Math.max(1, Math.min(4, w.rows || 2));
   card.style.gridColumn = 'span '+cols; card.style.gridRow = 'span '+rows;
-  card.setAttribute('data-cols', cols); card.setAttribute('data-rows', rows);
+  card.setAttribute('data-cols', cols); card.setAttribute('data-rows', rows); card.setAttribute('data-wtype', w.type);
   await wgFill(card, w);
   return card;
 }
 function wgGeom(l, cols, rows){
   var grid = $('#rp_grid'), gw = grid && grid.clientWidth ? grid.clientWidth : 0;
   if (!gw){ var fr = $('#rp_frame'); gw = (fr && fr.clientWidth ? fr.clientWidth : 360); }
-  var inner = gw - 28, gapX = 4, gapY = 8;
-  var cw = (inner - (l.cols - 1)*gapX) / l.cols, rh = l.size + (l.labels ? 32 : 14);
+  var gsx = grid ? getComputedStyle(grid) : null;
+  var inner = gw - 28, gapX = 4, gapY = gsx && parseFloat(gsx.rowGap) >= 0 ? parseFloat(gsx.rowGap) : 8;
+  var cw = (inner - (l.cols - 1)*gapX) / l.cols, rh = gsx && parseFloat(gsx.gridAutoRows) > 0 ? parseFloat(gsx.gridAutoRows) : hlRowH(l);
   return { w: cols*cw + (cols-1)*gapX, h: rows*rh + (rows-1)*gapY };
 }
 
@@ -18120,6 +18911,12 @@ async function wgNext(card, id, dir){
   WG_IDX[id] = (WG_IDX[id] == null ? 0 : WG_IDX[id]) + dir;
   await wgFill(card, w);
 }
+setInterval(function(){
+  if (!rpLive() || HOME_EDIT) return;
+  document.querySelectorAll('#rp_grid .rp_wg[data-wtype="clock"]').forEach(function(c){
+    wgList().then(function(l){ var w = l.filter(function(x){ return x.id === c.getAttribute('data-id'); })[0]; if (w) wgFill(c, w); }).catch(function(){});
+  });
+}, 30000);
 function wgWireGrid(){
   var grid = $('#rp_grid');
   grid.addEventListener('click', async function(e){
@@ -18138,6 +18935,9 @@ function wgWireGrid(){
     var w = (await wgList()).filter(function(x){ return x.id === id; })[0]; if (!w) return;
     if (w.type === 'notes') wgNext(card, id, -1);
     else if (w.type === 'love') openScreen('love');
+    else if (w.type === 'status') openScreen('status');
+    else if (w.type === 'chat') openScreen('messenger');
+    else if (w.type === 'count' && !w.date) wgSheet(id);
     else if (w.type === 'pet') openScreen('pet');
     else if (w.type === 'photo'){
       var ps = card.querySelector('.wg_photo'); var bi = ps ? (ps.style.backgroundImage.match(/url\(["']?(.*?)["']?\)\s*$/)||[])[1] : '';
@@ -18157,7 +18957,7 @@ function wgColorRow(key, val, auto){
   var pool = wgPalette();
   return '<div class="wg_cr" data-k="'+key+'">'+(auto ? '<span class="auto'+(!val?' on':'')+'" data-c="">Авто</span>' : '')+
     pool.map(function(c){ return '<i data-c="'+c+'" class="'+(val && val.toLowerCase()===c?'on':'')+'" style="background:'+c+'"></i>'; }).join('')+
-    '<input type="color" value="'+(/^#[0-9a-f]{6}$/i.test(val||'') ? val : '#ff4d6d')+'"></div>';
+    '<i class="wg_custom" data-custom="1" title="Свой цвет"></i></div>';
 }
 function wgSeg(key, val, opts){
   return '<div class="rp_td_seg" data-seg="'+key+'">'+opts.map(function(o){ return '<div data-v="'+o[0]+'" class="'+(String(val)===String(o[0])?'on':'')+'">'+o[1]+'</div>'; }).join('')+'</div>';
@@ -18206,6 +19006,26 @@ function wgSheet(id){
         (w.pimg ? '<div class="th_btn ghost" id="wg_pimg_clear" style="margin-top:6px;">Убрать фото</div>' : '')+
         '<div class="th_hint">Нажми на виджет на главном — фото откроется на весь экран.</div>';
     }
+    if (w.type === 'clock'){
+      html += '<div class="th_hint">Какое время показывать</div>'+wgSeg('src', w.src, [['story','Из истории'],['real','Реальное']])+wgChk('showDate', w.showDate, 'Показывать день недели и дату')+
+        '<div class="th_hint">Время из истории берётся из шапки [HDR] или по анализу контекста и подстраивается под чат.</div>';
+    }
+    if (w.type === 'count'){
+      html += '<div class="th_hint">Название события</div><input class="rp_input wg_txt" id="wg_clabel" maxlength="28" value="'+escapeHtml(w.label||'')+'" placeholder="До дня рождения">'+
+        '<div class="th_hint" style="margin-top:6px;">Дата события</div><input type="date" class="rp_input wg_txt" id="wg_cdate" value="'+escapeHtml(w.date||'')+'" style="margin:0;">'+
+        '<div class="th_hint">Считается от даты в истории: если событие прошло, покажет сколько дней назад.</div>';
+    }
+    if (w.type === 'status'){
+      html += wgChk('showReason', w.showReason, 'Показывать причину последней смены')+'<div class="th_hint">Данные берутся из приложения «Статус».</div>';
+    }
+    if (w.type === 'text'){
+      html += '<div class="th_hint">Текст</div><textarea class="rp_input wg_txt" id="wg_ctext" rows="3" maxlength="240" style="margin:0;">'+escapeHtml(w.text||'')+'</textarea>'+
+        '<div class="th_hint" style="margin-top:6px;">Подпись (необязательно)</div><input class="rp_input wg_txt" id="wg_csub" maxlength="40" value="'+escapeHtml(w.sub||'')+'" placeholder="Например: моё правило">'+
+        wgChk('tilt', w.tilt, 'Лёгкий наклон текста');
+    }
+    if (w.type === 'chat'){
+      html += '<div class="th_hint">Откуда брать сообщение</div>'+wgSeg('csrc', w.csrc, [['main','Чат с ботом'],['any','Любой чат']])+wgChk('showName', w.showName, 'Показывать, от кого');
+    }
     if (w.type === 'pet'){
       html += wgChk('showName', w.showName, 'Показывать имя')+wgChk('showBars', w.showBars, 'Полоски сытости и настроения')+
         '<div class="th_hint">Питомца выбирают в приложении «Мой малыш».</div>';
@@ -18247,7 +19067,7 @@ function wgSheet(id){
     sheet.querySelectorAll('.wg_cr').forEach(function(row){
       var k = row.getAttribute('data-k');
       row.querySelectorAll('[data-c]').forEach(function(s){ s.addEventListener('click', function(){ var o = {}; o[k] = s.getAttribute('data-c'); apply(o); }); });
-      var inp = row.querySelector('input[type=color]'); if (inp) inp.addEventListener('change', function(){ var o = {}; o[k] = inp.value; apply(o); });
+      var cu = row.querySelector('[data-custom]'); if (cu) cu.addEventListener('click', function(){ rpColorDialog({ title:'Свой цвет', gradient:false, value:w[k] || '#ff4d6d', onApply:function(v){ var o = {}; o[k] = v; apply(o); } }); });
     });
     sheet.querySelectorAll('[data-r]').forEach(function(r){
       r.addEventListener('input', function(){ var b = r.previousElementSibling.querySelector('b'); if (b) b.textContent = r.value + (r.getAttribute('data-r')==='angle' ? '°' : (r.getAttribute('data-r')==='rad' ? '' : '%')); });
@@ -18267,8 +19087,12 @@ function wgSheet(id){
       await rpSet('rp_love_hdr_start', d); apply({ start: d });
     });
     var lb = $('#wg_label', sheet); if (lb) lb.addEventListener('change', function(){ apply({ label: lb.value.trim() }); });
+    [['#wg_clabel','label'],['#wg_cdate','date'],['#wg_ctext','text'],['#wg_csub','sub']].forEach(function(p2){
+      var n2 = $(p2[0], sheet); if (n2) n2.addEventListener('change', function(){ var o2 = {}; o2[p2[1]] = n2.value.trim(); apply(o2); });
+    });
     var pf = $('#wg_add_pimg', sheet);
     if (pf) pf.addEventListener('click', async function(){
+      if (!rpNativeOk()){ toast('Не удалось открыть выбор фото'); return; }
       try{ var r = await rpImport({ multiple:false }); if (r && r[0] && r[0].path) apply({ pimg:String(r[0].path) }); }
       catch(err){ console.error(err); toast('Не удалось добавить фото: '+(err && err.message ? err.message : err)); }
     });
@@ -18329,11 +19153,15 @@ var WG_PRESETS = [
     { type:'pet', cols:2, rows:2, row:2 }, { type:'love', cols:3, rows:2, row:2 } ] },
   { id:'bottom', name:'Внизу', desc:'Большая записка под приложениями', photo:false, items:[
     { type:'notes', cols:5, rows:2, row:99, over:{ font:'hand' } } ] },
+  { id:'clockchat', name:'Часы и чат', desc:'Время истории и последнее сообщение сверху', photo:false, items:[
+    { type:'clock', cols:2, rows:2, row:0 }, { type:'chat', cols:3, rows:2, row:0 } ] },
+  { id:'info', name:'Инфо-панель', desc:'Статус отношений, отсчёт и часы в один ряд', photo:false, items:[
+    { type:'status', cols:2, rows:1, row:0 }, { type:'count', cols:2, rows:1, row:0 }, { type:'clock', cols:1, rows:1, row:0 } ] },
   { id:'showcase', name:'Витрина', desc:'Фото сверху, записка в середине, дни внизу', photo:true, items:[
     { type:'notes', cols:5, rows:1, row:2 }, { type:'love', cols:5, rows:1, row:99 } ] }
 ];
 function wgPresetPreview(pr){
-  var colors = { notes:'var(--glass1)', love:'linear-gradient(135deg,var(--accent2),var(--accent))', pet:'var(--glass1)' };
+  var colors = { notes:'var(--glass1)', love:'linear-gradient(135deg,var(--accent2),var(--accent))', pet:'var(--glass1)', count:'linear-gradient(135deg,var(--accent2),var(--accent))' };
   var cols = 5, rest = []; for (var i = 0; i < 20; i++) rest.push(0);
   var ents = pr.items.map(function(it, n){ return { idx: Math.min(rest.length, (it.row || 0) * cols), it:it, n:n }; }).sort(function(x, y){ return x.idx - y.idx || x.n - y.n; });
   var out = [], ptr = 0;
@@ -18343,7 +19171,7 @@ function wgPresetPreview(pr){
     for (var k = ptr; k < e.idx; k++) out.push(dot);
     ptr = e.idx;
     var bg = e.it.over && e.it.over.mode === 'clear' ? 'rgba(255,255,255,.15)' : colors[e.it.type];
-    out.push('<div style="grid-column:span '+e.it.cols+';grid-row:span '+e.it.rows+';background:'+bg+';border:1px solid rgba(255,255,255,.28);border-radius:3px;box-sizing:border-box;"></div>');
+    out.push('<div style="grid-column:span '+e.it.cols+';grid-row:span '+e.it.rows+';background:'+(bg || 'var(--glass1)')+';border:1px solid rgba(255,255,255,.28);border-radius:3px;box-sizing:border-box;"></div>');
   });
   for (var k2 = ptr; k2 < rest.length; k2++) out.push(dot);
   return '<div style="display:grid;grid-template-columns:repeat(5,1fr);grid-auto-rows:9px;gap:2px;width:92px;flex:none;">'+out.join('')+'</div>';
@@ -18905,10 +19733,12 @@ async function stkGenCharPost(root){
   if (stkAlive() && stkTab === 'home') stkRender(root);
 }
 function stkMeLead(post, names){ return post.by === 'me' && names && names.userName ? 'Video filmed by ' + names.userName + '; "я", "меня", "мне", "I", "me" in the description mean ' + names.userName + ' (the person in the reference photo). ' : ''; }
-async function stkEnsureImg(post, sec){
-  if (post.img || post.failed || STK_BUSY[post.id]) return;
+async function stkEnsureImg(post, sec, manual, promptOv){
+  if (STK_BUSY[post.id]) return;
+  if (!manual && (post.img || post.failed)) return;
   if (!(await imagesEnabled())) return;
-  STK_BUSY[post.id] = true;
+  if (!manual && !(await rpAutoGen())) return;
+  STK_BUSY[post.id] = true; var descS = '';
   var ld = sec && sec.querySelector('.stk_loading'); if (ld) ld.style.display = 'flex';
   var url = null, fl = STK_FILTERS.filter(function(f){ return f[0] === post.filter; })[0];
   try{
@@ -18916,18 +19746,20 @@ async function stkEnsureImg(post, sec){
     if (post.by === 'npc') cfgI.noPassports = true;
     else cfgI.refWho = post.by === 'me' ? 'user' : 'char';
     var nmS = post.by === 'me' ? await getNames() : null;
-    var u = await rpGenerateImage(buildChatImagePrompt((nmS ? stkMeLead(post, nmS) : '')+post.scene+', vertical social media short video frame, candid, natural'+(fl && fl[3] ? ', '+fl[3] : ''), null), cfgI);
+    descS = promptOv || ((nmS ? stkMeLead(post, nmS) : '')+post.scene+', vertical social media short video frame, candid, natural'+(fl && fl[3] ? ', '+fl[3] : ''));
+    var u = await rpGenerateImage(buildChatImagePrompt(descS, null), cfgI);
     var shr = u ? await galKeep(u, 720, 0.78) : null; url = shr ? shr.data : u;
   }catch(e){ console.error('RP sattok image failed', e); }
   delete STK_BUSY[post.id];
-  await stkUpdatePost(post.id, function(p){ if (url) p.img = url; else p.failed = true; });
-  post.img = url || ''; post.failed = !url;
+  await stkUpdatePost(post.id, function(p){ if (url){ p.img = url; p.failed = false; p.imgPrompt = descS; } else if (!manual) p.failed = true; });
+  if (url || !manual){ post.img = url || ''; post.failed = !url; if (url) post.imgPrompt = descS; } else { post.failed = true; }
   var live = STK_ROOT && STK_ROOT.querySelector('.stk_post[data-id="'+post.id+'"]');
   if (live) stkFillMedia(live, post);
 }
 function stkFillMedia(sec, post){
   var fl = STK_FILTERS.filter(function(f){ return f[0] === post.filter; })[0], f = fl && fl[2] ? 'filter:'+fl[2]+';' : '';
   var m = sec.querySelector('.stk_media'), g = sec.querySelector('.stk_glyph'), ld = sec.querySelector('.stk_loading');
+  sec.setAttribute('data-rpimg', 'stk|' + post.id);
   if (post.img){ m.style.cssText = 'background-image:url(\''+post.img+'\');'+f; if (g) g.style.display = 'none'; }
   else { m.style.cssText = 'background:'+(post.grad || stkGrad(post.id))+';animation:none;'; if (g){ g.style.display = ''; g.textContent = post.emoji || '✨'; } }
   if (ld) ld.style.display = (STK_BUSY[post.id]) ? 'flex' : 'none';
@@ -19017,12 +19849,13 @@ async function stkBuildPost(p, me, fo, container){
   var sec = el('div','stk_post'); sec.setAttribute('data-id', p.id);
   var cap = escapeHtml(p.caption||'').replace(/(#[\wа-яёА-ЯЁ]+)/g, '<em>$1</em>');
   sec.innerHTML = '<div class="stk_media"></div><div class="stk_glyph"></div><div class="stk_shade_t"></div><div class="stk_shade"></div><div class="stk_loading" style="display:none;"><svg class="rp_spin" style="width:13px;height:13px;"><use href="#rpi-spinner"/></svg>Снимаю кадр…</div>'+
-    '<div class="stk_info"><b>'+escapeHtml(who.user)+'</b><div class="stk_cap">'+cap+'</div><div class="stk_music">'+stkIco('rpi-music')+'<span>'+escapeHtml(p.music||'Оригинальный звук')+' · '+escapeHtml(who.name)+'</span></div></div>'+
+    '<div class="stk_info"><b>'+escapeHtml(who.user)+'</b><div class="stk_cap"'+(p.caption?' data-edf="stk"'+rpEdA(isMine?'rp_stk_mine':'rp_stk_feed',[p.id,'caption']):'')+'>'+cap+'</div><div class="stk_music">'+stkIco('rpi-music')+'<span>'+escapeHtml(p.music||'Оригинальный звук')+' · '+escapeHtml(who.name)+'</span></div></div>'+
     '<div class="stk_rail"><div class="stk_ra" data-a="av"></div>'+
     '<div class="stk_ra'+(p.liked?' on':'')+'" data-a="like">'+stkIco('rpi-heart-fill')+'<span>'+stkN(p.likes)+'</span></div>'+
     '<div class="stk_ra" data-a="cm">'+stkIco('rpi-chat')+'<span>'+stkN(p.comments)+'</span></div>'+
     '<div class="stk_ra sv'+(p.saved?' on':'')+'" data-a="save">'+stkIco('rpi-bookmark')+'<span>'+stkN(p.saves)+'</span></div>'+
-    '<div class="stk_ra" data-a="share">'+stkIco('rpi-send')+'<span>'+stkN(p.shares)+'</span></div><div class="stk_disc"></div></div><div class="stk_prog"></div>';
+    '<div class="stk_ra" data-a="share">'+stkIco('rpi-send')+'<span>'+stkN(p.shares)+'</span></div>'+
+    '<div class="stk_ra" data-rpimgtap="stk|'+p.id+'">'+stkIco('rpi-sparkle')+'<span>Кадр</span></div><div class="stk_disc"></div></div><div class="stk_prog"></div>';
   stkFillMedia(sec, p);
   var avHost = $('[data-a="av"]', sec), avHtml = await stkAvHtml(who, '');
   avHost.innerHTML = avHtml + (!isMine && !fo[p.user] ? '<div class="stk_fol">+</div>' : '');
@@ -19059,7 +19892,7 @@ async function stkComments(p, sec){
   var me = await stkMe();
   var bg = stkSheet('<div style="font-weight:900;margin-bottom:10px;">Комментарии</div><div id="stk_cl"><div class="stk_sub">Загружаю…</div></div><div class="stk_inp" style="padding:8px 0 0;border:0;"><input id="stk_ci" placeholder="Оставь комментарий…"><div class="stk_send" id="stk_cs">'+stkIco('rpi-send')+'</div></div>');
   var paint = function(){
-    $('#stk_cl', bg).innerHTML = (p.cm && p.cm.length) ? p.cm.map(function(c){ return '<div class="stk_cm">'+'<div class="stk_av" style="width:30px;height:30px;font-size:12px;border-width:0;background:'+stkGrad(c.u)+';">'+escapeHtml(String(c.u).replace('@','').charAt(0).toUpperCase())+'</div><div><b>'+escapeHtml(c.u)+(c.char?' · автор «'+escapeHtml('персонаж')+'»':'')+'</b>'+escapeHtml(c.t)+'</div></div>'; }).join('') : '<div class="stk_sub">Комментариев пока нет — будь первым.</div>';
+    $('#stk_cl', bg).innerHTML = (p.cm && p.cm.length) ? p.cm.map(function(c, ci){ return '<div class="stk_cm">'+'<div class="stk_av" style="width:30px;height:30px;font-size:12px;border-width:0;background:'+stkGrad(c.u)+';">'+escapeHtml(String(c.u).replace('@','').charAt(0).toUpperCase())+'</div><div><b>'+escapeHtml(c.u)+(c.char?' · автор «'+escapeHtml('персонаж')+'»':'')+'</b><span'+rpEdA(p.by==='me'?'rp_stk_mine':'rp_stk_feed',[p.id,'cm','#'+ci,'t'])+'>'+escapeHtml(c.t)+'</span></div></div>'; }).join('') : '<div class="stk_sub">Комментариев пока нет — будь первым.</div>';
   };
   if (!p.cm){
     try{
@@ -19071,6 +19904,7 @@ async function stkComments(p, sec){
   paint();
   var send = async function(){
     var inp = $('#stk_ci', bg), t = inp.value.trim(); if (!t) return;
+    var cur = (await stkMine()).concat(await stkFeed()).filter(function(x){ return x.id === p.id; })[0]; if (cur && cur.cm) p.cm = cur.cm;
     p.cm = p.cm || []; p.cm.unshift({ u:me.user, t:t.slice(0,200) }); p.comments++; inp.value = ''; paint();
     var cn = sec && sec.querySelector('[data-a="cm"] span'); if (cn) cn.textContent = stkN(p.comments);
     await stkUpdatePost(p.id, function(x){ x.cm = p.cm; x.comments = p.comments; });
@@ -19118,7 +19952,7 @@ async function stkPaintMsgs(wrap){
   host.innerHTML = ch.msgs.length ? ch.msgs.slice(-40).map(function(m){
     if (m.sys) return '<div class="stk_m sys">'+escapeHtml(m.t)+'</div>';
     var pv = m.post ? '<div class="pv" style="'+(m.post.img ? 'background-image:'+rpCssUrl(m.post.img)+';' : 'background:'+(m.post.grad || stkGrad(m.post.id))+';')+'">'+(m.post.img ? '' : escapeHtml(m.post.emoji||'🎬'))+'</div>' : '';
-    return '<div class="stk_m'+(m.w==='me'?' me':'')+'">'+pv+escapeHtml(m.post ? (m.t || m.post.caption || '') : m.t)+'</div>';
+    return '<div class="stk_m'+(m.w==='me'?' me':'')+'">'+pv+(m.t ? '<span'+rpEdIf('rp_stk_chat',['msgs'],m,['t'])+'>'+escapeHtml(m.t)+'</span>' : escapeHtml(m.post ? (m.post.caption || '') : ''))+'</div>';
   }).join('') : '<div class="stk_sub" style="text-align:center;margin-top:20px;">Напиши первое сообщение 🔥</div>';
   host.scrollTop = host.scrollHeight;
 }
@@ -19611,7 +20445,7 @@ async function smartScan(opts){
     var names = await getNames();
     var hdr = null; try{ hdr = await scanHdrClock(depth); }catch(e){}
     var clk = await rpGet('rp_rpclock', null);
-    if (hdr && (hdr.date || hdr.day) && (!hdr.date || parseFreeTextDateToISO(hdr.date)) && (!clk || clk.date !== hdr.date)){ await rpSet('rp_rpclock', { date:hdr.date||'', day:hdr.day||'', source:'hdr', updatedAt:Date.now() }); res.date = true; }
+    if (hdr && (hdr.date || hdr.day) && (!hdr.date || parseFreeTextDateToISO(hdr.date)) && (!clk || clk.date !== hdr.date || (clk.time || '') !== (hdr.time || ''))){ await rpSet('rp_rpclock', { date:hdr.date||'', day:hdr.day||'', time:hdr.time||'', source:'hdr', updatedAt:Date.now() }); res.date = true; }
     var text = msgs.map(function(m){
       var c = stripBrailleNoise(String(m.content||'')).replace(/<[^>]+>/g,' ').replace(/[ \t]+/g,' ').trim();
       return (m.role==='user' ? '['+names.userName+' — реплика игрока]' : '[рассказчик/'+names.charName+']')+' '+c;
@@ -19706,8 +20540,8 @@ var TH_BUILTIN = [
   thMk('t_candy','Candy Pop','Неон','light','#ffe3f6','#d9f4ff','#3b0a3f','#9a5fa0','#ff4fb8','#7c5cff','Яркий леденцовый поп.', { iconMode:'app', shape:'circle' }),
   thMk('t_noir','Noir Gold','Тёмные','dark','#14110a','#050403','#f6e7b8','#a8945a','#d4af37','#f5d76e','Чёрный с благородным золотом.', { shape:12 })
 ];
-var TH_CATS = ['Все','Тёмные','Светлые','Неон','Природа','Нежные','Мои'];
-var thTab = 'themes', thCat = 'Все';
+var TH_CATS = ['Мои','Все','Тёмные','Светлые','Неон','Природа','Нежные'];
+var thTab = 'themes', thCat = 'Мои';
 async function thCustomList(){ try{ var v = await PM.store.get('rp_custom_themes', 'global'); if (Array.isArray(v)) return v; }catch(e){} return []; }
 async function thCustomSave(list){ try{ await PM.store.set('rp_custom_themes', list, 'global'); return true; }catch(e){ toast('Не удалось сохранить тему'); return false; } }
 async function thLib(){ try{ var v = await PM.store.get('rp_wallpapers', 'global'); if (Array.isArray(v)) return v.map(function(x){ if (x && x.path && !x.data) x.data = x.path; return x; }); }catch(e){} return []; }
@@ -19743,8 +20577,42 @@ async function thWallApply(){
   }
   root.classList.add('rp_has_wall');
 }
-async function thSetWall(w){ await rpSet('rp_wall', w); await thWallApply(); }
+async function thSetWall(w){ await rpSet('rp_wall', w); await thWallApply(); thHook(); }
+async function winApply(){
+  var root = $('#rp_root'); if (!root) return;
+  var c = null; try{ c = await PM.store.get('rp_win', 'global'); }catch(e){}
+  var k = c && +c.k ? Math.max(.7, Math.min(1.3, +c.k)) : 1, lift = c && +c.lift ? Math.max(-60, Math.min(260, +c.lift)) : 0, up = c && +c.up ? Math.max(0, Math.min(500, +c.up)) : 0;
+  root.style.setProperty('--rp_k', k); root.style.setProperty('--rp_lift', lift + 'px'); root.style.setProperty('--rp_up', up + 'px');
+  root.style.setProperty('--rp_ft', (c && c.ft != null ? Math.max(0, Math.min(240, +c.ft || 0)) : 80) + 'px'); root.style.setProperty('--rp_fb', (c && c.fb != null ? Math.max(0, Math.min(240, +c.fb || 0)) : 0) + 'px');
+  root.classList.toggle('rp_full', !!(c && c.full)); root.classList.toggle('rp_lite', !!(c && c.lite));
+}
+function winNode(){
+  var box = el('div','rp_accordion on flat'), inner = el('div'); inner.style.cssText = 'padding:12px;'; box.appendChild(inner);
+  inner.innerHTML = '<div class="rp_muted" style="font-size:11px;line-height:1.5;margin-bottom:10px;">Окно телефона само подстраивается под экран. Если на твоём устройстве оно низко, мелко или крупно, подправь здесь. Настройка хранится только на этом устройстве.</div>' +
+    '<div class="th_lbl"><span>Размер окна</span><b id="win_kv"></b></div><input type="range" class="th_range" id="win_k" min="70" max="130" step="5">' +
+    '<div class="th_lbl" style="margin-top:10px;"><span>Выше от низа экрана</span><b id="win_lv"></b></div><input type="range" class="th_range" id="win_l" min="-60" max="260" step="4">' +
+    '<div class="th_lbl" style="margin-top:10px;"><span>Вытянуть вверх</span><b id="win_uv"></b></div><input type="range" class="th_range" id="win_u" min="0" max="500" step="10">' +
+    '<div class="th_btn ghost" id="win_full" style="margin-top:12px;padding:10px;"></div>' +
+    '<div class="th_btn ghost" id="win_lite" style="margin-top:8px;padding:10px;"></div>' +
+    '<div class="rp_muted" style="font-size:10.5px;line-height:1.4;margin-top:6px;">Лёгкий режим убирает размытие и плавные переходы. Включай, если телефон лагает: стекло на виджетах и окне сильно грузит слабые устройства.</div>' +
+    '<div class="rp_muted" style="font-size:10.5px;line-height:1.4;margin-top:6px;">В полном экране окно начинается ниже шапки Таверны. Если шапка или поле ввода всё равно перекрывают телефон, подвинь отступы.</div>' +
+    '<div class="th_lbl" style="margin-top:8px;"><span>Отступ сверху (полный экран)</span><b id="win_ftv"></b></div><input type="range" class="th_range" id="win_ft" min="0" max="240" step="2">' +
+    '<div class="th_lbl" style="margin-top:8px;"><span>Отступ снизу (полный экран)</span><b id="win_fbv"></b></div><input type="range" class="th_range" id="win_fb" min="0" max="240" step="2">' +
+    '<div class="rp_btn rp_ghost" id="win_reset" style="margin-top:12px;"><span>Сбросить</span></div>';
+  var kI = $('#win_k', inner), lI = $('#win_l', inner), kv = $('#win_kv', inner), lv = $('#win_lv', inner);
+  var uI = $('#win_u', inner), uv = $('#win_uv', inner), fB = $('#win_full', inner), lB = $('#win_lite', inner), full = false, lite = false, ftI = $('#win_ft', inner), fbI = $('#win_fb', inner), ftv = $('#win_ftv', inner), fbv = $('#win_fbv', inner);
+  var upd = function(){ kv.textContent = kI.value + '%'; lv.textContent = lI.value + ' px'; uv.textContent = uI.value + ' px'; ftv.textContent = ftI.value + ' px'; fbv.textContent = fbI.value + ' px'; fB.textContent = full ? 'На весь экран: включено' : 'На весь экран: выключено'; fB.classList.toggle('on', full); lB.textContent = lite ? 'Лёгкий режим: включён' : 'Лёгкий режим: выключен'; lB.classList.toggle('on', lite); };
+  kI.value = 100; lI.value = 0; uI.value = 0; ftI.value = 80; fbI.value = 0; upd();
+  (async function(){ try{ var c = await PM.store.get('rp_win', 'global'); kI.value = c && c.k ? Math.round(c.k * 100) : 100; lI.value = c && c.lift ? c.lift : 0; uI.value = c && c.up ? c.up : 0; ftI.value = c && c.ft != null ? c.ft : 80; fbI.value = c && c.fb != null ? c.fb : 0; full = !!(c && c.full); lite = !!(c && c.lite); upd(); }catch(e){} })();
+  var save = async function(){ upd(); try{ await PM.store.set('rp_win', { k:kI.value / 100, lift:+lI.value, up:+uI.value, full:full, lite:lite, ft:+ftI.value, fb:+fbI.value }, 'global'); }catch(e){} winApply(); };
+  kI.addEventListener('input', save); lI.addEventListener('input', save); uI.addEventListener('input', save); ftI.addEventListener('input', save); fbI.addEventListener('input', save);
+  fB.addEventListener('click', function(){ full = !full; save(); });
+  lB.addEventListener('click', function(){ lite = !lite; save(); });
+  $('#win_reset', inner).addEventListener('click', function(){ kI.value = 100; lI.value = 0; uI.value = 0; ftI.value = 80; fbI.value = 0; full = false; lite = false; save(); });
+  return box;
+}
 async function thInit(){
+  try{ await winApply(); }catch(e){}
   try{
     var t = await rpGet('rp_theme', null);
     if (t && t.vars){
@@ -19756,6 +20624,10 @@ async function thInit(){
   await thWallApply();
 }
 async function thApply(t){
+  TH_APPLYING++;
+  try{ await thApplyInner(t); }finally{ clearTimeout(TH_SYNC_TM); setTimeout(function(){ TH_APPLYING = Math.max(0, TH_APPLYING - 1); }, 900); }
+}
+async function thApplyInner(t){
   var root = $('#rp_root');
   TH_VARS.forEach(function(k){ if (t.vars && t.vars[k]) root.style.setProperty('--'+k, t.vars[k]); });
   root.classList.toggle('rp_icons_accent', t.iconMode === 'accent'); root.classList.toggle('rp_flat', !!t.flat);
@@ -19820,6 +20692,7 @@ SCREENS.themes = {
 };
 async function thRender(container){
   var keep = container.scrollTop;
+  TH_HIST.on = false;
   backTarget = openHome;
   container.innerHTML = '';
   var tabs = el('div','th_tabs');
@@ -19847,6 +20720,61 @@ async function thCreateTheme(name){
   return t;
 }
 var thStudioSub = 'look';
+var TH_FOLD = {}, TH_HIST = { list:[], i:-1, id:null, on:false, lock:0, tm:null };
+function thFold(inner, key){
+  var heads = Array.prototype.filter.call(inner.children, function(c){ return c.classList && c.classList.contains('th_sec'); });
+  heads.forEach(function(h, i){
+    var body = el('div', 'th_fold'), nx = h.nextSibling;
+    while (nx && !(nx.classList && nx.classList.contains('th_sec'))){ var t = nx.nextSibling; body.appendChild(nx); nx = t; }
+    h.after(body);
+    var fid = key + ':' + h.textContent.trim().slice(0, 40), open = TH_FOLD[fid] == null ? i === 0 : TH_FOLD[fid];
+    h.classList.add('th_fold_h'); h.classList.toggle('open', open); body.style.display = open ? '' : 'none';
+    h.addEventListener('click', function(){ var o = body.style.display === 'none'; body.style.display = o ? '' : 'none'; h.classList.toggle('open', o); TH_FOLD[fid] = o; });
+  });
+}
+async function thCaptureState(){
+  var ex = await thSnapshotExtras();
+  return Object.assign({ vars: thSnapshotVars(), flat: $('#rp_root').classList.contains('rp_flat'), wall: await rpGet('rp_wall', null) }, ex);
+}
+async function thHistInit(id){
+  if (TH_HIST.id === id && TH_HIST.list.length) return;
+  TH_HIST.id = id; TH_HIST.list = [JSON.stringify(await thCaptureState())]; TH_HIST.i = 0;
+}
+function thHistBtns(){
+  var u = $('#th_undo'), r = $('#th_redo'), a = $('#th_undo_all');
+  if (u) u.classList.toggle('dis', TH_HIST.i <= 0);
+  if (a) a.classList.toggle('dis', TH_HIST.i <= 0);
+  if (r) r.classList.toggle('dis', TH_HIST.i >= TH_HIST.list.length - 1);
+}
+function thHistSchedule(){
+  if (!TH_HIST.on || Date.now() < TH_HIST.lock) return;
+  clearTimeout(TH_HIST.tm); TH_HIST.tm = setTimeout(thHistCapture, 450);
+}
+async function thHistCapture(){
+  if (!TH_HIST.on || Date.now() < TH_HIST.lock || !rpLive()) return;
+  var js = JSON.stringify(await thCaptureState());
+  if (js === TH_HIST.list[TH_HIST.i]) return;
+  TH_HIST.list = TH_HIST.list.slice(0, TH_HIST.i + 1); TH_HIST.list.push(js);
+  if (TH_HIST.list.length > 20) TH_HIST.list.shift();
+  TH_HIST.i = TH_HIST.list.length - 1; thHistBtns();
+}
+async function thHistGo(to, container){
+  if (to < 0 || to >= TH_HIST.list.length) return;
+  clearTimeout(TH_HIST.tm); TH_HIST.lock = Date.now() + 3000; TH_HIST.i = to;
+  var id = await thEditId(), cur = (await thCustomList()).filter(function(x){ return x.id === id; })[0]; if (!cur) return;
+  await thApply(Object.assign({ id:cur.id, name:cur.name, custom:true }, JSON.parse(TH_HIST.list[to])));
+  await thSyncEdit(true); thRender(container);
+}
+async function thAutoPalette(hex, dark){
+  var c = cxHexHsv(hex) || { h:270, s:.6, v:.9 };
+  var acc2 = cxHsvHex((c.h + 28) % 360, c.s, c.v);
+  var b1 = dark ? cxHsvHex(c.h, .55, .22) : cxHsvHex(c.h, .08, 1), b2 = dark ? cxHsvHex(c.h, .6, .09) : cxHsvHex(c.h, .2, .93);
+  await rpSet('rp_bg_custom', { bg1:b1, bg2:b2 }); await applyBgPreset('custom');
+  await rpSet('rp_icon_custom', { accent:hex, accent2:acc2 }); await applyIconPreset('custom');
+  $('#rp_root').classList.add('rp_icons_accent');
+  await hlSave({ lblc:'' });
+  await thMarkCustom(); await buildGrid(); await thSyncEdit(true);
+}
 async function thTabStudio(body, container){
   var customs = await thCustomList(), editId = await thEditId();
   var cur = customs.filter(function(x){ return x.id === editId; })[0];
@@ -19884,6 +20812,7 @@ async function thTabStudio(body, container){
     $('#th_rn_x', sh).addEventListener('click', function(){ sh.remove(); });
     $('#th_rn_ok', sh).addEventListener('click', async function(){ var v = $('#th_rn', sh).value.trim(); if (!v) return; var l = await thCustomList(); l.forEach(function(x){ if (x.id === cur.id) x.name = v.slice(0,28); }); await thCustomSave(l); sh.remove(); thRender(container); });
   });
+  TH_HIST.on = true; await thHistInit(cur.id);
   var seg = el('div','th_tabs'); seg.style.marginBottom = '10px';
   seg.innerHTML = [['look','Цвета и фон'],['icons','Значки'],['widgets','Виджеты'],['screen','Экран']].map(function(t){ return '<div data-s="'+t[0]+'" class="'+(thStudioSub===t[0]?'on':'')+'">'+t[1]+'</div>'; }).join('');
   seg.querySelectorAll('div').forEach(function(d){ d.addEventListener('click', function(){ thStudioSub = d.getAttribute('data-s'); container.scrollTop = 0; thRender(container); }); });
@@ -19893,6 +20822,14 @@ async function thTabStudio(body, container){
   else if (thStudioSub === 'icons') await thTabApps(inner, container);
   else if (thStudioSub === 'widgets') await thTabWidgets(inner, container);
   else await thTabScreen(inner, container);
+  thFold(inner, thStudioSub);
+  var bar = el('div','th_bar');
+  bar.innerHTML = '<div class="th_btn ghost" id="th_undo" style="flex:0 0 44px;">↶</div><div class="th_btn ghost" id="th_redo" style="flex:0 0 44px;">↷</div><div class="th_btn ghost" id="th_undo_all" style="flex:1;">Откатить всё</div><div class="th_btn" id="th_bar_done" style="flex:1.2;">Готово</div>';
+  body.appendChild(bar); thHistBtns();
+  $('#th_undo', bar).addEventListener('click', function(){ thHistGo(TH_HIST.i - 1, container); });
+  $('#th_redo', bar).addEventListener('click', function(){ thHistGo(TH_HIST.i + 1, container); });
+  $('#th_undo_all', bar).addEventListener('click', function(){ thHistGo(0, container); });
+  $('#th_bar_done', bar).addEventListener('click', function(){ $('#th_st_done').click(); });
 }
 function thSaveBlock(container, afterSave){
   var box = el('div','th_card2');
@@ -19923,6 +20860,82 @@ async function thResetClassic(){
   await thSetWall(null);
   await hlSave({ shape: HL_DEFAULT.shape, size: HL_DEFAULT.size, lblc:'' });
   await buildGrid();
+}
+async function thWallToData(src){
+  var blob = null;
+  try{ var r = await fetch(src); if (r && r.ok) blob = await r.blob(); }catch(e){}
+  if (!blob){ try{ blob = await rpPathToBlob(src); }catch(e){} }
+  if (!blob) return null;
+  var im = await bkLoadImage(blob), k = Math.min(1, 1280 / Math.max(im.naturalWidth, im.naturalHeight));
+  var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(im.naturalWidth * k)); cv.height = Math.max(1, Math.round(im.naturalHeight * k));
+  cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+  return cv.toDataURL('image/jpeg', 0.82);
+}
+async function bkJsonUrl(obj){
+  var blob = new Blob([JSON.stringify(obj)], { type:'application/json' });
+  return await new Promise(function(res, rej){ var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = function(){ rej(new Error('не удалось собрать файл')); }; fr.readAsDataURL(blob); });
+}
+async function thShareTheme(t){
+  var withWall = false, src = '';
+  if (t.wall && t.wall.id){
+    if (t.wall.id.indexOf('url:') === 0) src = t.wall.id.slice(4);
+    else { var it = (await thLib()).filter(function(x){ return x.id === t.wall.id; })[0]; if (it) src = it.data || it.path || ''; }
+  }
+  var isFile = function(v){ return typeof v === 'string' && v && !/^(data:|https?:|blob:)/i.test(v); };
+  var wgImgs = ((t.home && t.home.wgts) || []).some(function(w){ return isFile(w.pimg) || isFile(w.img) || (w.img && /^data:/.test(w.img)) || (w.pimg && /^data:/.test(w.pimg)); });
+  var hasImgs = !!(src && src.indexOf('url:') !== 0) || wgImgs;
+  var sh = thSheet('<div style="font-weight:900;font-size:15px;margin-bottom:6px;">Поделиться темой «' + escapeHtml(t.name) + '»</div><div class="th_hint">Тема сохранится файлом .json. Отправляй его в телеграм как обычный файл.</div>' +
+    (hasImgs ? '<div class="th_row2" style="margin:10px 0;"><div class="th_btn ghost" id="th_sh_wall" style="flex:1;">Обои и фото: без них</div></div>' : '') +
+    '<div class="th_row2"><div class="th_btn ghost" id="th_sh_no" style="flex:1;">Отмена</div><div class="th_btn" id="th_sh_go" style="flex:2;">Сохранить файлом</div></div><div class="th_hint" id="th_sh_st" style="margin-top:8px;"></div>');
+  var wb = $('#th_sh_wall', sh);
+  if (wb) wb.addEventListener('click', function(){ withWall = !withWall; wb.classList.toggle('on', withWall); wb.textContent = withWall ? 'Обои и фото: вместе с ними' : 'Обои и фото: без них'; });
+  $('#th_sh_no', sh).addEventListener('click', function(){ sh.remove(); });
+  var busy = false;
+  var doShare = async function(){
+    if (busy) return; busy = true;
+    var st = $('#th_sh_st', sh);
+    try{
+      st.textContent = 'Упаковываю…';
+      var th = JSON.parse(JSON.stringify(t)); delete th.id;
+      var obj = { app:'PHONE MOUSE THEME', v:1, at:Date.now(), theme:th };
+      if (withWall && src && src.indexOf('url:') !== 0){
+        if (src.indexOf('data:') === 0) obj.wallData = src; else obj.wallData = await thWallToData(src);
+        if (!obj.wallData) throw new Error('не получилось прочитать обои');
+      } else if (th.wall && th.wall.id && th.wall.id.indexOf('url:') !== 0) th.wall = null;
+      var wl = (th.home && th.home.wgts) || [];
+      for (var wi = 0; wi < wl.length; wi++){
+        for (var fk = 0; fk < 2; fk++){
+          var key = fk ? 'img' : 'pimg', val = wl[wi][key];
+          if (!isFile(val)) continue;
+          if (withWall){ var dd = await thWallToData(val); wl[wi][key] = dd || ''; } else wl[wi][key] = '';
+        }
+      }
+      var nm = 'phone-mouse-theme_' + t.name.replace(/[^\wа-яё\-]+/gi, '_').slice(0, 24);
+      var url = await bkJsonUrl(obj), hw = await bkSaveFile(nm + '.json', url);
+      toast(hw === 'preview' ? 'Файл открыт' : 'Тема сохранена файлом');
+      sh.remove();
+    }catch(e){ console.error('RP theme share failed', e); st.textContent = 'Не получилось: ' + (e && e.message ? e.message : e); }
+    busy = false;
+  };
+  $('#th_sh_go', sh).addEventListener('click', function(){ doShare(); });
+}
+async function thImportTheme(container){
+  var blob = await bkPickBlob(); if (!blob) return;
+  var obj = await bkDecodeBlob(blob);
+  if (!obj || obj.app !== 'PHONE MOUSE THEME' || !obj.theme || typeof obj.theme !== 'object') throw new Error('это не картинка с темой');
+  var src = obj.theme, vars = {};
+  TH_VARS.forEach(function(k){ if (src.vars && typeof src.vars[k] === 'string') vars[k] = src.vars[k].slice(0, 200); });
+  if (!vars.accent || !vars.bg1) throw new Error('в теме нет цветов');
+  var t = { id:'c_' + uid(), name:String(src.name || 'Тема').slice(0, 28), cat:'Мои', custom:true, desc:'Моя тема', flat:!!src.flat, vars:vars, iconMode:src.iconMode === 'accent' ? 'accent' : 'app',
+    shape:src.shape, size:src.size, colors:src.colors && typeof src.colors === 'object' ? src.colors : {}, names:src.names && typeof src.names === 'object' ? src.names : {}, wall:null, home:src.home && typeof src.home === 'object' ? src.home : null };
+  if (src.wall && src.wall.id && String(src.wall.id).indexOf('url:') === 0) t.wall = { id:String(src.wall.id), dim:src.wall.dim };
+  if (typeof obj.wallData === 'string' && obj.wallData.indexOf('data:image') === 0){
+    var lib = await thLib(), it = { id:'w_' + uid(), data:obj.wallData }; lib.push(it);
+    if (await thLibSave(lib)) t.wall = { id:it.id, dim:src.wall && src.wall.dim != null ? src.wall.dim : 30 };
+  }
+  var list = await thCustomList(); list.unshift(t);
+  if (!(await thCustomSave(list))) return;
+  thCat = 'Мои'; toast('Тема «' + t.name + '» добавлена'); thRender(container);
 }
 async function thTabThemes(body, container){
   var resetRow = el('div','th_card2'); resetRow.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:10px;';
@@ -19958,8 +20971,10 @@ async function thTabThemes(body, container){
     }
     var card = el('div','th_card'+(active?' on':''));
     card.innerHTML = thPrevHtml(t, wallSrc)+'<div class="th_info"><div><div class="th_name">'+escapeHtml(t.name)+'</div><div class="th_cat">'+escapeHtml(t.cat)+'</div></div>'+
-      '<div class="th_row2"><div class="th_btn'+(active?' on':'')+'" data-ap="1">'+(active?'Выбрана ✓':'Применить')+'</div>'+(t.custom?'<div class="th_btn ghost" data-del="1" style="flex:0 0 34px;">×</div>':'')+'</div></div>';
+      '<div class="th_row2"><div class="th_btn'+(active?' on':'')+'" data-ap="1">'+(active?'Выбрана':'Применить')+'</div>'+(t.custom?'<div class="th_btn ghost ic" data-sh="1"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"/></svg></div><div class="th_btn ghost ic" data-del="1"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>':'')+'</div></div>';
     $('[data-ap]', card).addEventListener('click', async function(){ await thApply(t); toast('Тема «'+t.name+'» применена'); thRender(container); });
+    var shb = $('[data-sh]', card);
+    if (shb) shb.addEventListener('click', function(){ thShareTheme(t); });
     var del = $('[data-del]', card);
     if (del) del.addEventListener('click', async function(){
       var l2 = (await thCustomList()).filter(function(x){ return x.id !== t.id; });
@@ -19967,6 +20982,10 @@ async function thTabThemes(body, container){
     });
     grid.appendChild(card);
   });
+  var imp = el('div','th_card2'); imp.style.cssText = 'margin-top:12px;display:flex;align-items:center;gap:10px;';
+  imp.innerHTML = '<div style="flex:1;min-width:0;"><div class="th_sec" style="margin:0;">Тема из файла</div><div class="th_hint" style="margin:2px 0 0;">Загрузи файл или картинку с темой, которую тебе прислали. Кнопка со стрелкой вверх на своей теме сохраняет её файлом.</div></div><div class="th_btn" id="th_imp" style="flex:0 0 auto;padding:9px 12px;">Загрузить</div>';
+  body.appendChild(imp);
+  $('#th_imp', imp).addEventListener('click', async function(){ try{ await thImportTheme(container); }catch(e){ console.error('RP theme import failed', e); toast('Не вышло: ' + (e && e.message ? e.message : e)); } });
   var mk = el('div','th_card2'); mk.style.marginTop = '12px'; mk.innerHTML = '<div class="th_sec" style="margin-top:0;">Своя тема</div><div class="th_hint">Цвета, обои, значки, виджеты и их расположение — всё собирается в одном месте.</div><div class="th_btn" id="th_go_studio">Создать или изменить тему</div>';
   body.appendChild(mk); $('#th_go_studio', mk).addEventListener('click', function(){ thTab = 'studio'; container.scrollTop = 0; thRender(container); });
 }
@@ -19974,6 +20993,16 @@ async function thTabStyle(body, container){
   var lib = await thLib();
   var w = await rpGet('rp_wall', null) || {};
   var l = await hlGet();
+  body.appendChild(el('div','th_sec','Подобрать всё по одному цвету'));
+  body.appendChild(el('div','th_hint','Выбери главный цвет: фон, второй оттенок и значки подстроятся под него сами. Потом можно поправить вручную, а если не понравится — есть «Откатить».'));
+  var apb = el('div','rp_custom_btn','<i></i><span>Выбрать цвет и подобрать тему</span>'); body.appendChild(apb);
+  apb.addEventListener('click', function(){
+    rpColorDialog({ title:'Главный цвет темы', gradient:false, value:'#ff6fae', onApply: async function(hex){
+      var dark = await showChoiceModal({ title:'Какая тема?', message:'Подберу фон и оттенки под выбранный цвет.', buttons:[{ label:'Тёмная', value:'d' }, { label:'Светлая', value:'l' }, { label:'Отмена', value:null, ghost:true }] });
+      if (!dark) return;
+      await thAutoPalette(hex, dark === 'd'); thRender(container); toast('Тема подобрана');
+    } });
+  });
   body.appendChild(el('div','th_sec','Обои главного экрана'));
   body.appendChild(el('div','th_hint','Загрузи свою картинку или видео, либо вставь ссылку на картинку. Файл хранится в папке пользователя SillyTavern.'));
   var walls = el('div','th_walls'); body.appendChild(walls);
@@ -19981,8 +21010,8 @@ async function thTabStyle(body, container){
   none.addEventListener('click', async function(){ await thSetWall(null); thRender(container); });
   lib.forEach(function(it){
     var d = el('div','th_wall'+(w.id===it.id?' on':''));
-    if (/\.(mp4|webm|mov|m4v|ogv)(\?|$)/i.test(String(it.data))) d.innerHTML = '<video src="'+escapeHtml(it.data)+'#t=0.1" muted playsinline preload="metadata"></video><div class="x" data-x="1">×</div>';
-    else { d.style.backgroundImage = 'url("'+String(it.data).replace(/"/g,'%22')+'")'; d.innerHTML = '<div class="x" data-x="1">×</div>'; }
+    d.style.backgroundImage = 'url("'+String(it.data).replace(/"/g,'%22')+'")';
+    d.innerHTML = '<div class="x" data-x="1">×</div>';
     d.addEventListener('click', async function(e){
       if (e.target.closest('[data-x]')){
         var l2 = (await thLib()).filter(function(x){ return x.id !== it.id; }); await thLibSave(l2);
@@ -20000,12 +21029,12 @@ async function thTabStyle(body, container){
     add.addEventListener('click', async function(){
       if (wbusy) return; wbusy = true;
       try{
-        var res = await rpImport({ multiple:true, extensions:['png','jpg','jpeg','webp','gif','mp4','webm','mov'], max:1400, prefix:'wall' });
+        var res = await rpImport({ multiple:true });
         if (res && res.length){
           var list = await thLib(), last = null;
           res.forEach(function(f){ if (!f || !f.path) return; last = { id:'w_'+uid(), path:String(f.path) }; list.push(last); });
           if (last && await thLibSave(list)){ await thSetWall({ id:last.id, dim: w.dim == null ? 30 : w.dim }); await thMarkCustom(); toast('Обои добавлены'); }
-          else if (!last) toast('не вернулся путь к файлу');
+          else if (!last) toast('Таверна не вернула путь к файлу');
           thRender(container);
         }
       }catch(err){ console.error('RP wallpaper import failed', err); toast('Не удалось добавить обои: '+(err && err.message ? err.message : err)); }
@@ -20052,12 +21081,16 @@ async function thTabStyle(body, container){
     var wrap = el('div', '', h); body.appendChild(wrap);
     wrap.querySelectorAll('[data-bg]').forEach(function(s){ s.addEventListener('click', async function(){ await applyBgPreset(s.getAttribute('data-bg')); await thMarkCustom(); toast('Фон применён'); }); });
   });
+  var cbg = el('div', 'rp_custom_btn', '<i></i><span>Свой фон или градиент</span>'); body.appendChild(cbg);
+  cbg.addEventListener('click', function(){ rpCustomBg(thMarkCustom); });
   body.appendChild(el('div','th_sec','Акцентный цвет'));
   var ah = '<div class="rp_swatch_grid compact">';
   ICON_PRESETS.filter(function(p){ return !p.hide; }).forEach(function(p){ ah += '<div class="rp_swatch" data-icon="'+p.id+'" title="'+escapeHtml(p.label)+'"><div class="rp_swatch_dot" style="background:linear-gradient(160deg,'+p.accent+','+p.accent2+')"></div></div>'; });
   ah += '</div>';
   var aw = el('div','',ah); body.appendChild(aw);
   aw.querySelectorAll('[data-icon]').forEach(function(s){ s.addEventListener('click', async function(){ await applyIconPreset(s.getAttribute('data-icon')); await thMarkCustom(); toast('Акцент применён'); }); });
+  var cac = el('div', 'rp_custom_btn', '<i></i><span>Свой акцент или градиент</span>'); body.appendChild(cac);
+  cac.addEventListener('click', function(){ rpCustomAccent(thMarkCustom); });
   body.appendChild(el('div','th_sec','Значки'));
   var shapeSeg = el('div','rp_td_seg');
   var shapes = [[8,'Квадрат'],[14,'Скруглённые'],[22,'Мягкие'],['circle','Круг']];
@@ -20084,10 +21117,13 @@ async function thTabApps(body, container){
   var lcCard = el('div','th_card2');
   var lblNow = (await hlGet()).lblc || '';
   lcCard.innerHTML = '<div class="th_sec" style="margin-top:0;">Цвет подписей под значками</div><div class="th_hint">Название приложения под иконкой на главном экране.</div>'+wgColorRow('lblc', lblNow, true)+
+    '<div class="th_lbl" style="margin-top:8px;"><span>Размер шрифта подписей</span><b id="th_lbs_v">'+((await hlGet()).lbs || 8.5)+'</b></div><input type="range" class="th_range" id="th_lbs" min="6" max="14" step="0.5" value="'+((await hlGet()).lbs || 8.5)+'">'+
     '<div class="th_lbl" style="margin-top:8px;"><span>Показывать подписи</span><div class="th_btn'+((await hlGet()).labels ? '' : ' ghost')+'" id="th_lbl_on" style="flex:0 0 auto;padding:6px 12px;">'+((await hlGet()).labels ? 'Да' : 'Нет')+'</div></div>';
   body.appendChild(lcCard);
   lcCard.querySelectorAll('.wg_cr [data-c]').forEach(function(sw){ sw.addEventListener('click', async function(){ await hlSave({ lblc: sw.getAttribute('data-c') }); await buildGrid(); thRender(container); }); });
-  var lci = lcCard.querySelector('.wg_cr input[type=color]'); if (lci) lci.addEventListener('change', async function(){ await hlSave({ lblc: lci.value }); await buildGrid(); thRender(container); });
+  var lci = lcCard.querySelector('.wg_cr [data-custom]'); if (lci) lci.addEventListener('click', function(){ rpColorDialog({ title:'Цвет подписей', gradient:false, value:lblNow || '#ffffff', onApply: async function(v){ await hlSave({ lblc: v }); await buildGrid(); thRender(container); } }); });
+  $('#th_lbs', lcCard).addEventListener('input', function(){ $('#th_lbs_v', lcCard).textContent = this.value; });
+  $('#th_lbs', lcCard).addEventListener('change', async function(){ await hlSave({ lbs:+this.value }); await buildGrid(); });
   $('#th_lbl_on', lcCard).addEventListener('click', async function(){ var l0 = await hlGet(); await hlSave({ labels: !l0.labels }); await buildGrid(); thRender(container); });
   body.appendChild(el('div','th_hint','Нажми «На главный», чтобы добавить приложение на рабочий стол, или «Убрать», чтобы спрятать (данные не удаляются). Нажми на значок, чтобы поменять название и цвет.'));
   var grid = el('div','th_apps'); body.appendChild(grid);
@@ -20119,12 +21155,20 @@ function thAppSheet(app, container){
       '<div class="th_hint">Название на рабочем столе</div><input class="rp_input" id="th_app_name" maxlength="24" value="'+escapeHtml(names[app.id]||app.label)+'">'+
       '<div class="th_hint" style="margin-top:10px;">Цвет значка</div><div class="rp_swatch_grid compact">'+sw(pool)+'</div>'+
       '<div class="th_hint" style="margin-top:8px;">Градиенты</div><div class="rp_swatch_grid compact">'+sw(APP_ICON_GRADIENTS)+'</div>'+
+      '<div class="rp_custom_btn" id="th_app_custom"><i></i><span>Свой цвет или градиент</span></div>'+
       '<div class="th_row2" style="margin-top:12px;"><div class="th_btn ghost" id="th_app_reset">Сбросить</div><div class="th_btn" id="th_app_ok">Готово</div></div>');
     bg.querySelectorAll('[data-color]').forEach(function(s){ s.addEventListener('click', async function(){
       var c2 = await rpGet('rp_app_icon_colors', {}); c2[app.id] = s.getAttribute('data-color'); await rpSet('rp_app_icon_colors', c2);
       cur = c2[app.id].toLowerCase(); bg.querySelectorAll('[data-color]').forEach(function(x){ x.classList.toggle('on', x===s); });
       await buildGrid(); var st1 = await thSyncEdit(); if (st1) toast('Сохранено в теме «'+st1.name+'»');
     }); });
+    $('#th_app_custom', bg).addEventListener('click', function(){
+      rpColorDialog({ title:'Цвет значка: ' + app.label, gradient:true, value:cur, onApply: async function(v){
+        var c2 = await rpGet('rp_app_icon_colors', {}); c2[app.id] = v; await rpSet('rp_app_icon_colors', c2);
+        cur = v.toLowerCase(); bg.querySelectorAll('[data-color]').forEach(function(x){ x.classList.remove('on'); });
+        await buildGrid(); var st2 = await thSyncEdit(); if (st2) toast('Сохранено в теме «'+st2.name+'»');
+      } });
+    });
     $('#th_app_reset', bg).addEventListener('click', async function(){
       var c2 = await rpGet('rp_app_icon_colors', {}); delete c2[app.id]; await rpSet('rp_app_icon_colors', c2);
       var n2 = await rpGet('rp_app_names', {}); delete n2[app.id]; await rpSet('rp_app_names', n2);
@@ -20163,10 +21207,12 @@ async function thTabScreen(body, container){
   $('#th_w_bot', wcard).addEventListener('click', async function(){ var o = (await hlOrder()).filter(function(x){ return x !== 'widget'; }); o.push('widget'); await rpSet('rp_home_order', o); await buildGrid(); toast('Виджет внизу'); });
   var gcard = el('div','th_card2');
   gcard.innerHTML = '<div class="th_sec" style="margin-top:0;">Сетка значков</div><div class="th_hint">Колонок на экране</div><div class="rp_td_seg" id="th_g_cols">'+[4,5,6].map(function(n){ return '<div data-v="'+n+'" class="'+(l.cols===n?'on':'')+'">'+n+'</div>'; }).join('')+'</div>'+
+    '<div class="th_hint">Форма ячеек</div><div class="rp_td_seg" id="th_g_cell">'+[['rect','Прямоугольные'],['square','Квадратные']].map(function(s){ return '<div data-v="'+s[0]+'" class="'+(l.cell===s[0]?'on':'')+'">'+s[1]+'</div>'; }).join('')+'</div>'+
     '<div class="th_hint">Размер значков</div><div class="rp_td_seg" id="th_g_size">'+[[38,'Мелкие'],[44,'Средние'],[52,'Крупные']].map(function(s){ return '<div data-v="'+s[0]+'" class="'+(l.size===s[0]?'on':'')+'">'+s[1]+'</div>'; }).join('')+'</div>'+
     '<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:11.5px;font-weight:700;color:var(--text);">Подписи под значками</span><div class="rp_conseq_check'+(l.labels?' on':'')+'" id="th_g_lbl">'+(l.labels?'<svg><use href="#rpi-check"/></svg>':'')+'</div></div>';
   body.appendChild(gcard);
   $('#th_g_cols', gcard).querySelectorAll('div').forEach(function(d){ d.addEventListener('click', async function(){ await hlSave({ cols:+d.getAttribute('data-v') }); await buildGrid(); thRender(container); }); });
+  $('#th_g_cell', gcard).querySelectorAll('div').forEach(function(d){ d.addEventListener('click', async function(){ await hlSave({ cell:d.getAttribute('data-v') }); await buildGrid(); thRender(container); }); });
   $('#th_g_size', gcard).querySelectorAll('div').forEach(function(d){ d.addEventListener('click', async function(){ await hlSave({ size:+d.getAttribute('data-v') }); await buildGrid(); thRender(container); }); });
   $('#th_g_lbl', gcard).addEventListener('click', async function(){ var lay = await hlGet(); await hlSave({ labels: !lay.labels }); await buildGrid(); thRender(container); });
   var rcard = el('div','th_card2');
@@ -20200,7 +21246,7 @@ async function refreshOnOpen(){
   }catch(e){ console.error('RP refreshOnOpen failed', e); }
   finally{ REFRESH_BUSY = false; }
 }
-function closePanel(){ hlExitEdit(); stopDeliveryCountdown(); stopMarketCountdown(); $('#rp_phone_wrap').style.display='none'; panelOpen=false; rpHintConf().then(function(hc2){ if (hc2.on) rpHintBuild(null); }); }
+function closePanel(){ hlExitEdit(); rpEdSet(false); stopDeliveryCountdown(); stopMarketCountdown(); $('#rp_phone_wrap').style.display='none'; panelOpen=false; rpHintConf().then(function(hc2){ if (hc2.on) rpHintBuild(null); }); }
 function updateBadge(){ var b=$('#rp_badge'); if(!b) return; if (unreadCount>0){ b.style.display='flex'; b.textContent=String(unreadCount); } else b.style.display='none'; }
 
 var notifUnread = 0;
@@ -20522,7 +21568,7 @@ function rpHintKey(x){ return rpHintH(cxNormP(String(x || '').replace(/\d+(?:[.,
 async function rpHintChat(){
   await cxWho();
   var nm = CX.names, ts = await cxThreads(), cs = await cxContacts(), out = [];
-  var name = function(id){ return id === 'me' ? nm.userTavo : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
+  var name = function(id){ return id === 'me' ? nm.userSt : (id === 'char' ? nm.char : cxNameOf(id, cs)); };
   for (var i = 0; i < ts.length; i++){
     var t = ts[i]; if (t.owner !== 'me') continue;
     if (!(t.id === 'main' || (t.kind === 'group' && t.who.indexOf('char') >= 0))) continue;
@@ -20713,6 +21759,8 @@ function applyToggleSaved(p){
 
 $('#rp_close').addEventListener('click', closePanel);
 $('#rp_appbar_close').addEventListener('click', closePanel);
+$('#rp_appbar_edit').addEventListener('click', function(){ rpEdSet(!RP_ED.on); });
+$('#rp_screen').addEventListener('click', function(e){ if (!RP_ED.on) return; var n = e.target && e.target.closest ? e.target.closest('[data-ed]') : null; if (!n) return; e.preventDefault(); e.stopPropagation(); rpEdOpen(n); }, true);
 $('#rp_back').addEventListener('click', function(){ closeAppbarMenu(); (backTarget || openHome)(); });
 $('#rp_settings_open').addEventListener('click', function(){ openScreen('settings'); });
 $('#rp_themes_open').addEventListener('click', function(){ openScreen('themes'); });

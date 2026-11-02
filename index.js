@@ -2,7 +2,7 @@ import { settings, install, selfTest, fail } from './core.js';
 import { installHint } from './hint.js';
 
 const BASE = new URL('./', import.meta.url).href;
-const VERSION = '1.1.6';
+const VERSION = '1.2.0';
 let mountTimer = null;
 let mounting = false;
 let status = 'не запускался';
@@ -40,7 +40,7 @@ function ensureCss() {
     document.head.appendChild(link);
     const own = document.createElement('style');
     own.id = 'pm_css_own';
-    own.textContent = '#pm_host{position:fixed;left:0;top:0;width:100vw;height:100dvh;transform:translateZ(0);pointer-events:none;z-index:10040}#pm_host #rp_root,#pm_host #rp_phone_wrap,#pm_host .wg_lightbox{pointer-events:auto}#pm_host #rp_root{position:fixed;z-index:10041}#pm_host #rp_toggle{width:38px;height:38px;opacity:.92;background:rgba(24,20,36,.92);border-color:rgba(255,111,174,.8)}#pm_host #rp_toggle svg{width:19px;height:19px}';
+    own.textContent = '#pm_host{position:fixed;left:0;top:0;width:100vw;height:100dvh;transform:translateZ(0);pointer-events:none;z-index:10040}#pm_host #rp_root,#pm_host #rp_phone_wrap,#pm_host .wg_lightbox{pointer-events:auto}#pm_host #rp_root{position:fixed;z-index:10041}#pm_host #rp_toggle{width:38px;height:38px;opacity:.92;background:rgba(24,20,36,.92);border-color:rgba(255,111,174,.8)}#pm_host #rp_toggle svg{width:19px;height:19px}#pm_host #rp_frame{max-height:calc(var(--pm_vh,100dvh) - 24px)}';
     document.head.appendChild(own);
 }
 
@@ -100,64 +100,18 @@ function freeToggle() {
     }
 }
 
-let fullVh = 0;
-let lastVw = 0;
-
 function fit() {
-    const wrap = document.getElementById('rp_phone_wrap');
-    const frame = document.getElementById('rp_frame');
-    if (!wrap || !frame) return;
+    const host = document.getElementById('pm_host');
     const vv = window.visualViewport;
-    const vw = vv ? vv.width : innerWidth;
-    const vh = vv ? vv.height : innerHeight;
-    const ox = vv ? vv.offsetLeft : 0;
-    const oy = vv ? vv.offsetTop : 0;
-    if (Math.abs(vw - lastVw) > 40) { fullVh = 0; lastVw = vw; }
-    fullVh = Math.max(fullVh, vh, innerHeight);
-    const keyboard = fullVh - vh > 150;
-    const mobile = vw < 700;
-    const compact = mobile || vh < 560;
-    const zh = keyboard ? fullVh : vh;
-    const AW = vw - 16;
-    const AHz = compact ? zh - 20 : zh - 82;
-    const AH = compact ? vh - 12 : vh - 82;
-    const pick = Number(settings().phoneScale) || 0;
-    let z = pick ? pick / 100 : mobile ? Math.min(Math.max(AW / 320, 1), 1.4) : Math.min(Math.max(AHz / 592, 1), 1.5);
-    z = Math.max(0.8, Math.min(z, AW / 320, AHz / 380));
-    const H = Math.max(keyboard ? 200 : 380, Math.min(AH / z, mobile ? 900 : 592));
-    frame.style.setProperty('width', '320px', 'important');
-    frame.style.setProperty('height', H + 'px', 'important');
-    frame.style.setProperty('max-height', 'none', 'important');
-    frame.style.setProperty('zoom', String(z), 'important');
-    const w = 320 * z;
-    const h = H * z;
-    if (compact) {
-        wrap.style.setProperty('left', Math.round(ox + (vw - w) / 2) + 'px', 'important');
-        wrap.style.setProperty('top', Math.round(oy + (keyboard ? 6 : (vh - h) / 2)) + 'px', 'important');
-        wrap.style.setProperty('right', 'auto', 'important');
-        wrap.style.setProperty('bottom', 'auto', 'important');
-    } else {
-        wrap.style.setProperty('left', 'auto', 'important');
-        wrap.style.setProperty('top', 'auto', 'important');
-        wrap.style.setProperty('right', '16px', 'important');
-        wrap.style.setProperty('bottom', '66px', 'important');
-    }
-    if (keyboard !== fit.kb) {
-        fit.kb = keyboard;
-        setTimeout(() => {
-            const box = document.getElementById('cx_msgs');
-            if (box) box.scrollTop = box.scrollHeight;
-        }, 120);
-    }
+    if (!host || !vv) return;
+    host.style.setProperty('left', vv.offsetLeft + 'px');
+    host.style.setProperty('top', vv.offsetTop + 'px');
+    host.style.setProperty('width', vv.width + 'px');
+    host.style.setProperty('height', vv.height + 'px');
+    host.style.setProperty('--pm_vh', vv.height + 'px');
 }
 
-let fitObserver = null;
 function watchFit() {
-    if (fitObserver) fitObserver.disconnect();
-    const wrap = document.getElementById('rp_phone_wrap');
-    if (!wrap) return;
-    fitObserver = new MutationObserver(fit);
-    fitObserver.observe(wrap, { attributes: true, attributeFilter: ['style'] });
     fit();
 }
 
@@ -187,7 +141,6 @@ function addSettingsUi() {
         '<div class="inline-drawer-content">' +
         '<label class="checkbox_label"><input type="checkbox" data-k="enabled"><span>Включить телефон</span></label>' +
         '<div class="menu_button" id="pm_open_btn">Открыть телефон</div>' +
-        '<label>Размер телефона</label><select class="text_pole" data-k="phoneScale"><option value="0">Авто по экрану</option><option value="80">80%</option><option value="100">100%</option><option value="125">125%</option><option value="150">150%</option><option value="175">175%</option></select>' +
         '<div class="menu_button" id="pm_diag_btn">Диагностика</div>' +
         '<small>Статус: <span id="pm_status"></span></small>' +
         '<textarea class="text_pole" id="pm_diag_out" rows="10" style="display:none;font-size:11px;white-space:pre;" readonly></textarea>' +
@@ -224,7 +177,6 @@ function addSettingsUi() {
             }
             ctx().saveSettingsDebounced();
             if (k === 'enabled') mountSoon();
-            if (k === 'phoneScale') fit();
         });
     });
 }
